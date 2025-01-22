@@ -15,6 +15,7 @@ import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
 import {Moment} from "moment/moment";
 import moment from "moment/moment";
+import {performAndMeasure} from "./utils/performance.ts";
 
 const darkTheme = createTheme({
     palette: {
@@ -47,8 +48,8 @@ type SongStatsType = {
 
 type StatsType = {
     playBackDataCount: number;
-    earliestEntry: Date;
-    latestEntry: Date;
+    earliestEntry: Moment;
+    latestEntry: Moment;
     uniqueArtists: number;
     uniqueSongs: number;
     totalSecondsPlayed: number;
@@ -154,38 +155,42 @@ const App = () => {
                 if (!data.target || !data.target.result) {
                     return;
                 }
+                console.log("HMMM????")
                 const parsed : PlaybackData[] = JSON.parse(data.target?.result.toString());
+                parsed.forEach(a => {
+                    a.ts = new Date(a.ts);
+                });
                 setAllPlaybackData((prevState) => {
-                    parsed.forEach(a => {
-                        a.ts = new Date(a.ts);
+                    console.log("lol what");
+                    return performAndMeasure("parseFile", () => {
+                        const all = [...prevState, ...parsed];
+                        const allTs = all.map(a => a.ts.getTime());
+
+                        const uniqueArtistCount = all
+                            .flatMap(pb => pb.master_metadata_album_artist_name || [])
+                            .filter((s, index, array) => array.indexOf(s) === index)
+                            .length;
+
+                        const uniqueSongCount = all
+                            .flatMap(pb => pb.spotify_track_uri)
+                            .filter((s, index, array) => array.indexOf(s) === index)
+                            .length;
+
+                        setUnfilteredStats({
+                            playBackDataCount: all.length,
+                            earliestEntry: moment(Math.min(...allTs)),
+                            latestEntry: moment(Math.max(...allTs)),
+                            uniqueArtists: uniqueArtistCount,
+                            uniqueSongs: uniqueSongCount,
+                            totalSecondsPlayed: all.reduce((a, b) => a + b.ms_played / 1_000, 0)
+                        })
+
+                        return all;
                     });
-
-                    const all = [...prevState, ...parsed];
-                    const allTs = all.map(a => a.ts.getTime());
-
-                    const uniqueArtistCount = all
-                        .flatMap(pb => pb.master_metadata_album_artist_name || [])
-                        .filter((s, index, array) => array.indexOf(s) === index)
-                        .length;
-
-                    const uniqueSongCount = all
-                        .flatMap(pb => pb.spotify_track_uri)
-                        .filter((s, index, array) => array.indexOf(s) === index)
-                        .length;
-
-                    setUnfilteredStats({
-                        playBackDataCount: all.length,
-                        earliestEntry: new Date(Math.min(...allTs)),
-                        latestEntry: new Date(Math.max(...allTs)),
-                        uniqueArtists: uniqueArtistCount,
-                        uniqueSongs: uniqueSongCount,
-                        totalSecondsPlayed: all.reduce((a, b) => a + b.ms_played/1_000, 0)
-                    })
-
-                    return all;
                 });
                 resolve();
             }
+            console.log("wtf happens here")
             reader.readAsText(file);
         });
         return parsingLoader;
@@ -225,14 +230,6 @@ const App = () => {
         }
     }, [allPlaybackData.length, baseData]);
 
-    const fooWorker = (): void => {
-        const foo = new Worker(new URL("./workers/fileWorker.ts", import.meta.url));
-        foo.onmessage = (e) => {
-            console.log(e.data);
-            setCountTest(e.data);
-        }
-        foo.postMessage({ message: "hihi", currentState: countTest });
-    };
 
     return (
         <LocalizationProvider dateAdapter={AdapterMoment}>
@@ -251,9 +248,6 @@ const App = () => {
                                         onChange={(event) => parseFiles(event.target.files)}
                                         multiple={true}
                                     />
-                                </Button>
-                                <Button onClick={fooWorker}>
-                                    Worker Test ({countTest})
                                 </Button>
                             </ButtonGroup>
                         </Grid2>
@@ -396,8 +390,8 @@ const App = () => {
                                     {unfilteredStats && !loading && (
                                         <Stack spacing={2}>
                                             <Typography>Playback count: {unfilteredStats.playBackDataCount}</Typography>
-                                            <Typography>Earliest Entry: {unfilteredStats.earliestEntry.toLocaleDateString("de-DE", dateTimeFormatOptions)}</Typography>
-                                            <Typography>Latest Entry: {unfilteredStats.latestEntry.toLocaleDateString("de-DE", dateTimeFormatOptions)}</Typography>
+                                            <Typography>Earliest Entry: {unfilteredStats.earliestEntry.format("dd.MM.YYYY hh:mm:ss")}</Typography>
+                                            <Typography>Latest Entry: {unfilteredStats.latestEntry.format("dd.MM.YYYY hh:mm:ss")}</Typography>
                                             <Typography>Unique Artists: {unfilteredStats.uniqueArtists}</Typography>
                                             <Typography>Unique Songs: {unfilteredStats.uniqueSongs}</Typography>
                                             <Typography>Unique Songs: {unfilteredStats.totalSecondsPlayed}</Typography>
