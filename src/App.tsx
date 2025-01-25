@@ -35,18 +35,18 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-type ArtistStatsType = {
+interface ArtistStatsType {
     name: string;
     count: number;
 }
 
-type SongStatsType = {
+interface SongStatsType {
     name: string;
     count: number;
     artist: string;
 }
 
-type StatsType = {
+interface StatsType {
     playBackDataCount: number;
     earliestEntry: Moment;
     latestEntry: Moment;
@@ -67,7 +67,6 @@ const App = () => {
     const [topArtistCount, setTopArtistCount] = useState<number>(50);
     const [topSongCount, setTopSongCount] = useState<number>(50);
     const [unfilteredStats, setUnfilteredStats] = useState<StatsType>();
-    const [countTest, setCountTest] = useState<number>(0);
 
     const [fromDate, setFromDate] = useState<Moment | null>(null);
     const [toDate, setToDate] = useState<Moment | null>(null);
@@ -152,7 +151,7 @@ const App = () => {
         const reader = new FileReader();
         const parsingLoader = new Promise<void>((resolve) => {
             reader.onload = (data) => {
-                if (!data.target || !data.target.result) {
+                if (!data.target?.result) {
                     return;
                 }
                 console.log("HMMM????")
@@ -167,7 +166,7 @@ const App = () => {
                         const allTs = all.map(a => a.ts.getTime());
 
                         const uniqueArtistCount = all
-                            .flatMap(pb => pb.master_metadata_album_artist_name || [])
+                            .flatMap(pb => pb.master_metadata_album_artist_name ?? [])
                             .filter((s, index, array) => array.indexOf(s) === index)
                             .length;
 
@@ -203,7 +202,7 @@ const App = () => {
         setLoading(true);
 
         for (let i = 0; i < files.length; i++) {
-            await parseFile(files[i]!);
+            await parseFile(files[i]);
         }
         setLoading(false);
     };
@@ -211,7 +210,7 @@ const App = () => {
     const filteredStats: StatsType = useMemo(() => {
         const allTs = baseData.map(pb => pb.ts.getTime());
         const uniqueArtistCount = baseData
-            .flatMap(pb => pb.master_metadata_album_artist_name || [])
+            .flatMap(pb => pb.master_metadata_album_artist_name ?? [])
             .filter((s, index, array) => array.indexOf(s) === index)
             .length;
 
@@ -228,7 +227,7 @@ const App = () => {
             uniqueSongs: uniqueSongCount,
             totalSecondsPlayed: baseData.reduce((a, b) => a + b.ms_played/1_000, 0)
         }
-    }, [allPlaybackData.length, baseData]);
+    }, [baseData]);
 
 
     return (
@@ -405,114 +404,114 @@ const App = () => {
                         </Grid2>
                         <Grid2 size={4}>
                             <Card>
-                            <CardHeader title={'Meta Stats (filtered)'}/>
-                            <CardContent>
-                                {loading && (
-                                    <Stack>
-                                        <Skeleton variant={'text'}/>
-                                        <Skeleton variant={'text'}/>
-                                        <Skeleton variant={'text'}/>
-                                        <Skeleton variant={'text'}/>
-                                        <Skeleton variant={'text'}/>
-                                    </Stack>
-                                )}
-                                {unfilteredStats && !loading && (
-                                    <Stack spacing={2}>
-                                        <Typography>Playback count: {filteredStats.playBackDataCount}</Typography>
-                                        <Typography>Earliest Entry: {filteredStats.earliestEntry.toLocaleDateString("de-DE", dateTimeFormatOptions)}</Typography>
-                                        <Typography>Latest Entry: {filteredStats.latestEntry.toLocaleDateString("de-DE", dateTimeFormatOptions)}</Typography>
-                                        <Typography>Unique Artists: {filteredStats.uniqueArtists}</Typography>
-                                        <Typography>Unique Songs: {filteredStats.uniqueSongs}</Typography>
-                                        <Typography>Unique Songs: {filteredStats.totalSecondsPlayed}</Typography>
-                                    </Stack>
-                                )}
-                                {!unfilteredStats && !loading && (
-                                    <Typography>No Data yet</Typography>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </Grid2>
-                    <Grid2 size={4}>
-                        <Card>
-                            <CardHeader title={'Meta Stats diff'}/>
-                            <CardContent>
-                                {loading && (
-                                    <Stack>
-                                        <Skeleton variant={'text'}/>
-                                        <Skeleton variant={'text'}/>
-                                        <Skeleton variant={'text'}/>
-                                    </Stack>
-                                )}
-                                {unfilteredStats && !loading && (
-                                    <Stack spacing={2}>
-                                        <Typography>Playback count diff: {unfilteredStats.playBackDataCount - filteredStats.playBackDataCount}</Typography>
-                                        <Typography>Unique Artists diff: {unfilteredStats.uniqueArtists - filteredStats.uniqueArtists}</Typography>
-                                        <Typography>Unique Songs diff: {unfilteredStats.uniqueSongs - filteredStats.uniqueSongs}</Typography>
-                                    </Stack>
-                                )}
-                                {!unfilteredStats && !loading && (
-                                    <Typography>No Data yet</Typography>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </Grid2>
-                    <Grid2 size={4}>
-                        <Card>
-                            <CardHeader title={'Feature Log'}/>
-                            <CardContent>
-                                <List>
-                                    <ListItem>
-                                        <Typography>
+                                <CardHeader title={'Meta Stats (filtered)'}/>
+                                <CardContent>
+                                    {loading && (
+                                        <Stack>
+                                            <Skeleton variant={'text'}/>
+                                            <Skeleton variant={'text'}/>
+                                            <Skeleton variant={'text'}/>
+                                            <Skeleton variant={'text'}/>
+                                            <Skeleton variant={'text'}/>
+                                        </Stack>
+                                    )}
+                                    {unfilteredStats && !loading && (
+                                        <Stack spacing={2}>
+                                            <Typography>Playback count: {filteredStats.playBackDataCount}</Typography>
+                                            <Typography>Earliest Entry: {filteredStats.earliestEntry.toLocaleDateString("de-DE", dateTimeFormatOptions)}</Typography>
+                                            <Typography>Latest Entry: {filteredStats.latestEntry.toLocaleDateString("de-DE", dateTimeFormatOptions)}</Typography>
+                                            <Typography>Unique Artists: {filteredStats.uniqueArtists}</Typography>
+                                            <Typography>Unique Songs: {filteredStats.uniqueSongs}</Typography>
+                                            <Typography>Unique Songs: {filteredStats.totalSecondsPlayed}</Typography>
+                                        </Stack>
+                                    )}
+                                    {!unfilteredStats && !loading && (
+                                        <Typography>No Data yet</Typography>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </Grid2>
+                        <Grid2 size={4}>
+                            <Card>
+                                <CardHeader title={'Meta Stats diff'}/>
+                                <CardContent>
+                                    {loading && (
+                                        <Stack>
+                                            <Skeleton variant={'text'}/>
+                                            <Skeleton variant={'text'}/>
+                                            <Skeleton variant={'text'}/>
+                                        </Stack>
+                                    )}
+                                    {unfilteredStats && !loading && (
+                                        <Stack spacing={2}>
+                                            <Typography>Playback count diff: {unfilteredStats.playBackDataCount - filteredStats.playBackDataCount}</Typography>
+                                            <Typography>Unique Artists diff: {unfilteredStats.uniqueArtists - filteredStats.uniqueArtists}</Typography>
+                                            <Typography>Unique Songs diff: {unfilteredStats.uniqueSongs - filteredStats.uniqueSongs}</Typography>
+                                        </Stack>
+                                    )}
+                                    {!unfilteredStats && !loading && (
+                                        <Typography>No Data yet</Typography>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </Grid2>
+                        <Grid2 size={4}>
+                            <Card>
+                                <CardHeader title={'Feature Log'}/>
+                                <CardContent>
+                                    <List>
+                                        <ListItem>
+                                            <Typography>
                                             Seconds per artist
-                                        </Typography>
-                                    </ListItem>
-                                    <ListItem>
-                                        <Typography>
+                                            </Typography>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Typography>
                                             Seconds per song
-                                        </Typography>
-                                    </ListItem>
-                                    <ListItem>
-                                        <Typography>
+                                            </Typography>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Typography>
                                             Streams vs. seconds
-                                        </Typography>
-                                    </ListItem>
-                                    <ListItem>
-                                        <Typography>
+                                            </Typography>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Typography>
                                             Grouping per Artist
-                                        </Typography>
-                                    </ListItem>
-                                    <ListItem>
-                                        <Typography>
+                                            </Typography>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Typography>
                                             Filter per Artist
-                                        </Typography>
-                                    </ListItem>
-                                    <ListItem>
-                                        <Typography>
+                                            </Typography>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Typography>
                                             Filter for min. date
-                                        </Typography>
-                                    </ListItem>
-                                    <ListItem>
-                                        <Typography>
+                                            </Typography>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Typography>
                                             Filter for max. date
-                                        </Typography>
-                                    </ListItem>
-                                    <ListItem>
-                                        <Typography>
+                                            </Typography>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Typography>
                                             Device stats
-                                        </Typography>
-                                    </ListItem>
-                                    <ListItem>
-                                        <Typography>
+                                            </Typography>
+                                        </ListItem>
+                                        <ListItem>
+                                            <Typography>
                                             Stop reasons
-                                        </Typography>
-                                    </ListItem>
-                                </List>
-                            </CardContent>
-                        </Card>
+                                            </Typography>
+                                        </ListItem>
+                                    </List>
+                                </CardContent>
+                            </Card>
+                        </Grid2>
                     </Grid2>
-                </Grid2>
-            </CssBaseline>
-        </ThemeProvider>
+                </CssBaseline>
+            </ThemeProvider>
         </LocalizationProvider>
     );
 }

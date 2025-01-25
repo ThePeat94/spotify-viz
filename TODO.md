@@ -1,0 +1,3 @@
+- [x] Fix ESLint
+- [ ] Put stuff into components instead one giga file
+- [ ] Improve Import Performance/Less laggy UI
