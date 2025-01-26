@@ -6,7 +6,7 @@ import {
     CardContent,
     CardHeader,
     CircularProgress,
-    Grid2, List, ListItem, ListItemText, Slider, Stack,
+    Grid2, Stack,
     styled, Typography,
 } from '@mui/material';
 import moment from 'moment/moment';
@@ -15,10 +15,11 @@ import { performAndMeasure } from 'src/utils/performance';
 import { DataFilterType } from 'src/filter/type';
 import DataFilter from 'src/components/DataFilter';
 import FeatureLogCard from 'src/components/cards/FeatureLogCard';
-import { StatsType } from 'src/stats/type';
+import { ArtistStatsType, SongStatsType, StatsType } from 'src/stats/type';
 import StatsCard from 'src/components/cards/StatsCard';
 import StatsDiffCard from 'src/components/cards/StatsDiffCard';
-import TopArtistsCard from 'src/components/cards/TopArtistsCard.tsx';
+import TopArtistsCard from 'src/components/cards/TopArtistsCard';
+import TopSongsCard from 'src/components/cards/TopSongsCard';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -32,18 +33,11 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-type SongStatsType = {
-    name: string;
-    count: number;
-    artist: string;
-}
-
 const App = () => {
 
     const [loading, setLoading] = useState<boolean>(false);
 
     const [allPlaybackData, setAllPlaybackData] = useState<PlaybackData[]>([]);
-    const [topSongCount, setTopSongCount] = useState<number>(50);
     const [unfilteredStats, setUnfilteredStats] = useState<StatsType>();
 
     const [filter, setFilter] = useState<DataFilterType>({
@@ -127,13 +121,6 @@ const App = () => {
             return { name: trackUriTracks[k], count: v, artist: trackUriArtist[k] };
         });
     }, [baseData]);
-
-
-
-    const sortedPerSong = useMemo(() => {
-        return playedPerSong.sort((p1, p2) => p2.count - p1.count).slice(0, topSongCount);
-    }, [playedPerSong, topSongCount]);
-
 
     const parseFile = (file: File): Promise<void> => {
         const reader = new FileReader();
@@ -257,38 +244,7 @@ const App = () => {
                     <TopArtistsCard artistStats={playedPerArtist}/>
                 </Grid2>
                 <Grid2 size={4}>
-                    <Card>
-                        <CardHeader title={'Top Songs'}/>
-                        <CardContent>
-                            <Stack>
-                                <Slider
-                                    getAriaLabel={() => 'Foo'}
-                                    min={10}
-                                    max={500}
-                                    step={10}
-                                    marks={true}
-                                    onChange={(_, v) => setTopSongCount(v as number)}
-                                    value={topSongCount}
-                                />
-                                <Typography>Display {topSongCount} Top Songs</Typography>
-                            </Stack>
-                            <List
-                                sx={{
-                                    maxHeight: 300,
-                                    overflow: 'auto',
-                                }}
-                            >
-                                {sortedPerSong.map(p => (
-                                    <ListItem>
-                                        <ListItemText
-                                            primary={<>{p.name} - {p.artist}</>}
-                                            secondary={p.count}
-                                        />
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </CardContent>
-                    </Card>
+                    <TopSongsCard songStats={playedPerSong}/>
                 </Grid2>
                 <Grid2 size={4}>
                     <Card>

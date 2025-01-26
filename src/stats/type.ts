@@ -13,3 +13,9 @@ export type ArtistStatsType = {
     name: string;
     count: number;
 }
+
+export type SongStatsType = {
+    name: string;
+    count: number;
+    artist: string;
+}
