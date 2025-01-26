@@ -13,8 +13,9 @@ import { Moment } from 'moment/moment';
 import moment from 'moment/moment';
 import { PlaybackData } from 'src/streams/type';
 import { performAndMeasure } from 'src/utils/performance';
-import { DataFilterType } from 'src/filter/type.ts';
-import DataFilter from 'src/components/DataFilter.tsx';
+import { DataFilterType } from 'src/filter/type';
+import DataFilter from 'src/components/DataFilter';
+import FeatureLogCard from 'src/components/cards/FeatureLogCard';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -426,58 +427,7 @@ const App = () => {
                     </Card>
                 </Grid2>
                 <Grid2 size={4}>
-                    <Card>
-                        <CardHeader title={'Feature Log'}/>
-                        <CardContent>
-                            <List>
-                                <ListItem>
-                                    <Typography>
-                                            Seconds per artist
-                                    </Typography>
-                                </ListItem>
-                                <ListItem>
-                                    <Typography>
-                                            Seconds per song
-                                    </Typography>
-                                </ListItem>
-                                <ListItem>
-                                    <Typography>
-                                            Streams vs. seconds
-                                    </Typography>
-                                </ListItem>
-                                <ListItem>
-                                    <Typography>
-                                            Grouping per Artist
-                                    </Typography>
-                                </ListItem>
-                                <ListItem>
-                                    <Typography>
-                                            Filter per Artist
-                                    </Typography>
-                                </ListItem>
-                                <ListItem>
-                                    <Typography>
-                                            Filter for min. date
-                                    </Typography>
-                                </ListItem>
-                                <ListItem>
-                                    <Typography>
-                                            Filter for max. date
-                                    </Typography>
-                                </ListItem>
-                                <ListItem>
-                                    <Typography>
-                                            Device stats
-                                    </Typography>
-                                </ListItem>
-                                <ListItem>
-                                    <Typography>
-                                            Stop reasons
-                                    </Typography>
-                                </ListItem>
-                            </List>
-                        </CardContent>
-                    </Card>
+                    <FeatureLogCard />
                 </Grid2>
             </Grid2>
         </>
