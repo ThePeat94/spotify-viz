@@ -8,3 +8,8 @@ export type StatsType = {
     uniqueSongs: number;
     totalSecondsPlayed: number;
 }
+
+export type ArtistStatsType = {
+    name: string;
+    count: number;
+}

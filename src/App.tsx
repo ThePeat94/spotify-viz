@@ -18,6 +18,7 @@ import FeatureLogCard from 'src/components/cards/FeatureLogCard';
 import { StatsType } from 'src/stats/type';
 import StatsCard from 'src/components/cards/StatsCard';
 import StatsDiffCard from 'src/components/cards/StatsDiffCard';
+import TopArtistsCard from 'src/components/cards/TopArtistsCard.tsx';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -31,28 +32,17 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-type ArtistStatsType = {
-    name: string;
-    count: number;
-}
-
 type SongStatsType = {
     name: string;
     count: number;
     artist: string;
 }
 
-
-
-const dateTimeFormatOptions : Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-
-
 const App = () => {
 
     const [loading, setLoading] = useState<boolean>(false);
 
     const [allPlaybackData, setAllPlaybackData] = useState<PlaybackData[]>([]);
-    const [topArtistCount, setTopArtistCount] = useState<number>(50);
     const [topSongCount, setTopSongCount] = useState<number>(50);
     const [unfilteredStats, setUnfilteredStats] = useState<StatsType>();
 
@@ -138,9 +128,7 @@ const App = () => {
         });
     }, [baseData]);
 
-    const sortedPerArtist = useMemo(() => {
-        return playedPerArtist.sort((p1, p2) => p2.count - p1.count).slice(0, topArtistCount);
-    }, [playedPerArtist, topArtistCount]);
+
 
     const sortedPerSong = useMemo(() => {
         return playedPerSong.sort((p1, p2) => p2.count - p1.count).slice(0, topSongCount);
@@ -266,38 +254,7 @@ const App = () => {
                     <Typography variant={'h4'} pt={2}>Data Analysis</Typography>
                 </Grid2>
                 <Grid2 size={4}>
-                    <Card>
-                        <CardHeader title={'Top Artists'}/>
-                        <CardContent>
-                            <Stack>
-                                <Slider
-                                    getAriaLabel={() => 'Foo'}
-                                    min={10}
-                                    max={500}
-                                    step={10}
-                                    marks={true}
-                                    onChange={(_, v) => setTopArtistCount(v as number)}
-                                    value={topArtistCount}
-                                />
-                                <Typography>Display {topArtistCount} Top Artists</Typography>
-                            </Stack>
-                            <List
-                                sx={{
-                                    maxHeight: 300,
-                                    overflow: 'auto',
-                                }}
-                            >
-                                {sortedPerArtist.map(p => (
-                                    <ListItem>
-                                        <ListItemText
-                                            primary={p.name}
-                                            secondary={p.count}
-                                        />
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </CardContent>
-                    </Card>
+                    <TopArtistsCard artistStats={playedPerArtist}/>
                 </Grid2>
                 <Grid2 size={4}>
                     <Card>
