@@ -9,13 +9,14 @@ import {
     Grid2, List, ListItem, ListItemText, Skeleton, Slider, Stack,
     styled, Typography,
 } from '@mui/material';
-import { Moment } from 'moment/moment';
 import moment from 'moment/moment';
 import { PlaybackData } from 'src/streams/type';
 import { performAndMeasure } from 'src/utils/performance';
 import { DataFilterType } from 'src/filter/type';
 import DataFilter from 'src/components/DataFilter';
 import FeatureLogCard from 'src/components/cards/FeatureLogCard';
+import { StatsType } from 'src/stats/type.ts';
+import StatsCard from 'src/components/cards/StatsCard.tsx';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -40,14 +41,7 @@ type SongStatsType = {
     artist: string;
 }
 
-type StatsType = {
-    playBackDataCount: number;
-    earliestEntry: Moment;
-    latestEntry: Moment;
-    uniqueArtists: number;
-    uniqueSongs: number;
-    totalSecondsPlayed: number;
-}
+
 
 const dateTimeFormatOptions : Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
 
@@ -212,7 +206,11 @@ const App = () => {
         setLoading(false);
     };
 
-    const filteredStats: StatsType = useMemo(() => {
+    const filteredStats: StatsType | undefined = useMemo(() => {
+        if (!baseData.length) {
+            return undefined;
+        }
+
         const allTs = baseData.map(pb => pb.ts.getTime());
         const uniqueArtistCount = baseData
             .flatMap(pb => pb.master_metadata_album_artist_name ?? [])
@@ -226,8 +224,8 @@ const App = () => {
 
         return {
             playBackDataCount: baseData.length,
-            earliestEntry: new Date(Math.min(...allTs)),
-            latestEntry: new Date(Math.max(...allTs)),
+            earliestEntry: moment(Math.min(...allTs)),
+            latestEntry: moment(Math.max(...allTs)),
             uniqueArtists: uniqueArtistCount,
             uniqueSongs: uniqueSongCount,
             totalSecondsPlayed: baseData.reduce((a, b) => a + b.ms_played/1_000, 0)
@@ -345,62 +343,10 @@ const App = () => {
                     </Card>
                 </Grid2>
                 <Grid2 size={4}>
-                    <Card>
-                        <CardHeader title={'Meta Stats (unfiltered)'}/>
-                        <CardContent>
-                            {loading && (
-                                <Stack>
-                                    <Skeleton variant={'text'}/>
-                                    <Skeleton variant={'text'}/>
-                                    <Skeleton variant={'text'}/>
-                                    <Skeleton variant={'text'}/>
-                                    <Skeleton variant={'text'}/>
-                                </Stack>
-                            )}
-                            {unfilteredStats && !loading && (
-                                <Stack spacing={2}>
-                                    <Typography>Playback count: {unfilteredStats.playBackDataCount}</Typography>
-                                    <Typography>Earliest Entry: {unfilteredStats.earliestEntry.format('dd.MM.YYYY hh:mm:ss')}</Typography>
-                                    <Typography>Latest Entry: {unfilteredStats.latestEntry.format('dd.MM.YYYY hh:mm:ss')}</Typography>
-                                    <Typography>Unique Artists: {unfilteredStats.uniqueArtists}</Typography>
-                                    <Typography>Unique Songs: {unfilteredStats.uniqueSongs}</Typography>
-                                    <Typography>Unique Songs: {unfilteredStats.totalSecondsPlayed}</Typography>
-                                </Stack>
-                            )}
-                            {!unfilteredStats && !loading && (
-                                <Typography>No Data yet</Typography>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <StatsCard title={'Unfiltered Stats'} loading={loading} stats={unfilteredStats}/>
                 </Grid2>
                 <Grid2 size={4}>
-                    <Card>
-                        <CardHeader title={'Meta Stats (filtered)'}/>
-                        <CardContent>
-                            {loading && (
-                                <Stack>
-                                    <Skeleton variant={'text'}/>
-                                    <Skeleton variant={'text'}/>
-                                    <Skeleton variant={'text'}/>
-                                    <Skeleton variant={'text'}/>
-                                    <Skeleton variant={'text'}/>
-                                </Stack>
-                            )}
-                            {unfilteredStats && !loading && (
-                                <Stack spacing={2}>
-                                    <Typography>Playback count: {filteredStats.playBackDataCount}</Typography>
-                                    <Typography>Earliest Entry: {filteredStats.earliestEntry.toLocaleDateString('de-DE', dateTimeFormatOptions)}</Typography>
-                                    <Typography>Latest Entry: {filteredStats.latestEntry.toLocaleDateString('de-DE', dateTimeFormatOptions)}</Typography>
-                                    <Typography>Unique Artists: {filteredStats.uniqueArtists}</Typography>
-                                    <Typography>Unique Songs: {filteredStats.uniqueSongs}</Typography>
-                                    <Typography>Unique Songs: {filteredStats.totalSecondsPlayed}</Typography>
-                                </Stack>
-                            )}
-                            {!unfilteredStats && !loading && (
-                                <Typography>No Data yet</Typography>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <StatsCard title={'Filtered Stats'} loading={loading} stats={filteredStats}/>
                 </Grid2>
                 <Grid2 size={4}>
                     <Card>
