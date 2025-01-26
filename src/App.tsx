@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from "react";
+import React, { useMemo, useState } from 'react';
 import {
     Button,
     ButtonGroup,
@@ -9,13 +9,13 @@ import {
     Grid2, List, ListItem, ListItemText, Skeleton, Slider, Stack,
     styled, ThemeProvider,
     Typography
-} from "@mui/material";
-import {PlaybackData} from "./streams/type.ts";
-import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
-import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
-import {Moment} from "moment/moment";
-import moment from "moment/moment";
-import {performAndMeasure} from "./utils/performance.ts";
+} from '@mui/material';
+import { PlaybackData } from './streams/type.ts';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { Moment } from 'moment/moment';
+import moment from 'moment/moment';
+import { performAndMeasure } from './utils/performance.ts';
 
 const darkTheme = createTheme({
     palette: {
@@ -55,7 +55,7 @@ interface StatsType {
     totalSecondsPlayed: number;
 }
 
-const dateTimeFormatOptions : Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'};
+const dateTimeFormatOptions : Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
 
 
 const App = () => {
@@ -134,7 +134,7 @@ const App = () => {
         }, {} as Record<string, number>)
 
         return Object.entries(trackCount).map(([k, v]) => {
-            return {name: trackUriTracks[k], count: v, artist: trackUriArtist[k] };
+            return { name: trackUriTracks[k], count: v, artist: trackUriArtist[k] };
         })
     }, [baseData]);
 
@@ -154,14 +154,14 @@ const App = () => {
                 if (!data.target?.result) {
                     return;
                 }
-                console.log("HMMM????")
+                console.log('HMMM????')
                 const parsed : PlaybackData[] = JSON.parse(data.target?.result.toString());
                 parsed.forEach(a => {
                     a.ts = new Date(a.ts);
                 });
                 setAllPlaybackData((prevState) => {
-                    console.log("lol what");
-                    return performAndMeasure("parseFile", () => {
+                    console.log('lol what');
+                    return performAndMeasure('parseFile', () => {
                         const all = [...prevState, ...parsed];
                         const allTs = all.map(a => a.ts.getTime());
 
@@ -189,13 +189,13 @@ const App = () => {
                 });
                 resolve();
             }
-            console.log("wtf happens here")
+            console.log('wtf happens here')
             reader.readAsText(file);
         });
         return parsingLoader;
     };
 
-    const parseFiles = async (files?: FileList): Promise<void> => {
+    const parseFiles = async (files?: FileList | null): Promise<void> => {
         if (!files || files.length === 0) {
             return;
         }
@@ -389,8 +389,8 @@ const App = () => {
                                     {unfilteredStats && !loading && (
                                         <Stack spacing={2}>
                                             <Typography>Playback count: {unfilteredStats.playBackDataCount}</Typography>
-                                            <Typography>Earliest Entry: {unfilteredStats.earliestEntry.format("dd.MM.YYYY hh:mm:ss")}</Typography>
-                                            <Typography>Latest Entry: {unfilteredStats.latestEntry.format("dd.MM.YYYY hh:mm:ss")}</Typography>
+                                            <Typography>Earliest Entry: {unfilteredStats.earliestEntry.format('dd.MM.YYYY hh:mm:ss')}</Typography>
+                                            <Typography>Latest Entry: {unfilteredStats.latestEntry.format('dd.MM.YYYY hh:mm:ss')}</Typography>
                                             <Typography>Unique Artists: {unfilteredStats.uniqueArtists}</Typography>
                                             <Typography>Unique Songs: {unfilteredStats.uniqueSongs}</Typography>
                                             <Typography>Unique Songs: {unfilteredStats.totalSecondsPlayed}</Typography>
@@ -418,8 +418,8 @@ const App = () => {
                                     {unfilteredStats && !loading && (
                                         <Stack spacing={2}>
                                             <Typography>Playback count: {filteredStats.playBackDataCount}</Typography>
-                                            <Typography>Earliest Entry: {filteredStats.earliestEntry.toLocaleDateString("de-DE", dateTimeFormatOptions)}</Typography>
-                                            <Typography>Latest Entry: {filteredStats.latestEntry.toLocaleDateString("de-DE", dateTimeFormatOptions)}</Typography>
+                                            <Typography>Earliest Entry: {filteredStats.earliestEntry.toLocaleDateString('de-DE', dateTimeFormatOptions)}</Typography>
+                                            <Typography>Latest Entry: {filteredStats.latestEntry.toLocaleDateString('de-DE', dateTimeFormatOptions)}</Typography>
                                             <Typography>Unique Artists: {filteredStats.uniqueArtists}</Typography>
                                             <Typography>Unique Songs: {filteredStats.uniqueSongs}</Typography>
                                             <Typography>Unique Songs: {filteredStats.totalSecondsPlayed}</Typography>
