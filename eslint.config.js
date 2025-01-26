@@ -5,11 +5,18 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import react from 'eslint-plugin-react'
 import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths';
+import importPlugin from 'eslint-plugin-import';
+import unusedImports from "eslint-plugin-unused-imports";
 
 export default tseslint.config(
     {ignores: ['dist']},
     {
-        extends: [js.configs.recommended, ...tseslint.configs.recommendedTypeChecked, ...tseslint.configs.stylisticTypeChecked],
+        extends: [
+            js.configs.recommended,
+            ...tseslint.configs.recommendedTypeChecked,
+            ...tseslint.configs.stylisticTypeChecked,
+            importPlugin.flatConfigs.typescript,
+        ],
         files: ['**/*.{ts,tsx}'],
         languageOptions: {
             ecmaVersion: 2020,
@@ -25,6 +32,8 @@ export default tseslint.config(
             'react-refresh': reactRefresh,
             react,
             'no-relative-import-paths': noRelativeImportPaths,
+            'import': importPlugin,
+            "unused-imports": unusedImports,
         },
         rules: {
             ...reactHooks.configs.recommended.rules,
@@ -43,10 +52,15 @@ export default tseslint.config(
             "@typescript-eslint/no-unsafe-assignment": "off",
             "@typescript-eslint/no-unsafe-return": "off",
             "@typescript-eslint/no-base-to-string": "off",
+            "@typescript-eslint/no-unused-vars": "off",
             "@typescript-eslint/consistent-type-definitions": ["error", "type"],
             "react/jsx-key": "warn",
-            "no-relative-import-paths/no-relative-import-paths": ["error", { "rootDir": "src" }],
+            "no-relative-import-paths/no-relative-import-paths": ["error", {"rootDir": "src"}],
             "no-trailing-spaces": "error",
+            "import/extensions": "error",
+            "semi": ["error", "always"],
+            "unused-imports/no-unused-imports": "error",
+            "unused-imports/no-unused-vars": "error",
         },
     },
 )

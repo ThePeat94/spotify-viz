@@ -5,22 +5,15 @@ import {
     Card,
     CardContent,
     CardHeader,
-    CircularProgress, createTheme, CssBaseline,
+    CircularProgress,
     Grid2, List, ListItem, ListItemText, Skeleton, Slider, Stack,
-    styled, ThemeProvider,
-    Typography
+    styled, Typography,
 } from '@mui/material';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { DatePicker } from '@mui/x-date-pickers';
 import { Moment } from 'moment/moment';
 import moment from 'moment/moment';
 import { PlaybackData } from 'src/streams/type';
-
-const darkTheme = createTheme({
-    palette: {
-        mode: 'dark',
-    },
-});
+import { performAndMeasure } from 'src/utils/performance';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -99,7 +92,7 @@ const App = () => {
 
         return Object.entries(reduced).map(([k, v]) => ({
             name: k, count: v
-        }))
+        }));
     }, [baseData]);
 
     const playedPerSong: SongStatsType[] = useMemo(() => {
@@ -130,11 +123,11 @@ const App = () => {
 
             prev[current.spotify_track_uri]++;
             return prev;
-        }, {} as Record<string, number>)
+        }, {} as Record<string, number>);
 
         return Object.entries(trackCount).map(([k, v]) => {
             return { name: trackUriTracks[k], count: v, artist: trackUriArtist[k] };
-        })
+        });
     }, [baseData]);
 
     const sortedPerArtist = useMemo(() => {
@@ -153,7 +146,7 @@ const App = () => {
                 if (!data.target?.result) {
                     return;
                 }
-                console.log('HMMM????')
+                console.log('HMMM????');
                 const parsed : PlaybackData[] = JSON.parse(data.target?.result.toString());
                 parsed.forEach(a => {
                     a.ts = new Date(a.ts);
@@ -181,14 +174,14 @@ const App = () => {
                             uniqueArtists: uniqueArtistCount,
                             uniqueSongs: uniqueSongCount,
                             totalSecondsPlayed: all.reduce((a, b) => a + b.ms_played / 1_000, 0)
-                        })
+                        });
 
                         return all;
                     });
                 });
                 resolve();
-            }
-            console.log('wtf happens here')
+            };
+            console.log('wtf happens here');
             reader.readAsText(file);
         });
         return parsingLoader;
@@ -225,294 +218,290 @@ const App = () => {
             uniqueArtists: uniqueArtistCount,
             uniqueSongs: uniqueSongCount,
             totalSecondsPlayed: baseData.reduce((a, b) => a + b.ms_played/1_000, 0)
-        }
+        };
     }, [baseData]);
 
 
     return (
-        <LocalizationProvider dateAdapter={AdapterMoment}>
-            <ThemeProvider theme={darkTheme}>
-                <CssBaseline>
-                    <Grid2 container={true} alignItems={'center'} spacing={2}>
-                        <Grid2 size={12}>
-                            <Typography variant={'h4'}>Spotify Viz</Typography>
-                        </Grid2>
-                        <Grid2 size={12}>
-                            <ButtonGroup variant={'contained'}>
-                                <Button component={'label'} >
+        <>
+            <Grid2 container={true} alignItems={'center'} spacing={2}>
+                <Grid2 size={12}>
+                    <Typography variant={'h4'}>Spotify Viz</Typography>
+                </Grid2>
+                <Grid2 size={12}>
+                    <ButtonGroup variant={'contained'}>
+                        <Button component={'label'} >
                                     Select Files
-                                    <VisuallyHiddenInput
-                                        type={'file'}
-                                        onChange={(event) => parseFiles(event.target.files)}
-                                        multiple={true}
-                                    />
-                                </Button>
-                            </ButtonGroup>
-                        </Grid2>
-                        {loading && (
-                            <Grid2 size={12}>
-                                <CircularProgress />
-                            </Grid2>
-                        )}
+                            <VisuallyHiddenInput
+                                type={'file'}
+                                onChange={(event) => parseFiles(event.target.files)}
+                                multiple={true}
+                            />
+                        </Button>
+                    </ButtonGroup>
+                </Grid2>
+                {loading && (
+                    <Grid2 size={12}>
+                        <CircularProgress />
                     </Grid2>
-                    <Typography variant={'h4'} pt={2}>Filter</Typography>
-                    <Grid2 container={true} alignItems={'center'} spacing={2}>
-                        <Grid2 size={4} p={2}>
+                )}
+            </Grid2>
+            <Typography variant={'h4'} pt={2}>Filter</Typography>
+            <Grid2 container={true} alignItems={'center'} spacing={2}>
+                <Grid2 size={4} p={2}>
+                    <Stack>
+                        <Typography variant={'body2'}>Min. Duration</Typography>
+                        <Slider
+                            getAriaLabel={() => 'Foo'}
+                            min={0}
+                            max={10_000}
+                            step={100}
+                            marks={true}
+                            valueLabelDisplay={'on'}
+                            onChange={(_, v) => setMinDuration(v as number)}
+                            value={minDuration}
+                        />
+                        <Typography variant={'caption'}>{minDuration/1000}s</Typography>
+                    </Stack>
+                </Grid2>
+                <Grid2 size={2}>
+                    <DatePicker
+                        maxDate={toDate ?? undefined}
+                        label={'From'}
+                        value={fromDate}
+                        onChange={v => setFromDate(v)}
+                    />
+                </Grid2>
+                <Grid2 size={2}>
+                    <DatePicker
+                        minDate={fromDate ?? undefined}
+                        label={'To'}
+                        value={toDate}
+                        onChange={v => setToDate(v)}
+                    />
+                </Grid2>
+            </Grid2>
+            <Grid2 container={true} alignItems={'center'} spacing={2}>
+                <Grid2 size={12}>
+                    <Typography variant={'h4'} pt={2}>Data Analysis</Typography>
+                </Grid2>
+                <Grid2 size={4}>
+                    <Card>
+                        <CardHeader title={'Top Artists'}/>
+                        <CardContent>
                             <Stack>
-                                <Typography variant={'body2'}>Min. Duration</Typography>
                                 <Slider
                                     getAriaLabel={() => 'Foo'}
-                                    min={0}
-                                    max={10_000}
-                                    step={100}
+                                    min={10}
+                                    max={500}
+                                    step={10}
                                     marks={true}
-                                    valueLabelDisplay={'on'}
-                                    onChange={(_, v) => setMinDuration(v as number)}
-                                    value={minDuration}
+                                    onChange={(_, v) => setTopArtistCount(v as number)}
+                                    value={topArtistCount}
                                 />
-                                <Typography variant={'caption'}>{minDuration/1000}s</Typography>
+                                <Typography>Display {topArtistCount} Top Artists</Typography>
                             </Stack>
-                        </Grid2>
-                        <Grid2 size={2}>
-                            <DatePicker
-                                maxDate={toDate ?? undefined}
-                                label={'From'}
-                                value={fromDate}
-                                onChange={v => setFromDate(v)}
-                            />
-                        </Grid2>
-                        <Grid2 size={2}>
-                            <DatePicker
-                                minDate={fromDate ?? undefined}
-                                label={'To'}
-                                value={toDate}
-                                onChange={v => setToDate(v)}
-                            />
-                        </Grid2>
-                    </Grid2>
-                    <Grid2 container={true} alignItems={'center'} spacing={2}>
-                        <Grid2 size={12}>
-                            <Typography variant={'h4'} pt={2}>Data Analysis</Typography>
-                        </Grid2>
-                        <Grid2 size={4}>
-                            <Card>
-                                <CardHeader title={'Top Artists'}/>
-                                <CardContent>
-                                    <Stack>
-                                        <Slider
-                                            getAriaLabel={() => 'Foo'}
-                                            min={10}
-                                            max={500}
-                                            step={10}
-                                            marks={true}
-                                            onChange={(_, v) => setTopArtistCount(v as number)}
-                                            value={topArtistCount}
+                            <List
+                                sx={{
+                                    maxHeight: 300,
+                                    overflow: 'auto',
+                                }}
+                            >
+                                {sortedPerArtist.map(p => (
+                                    <ListItem>
+                                        <ListItemText
+                                            primary={p.name}
+                                            secondary={p.count}
                                         />
-                                        <Typography>Display {topArtistCount} Top Artists</Typography>
-                                    </Stack>
-                                    <List
-                                        sx={{
-                                            maxHeight: 300,
-                                            overflow: 'auto',
-                                        }}
-                                    >
-                                        {sortedPerArtist.map(p => (
-                                            <ListItem>
-                                                <ListItemText
-                                                    primary={p.name}
-                                                    secondary={p.count}
-                                                />
-                                            </ListItem>
-                                        ))}
-                                    </List>
-                                </CardContent>
-                            </Card>
-                        </Grid2>
-                        <Grid2 size={4}>
-                            <Card>
-                                <CardHeader title={'Top Songs'}/>
-                                <CardContent>
-                                    <Stack>
-                                        <Slider
-                                            getAriaLabel={() => 'Foo'}
-                                            min={10}
-                                            max={500}
-                                            step={10}
-                                            marks={true}
-                                            onChange={(_, v) => setTopSongCount(v as number)}
-                                            value={topSongCount}
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </CardContent>
+                    </Card>
+                </Grid2>
+                <Grid2 size={4}>
+                    <Card>
+                        <CardHeader title={'Top Songs'}/>
+                        <CardContent>
+                            <Stack>
+                                <Slider
+                                    getAriaLabel={() => 'Foo'}
+                                    min={10}
+                                    max={500}
+                                    step={10}
+                                    marks={true}
+                                    onChange={(_, v) => setTopSongCount(v as number)}
+                                    value={topSongCount}
+                                />
+                                <Typography>Display {topSongCount} Top Songs</Typography>
+                            </Stack>
+                            <List
+                                sx={{
+                                    maxHeight: 300,
+                                    overflow: 'auto',
+                                }}
+                            >
+                                {sortedPerSong.map(p => (
+                                    <ListItem>
+                                        <ListItemText
+                                            primary={<>{p.name} - {p.artist}</>}
+                                            secondary={p.count}
                                         />
-                                        <Typography>Display {topSongCount} Top Songs</Typography>
-                                    </Stack>
-                                    <List
-                                        sx={{
-                                            maxHeight: 300,
-                                            overflow: 'auto',
-                                        }}
-                                    >
-                                        {sortedPerSong.map(p => (
-                                            <ListItem>
-                                                <ListItemText
-                                                    primary={<>{p.name} - {p.artist}</>}
-                                                    secondary={p.count}
-                                                />
-                                            </ListItem>
-                                        ))}
-                                    </List>
-                                </CardContent>
-                            </Card>
-                        </Grid2>
-                        <Grid2 size={4}>
-                            <Card>
-                                <CardHeader title={'Chains'}/>
-                                <CardContent>
-                                    <Stack>
-                                        <Typography>Songs, with the longest streak</Typography>
-                                    </Stack>
-                                </CardContent>
-                            </Card>
-                        </Grid2>
-                        <Grid2 size={4}>
-                            <Card>
-                                <CardHeader title={'Meta Stats (unfiltered)'}/>
-                                <CardContent>
-                                    {loading && (
-                                        <Stack>
-                                            <Skeleton variant={'text'}/>
-                                            <Skeleton variant={'text'}/>
-                                            <Skeleton variant={'text'}/>
-                                            <Skeleton variant={'text'}/>
-                                            <Skeleton variant={'text'}/>
-                                        </Stack>
-                                    )}
-                                    {unfilteredStats && !loading && (
-                                        <Stack spacing={2}>
-                                            <Typography>Playback count: {unfilteredStats.playBackDataCount}</Typography>
-                                            <Typography>Earliest Entry: {unfilteredStats.earliestEntry.format('dd.MM.YYYY hh:mm:ss')}</Typography>
-                                            <Typography>Latest Entry: {unfilteredStats.latestEntry.format('dd.MM.YYYY hh:mm:ss')}</Typography>
-                                            <Typography>Unique Artists: {unfilteredStats.uniqueArtists}</Typography>
-                                            <Typography>Unique Songs: {unfilteredStats.uniqueSongs}</Typography>
-                                            <Typography>Unique Songs: {unfilteredStats.totalSecondsPlayed}</Typography>
-                                        </Stack>
-                                    )}
-                                    {!unfilteredStats && !loading && (
-                                        <Typography>No Data yet</Typography>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </Grid2>
-                        <Grid2 size={4}>
-                            <Card>
-                                <CardHeader title={'Meta Stats (filtered)'}/>
-                                <CardContent>
-                                    {loading && (
-                                        <Stack>
-                                            <Skeleton variant={'text'}/>
-                                            <Skeleton variant={'text'}/>
-                                            <Skeleton variant={'text'}/>
-                                            <Skeleton variant={'text'}/>
-                                            <Skeleton variant={'text'}/>
-                                        </Stack>
-                                    )}
-                                    {unfilteredStats && !loading && (
-                                        <Stack spacing={2}>
-                                            <Typography>Playback count: {filteredStats.playBackDataCount}</Typography>
-                                            <Typography>Earliest Entry: {filteredStats.earliestEntry.toLocaleDateString('de-DE', dateTimeFormatOptions)}</Typography>
-                                            <Typography>Latest Entry: {filteredStats.latestEntry.toLocaleDateString('de-DE', dateTimeFormatOptions)}</Typography>
-                                            <Typography>Unique Artists: {filteredStats.uniqueArtists}</Typography>
-                                            <Typography>Unique Songs: {filteredStats.uniqueSongs}</Typography>
-                                            <Typography>Unique Songs: {filteredStats.totalSecondsPlayed}</Typography>
-                                        </Stack>
-                                    )}
-                                    {!unfilteredStats && !loading && (
-                                        <Typography>No Data yet</Typography>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </Grid2>
-                        <Grid2 size={4}>
-                            <Card>
-                                <CardHeader title={'Meta Stats diff'}/>
-                                <CardContent>
-                                    {loading && (
-                                        <Stack>
-                                            <Skeleton variant={'text'}/>
-                                            <Skeleton variant={'text'}/>
-                                            <Skeleton variant={'text'}/>
-                                        </Stack>
-                                    )}
-                                    {unfilteredStats && !loading && (
-                                        <Stack spacing={2}>
-                                            <Typography>Playback count diff: {unfilteredStats.playBackDataCount - filteredStats.playBackDataCount}</Typography>
-                                            <Typography>Unique Artists diff: {unfilteredStats.uniqueArtists - filteredStats.uniqueArtists}</Typography>
-                                            <Typography>Unique Songs diff: {unfilteredStats.uniqueSongs - filteredStats.uniqueSongs}</Typography>
-                                        </Stack>
-                                    )}
-                                    {!unfilteredStats && !loading && (
-                                        <Typography>No Data yet</Typography>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </Grid2>
-                        <Grid2 size={4}>
-                            <Card>
-                                <CardHeader title={'Feature Log'}/>
-                                <CardContent>
-                                    <List>
-                                        <ListItem>
-                                            <Typography>
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </CardContent>
+                    </Card>
+                </Grid2>
+                <Grid2 size={4}>
+                    <Card>
+                        <CardHeader title={'Chains'}/>
+                        <CardContent>
+                            <Stack>
+                                <Typography>Songs, with the longest streak</Typography>
+                            </Stack>
+                        </CardContent>
+                    </Card>
+                </Grid2>
+                <Grid2 size={4}>
+                    <Card>
+                        <CardHeader title={'Meta Stats (unfiltered)'}/>
+                        <CardContent>
+                            {loading && (
+                                <Stack>
+                                    <Skeleton variant={'text'}/>
+                                    <Skeleton variant={'text'}/>
+                                    <Skeleton variant={'text'}/>
+                                    <Skeleton variant={'text'}/>
+                                    <Skeleton variant={'text'}/>
+                                </Stack>
+                            )}
+                            {unfilteredStats && !loading && (
+                                <Stack spacing={2}>
+                                    <Typography>Playback count: {unfilteredStats.playBackDataCount}</Typography>
+                                    <Typography>Earliest Entry: {unfilteredStats.earliestEntry.format('dd.MM.YYYY hh:mm:ss')}</Typography>
+                                    <Typography>Latest Entry: {unfilteredStats.latestEntry.format('dd.MM.YYYY hh:mm:ss')}</Typography>
+                                    <Typography>Unique Artists: {unfilteredStats.uniqueArtists}</Typography>
+                                    <Typography>Unique Songs: {unfilteredStats.uniqueSongs}</Typography>
+                                    <Typography>Unique Songs: {unfilteredStats.totalSecondsPlayed}</Typography>
+                                </Stack>
+                            )}
+                            {!unfilteredStats && !loading && (
+                                <Typography>No Data yet</Typography>
+                            )}
+                        </CardContent>
+                    </Card>
+                </Grid2>
+                <Grid2 size={4}>
+                    <Card>
+                        <CardHeader title={'Meta Stats (filtered)'}/>
+                        <CardContent>
+                            {loading && (
+                                <Stack>
+                                    <Skeleton variant={'text'}/>
+                                    <Skeleton variant={'text'}/>
+                                    <Skeleton variant={'text'}/>
+                                    <Skeleton variant={'text'}/>
+                                    <Skeleton variant={'text'}/>
+                                </Stack>
+                            )}
+                            {unfilteredStats && !loading && (
+                                <Stack spacing={2}>
+                                    <Typography>Playback count: {filteredStats.playBackDataCount}</Typography>
+                                    <Typography>Earliest Entry: {filteredStats.earliestEntry.toLocaleDateString('de-DE', dateTimeFormatOptions)}</Typography>
+                                    <Typography>Latest Entry: {filteredStats.latestEntry.toLocaleDateString('de-DE', dateTimeFormatOptions)}</Typography>
+                                    <Typography>Unique Artists: {filteredStats.uniqueArtists}</Typography>
+                                    <Typography>Unique Songs: {filteredStats.uniqueSongs}</Typography>
+                                    <Typography>Unique Songs: {filteredStats.totalSecondsPlayed}</Typography>
+                                </Stack>
+                            )}
+                            {!unfilteredStats && !loading && (
+                                <Typography>No Data yet</Typography>
+                            )}
+                        </CardContent>
+                    </Card>
+                </Grid2>
+                <Grid2 size={4}>
+                    <Card>
+                        <CardHeader title={'Meta Stats diff'}/>
+                        <CardContent>
+                            {loading && (
+                                <Stack>
+                                    <Skeleton variant={'text'}/>
+                                    <Skeleton variant={'text'}/>
+                                    <Skeleton variant={'text'}/>
+                                </Stack>
+                            )}
+                            {unfilteredStats && !loading && (
+                                <Stack spacing={2}>
+                                    <Typography>Playback count diff: {unfilteredStats.playBackDataCount - filteredStats.playBackDataCount}</Typography>
+                                    <Typography>Unique Artists diff: {unfilteredStats.uniqueArtists - filteredStats.uniqueArtists}</Typography>
+                                    <Typography>Unique Songs diff: {unfilteredStats.uniqueSongs - filteredStats.uniqueSongs}</Typography>
+                                </Stack>
+                            )}
+                            {!unfilteredStats && !loading && (
+                                <Typography>No Data yet</Typography>
+                            )}
+                        </CardContent>
+                    </Card>
+                </Grid2>
+                <Grid2 size={4}>
+                    <Card>
+                        <CardHeader title={'Feature Log'}/>
+                        <CardContent>
+                            <List>
+                                <ListItem>
+                                    <Typography>
                                             Seconds per artist
-                                            </Typography>
-                                        </ListItem>
-                                        <ListItem>
-                                            <Typography>
+                                    </Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography>
                                             Seconds per song
-                                            </Typography>
-                                        </ListItem>
-                                        <ListItem>
-                                            <Typography>
+                                    </Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography>
                                             Streams vs. seconds
-                                            </Typography>
-                                        </ListItem>
-                                        <ListItem>
-                                            <Typography>
+                                    </Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography>
                                             Grouping per Artist
-                                            </Typography>
-                                        </ListItem>
-                                        <ListItem>
-                                            <Typography>
+                                    </Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography>
                                             Filter per Artist
-                                            </Typography>
-                                        </ListItem>
-                                        <ListItem>
-                                            <Typography>
+                                    </Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography>
                                             Filter for min. date
-                                            </Typography>
-                                        </ListItem>
-                                        <ListItem>
-                                            <Typography>
+                                    </Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography>
                                             Filter for max. date
-                                            </Typography>
-                                        </ListItem>
-                                        <ListItem>
-                                            <Typography>
+                                    </Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography>
                                             Device stats
-                                            </Typography>
-                                        </ListItem>
-                                        <ListItem>
-                                            <Typography>
+                                    </Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography>
                                             Stop reasons
-                                            </Typography>
-                                        </ListItem>
-                                    </List>
-                                </CardContent>
-                            </Card>
-                        </Grid2>
-                    </Grid2>
-                </CssBaseline>
-            </ThemeProvider>
-        </LocalizationProvider>
+                                    </Typography>
+                                </ListItem>
+                            </List>
+                        </CardContent>
+                    </Card>
+                </Grid2>
+            </Grid2>
+        </>
     );
-}
+};
 
-export default App
+export default App;
