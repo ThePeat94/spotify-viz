@@ -13,12 +13,13 @@ type UnfilteredMetaStatsCardProps = {
  */
 const StatsCard: React.FC<UnfilteredMetaStatsCardProps> = (props) => {
     const {
+        title,
         loading,
         stats,
     } = props;
     return (
         <Card>
-            <CardHeader title={'Meta Stats (unfiltered)'}/>
+            <CardHeader title={title}/>
             <CardContent>
                 {loading && (
                     <Stack>

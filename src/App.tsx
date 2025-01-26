@@ -6,7 +6,7 @@ import {
     CardContent,
     CardHeader,
     CircularProgress,
-    Grid2, List, ListItem, ListItemText, Skeleton, Slider, Stack,
+    Grid2, List, ListItem, ListItemText, Slider, Stack,
     styled, Typography,
 } from '@mui/material';
 import moment from 'moment/moment';
@@ -15,8 +15,9 @@ import { performAndMeasure } from 'src/utils/performance';
 import { DataFilterType } from 'src/filter/type';
 import DataFilter from 'src/components/DataFilter';
 import FeatureLogCard from 'src/components/cards/FeatureLogCard';
-import { StatsType } from 'src/stats/type.ts';
-import StatsCard from 'src/components/cards/StatsCard.tsx';
+import { StatsType } from 'src/stats/type';
+import StatsCard from 'src/components/cards/StatsCard';
+import StatsDiffCard from 'src/components/cards/StatsDiffCard';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -349,28 +350,7 @@ const App = () => {
                     <StatsCard title={'Filtered Stats'} loading={loading} stats={filteredStats}/>
                 </Grid2>
                 <Grid2 size={4}>
-                    <Card>
-                        <CardHeader title={'Meta Stats diff'}/>
-                        <CardContent>
-                            {loading && (
-                                <Stack>
-                                    <Skeleton variant={'text'}/>
-                                    <Skeleton variant={'text'}/>
-                                    <Skeleton variant={'text'}/>
-                                </Stack>
-                            )}
-                            {unfilteredStats && !loading && (
-                                <Stack spacing={2}>
-                                    <Typography>Playback count diff: {unfilteredStats.playBackDataCount - filteredStats.playBackDataCount}</Typography>
-                                    <Typography>Unique Artists diff: {unfilteredStats.uniqueArtists - filteredStats.uniqueArtists}</Typography>
-                                    <Typography>Unique Songs diff: {unfilteredStats.uniqueSongs - filteredStats.uniqueSongs}</Typography>
-                                </Stack>
-                            )}
-                            {!unfilteredStats && !loading && (
-                                <Typography>No Data yet</Typography>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <StatsDiffCard loading={loading} unfilteredStats={unfilteredStats} filteredStats={filteredStats}/>
                 </Grid2>
                 <Grid2 size={4}>
                     <FeatureLogCard />
