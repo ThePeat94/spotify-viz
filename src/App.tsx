@@ -10,12 +10,11 @@ import {
     styled, ThemeProvider,
     Typography
 } from '@mui/material';
-import { PlaybackData } from './streams/type.ts';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { Moment } from 'moment/moment';
 import moment from 'moment/moment';
-import { performAndMeasure } from './utils/performance.ts';
+import { PlaybackData } from 'src/streams/type';
 
 const darkTheme = createTheme({
     palette: {
@@ -35,18 +34,18 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-interface ArtistStatsType {
+type ArtistStatsType = {
     name: string;
     count: number;
 }
 
-interface SongStatsType {
+type SongStatsType = {
     name: string;
     count: number;
     artist: string;
 }
 
-interface StatsType {
+type StatsType = {
     playBackDataCount: number;
     earliestEntry: Moment;
     latestEntry: Moment;
