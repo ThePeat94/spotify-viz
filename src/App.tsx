@@ -9,11 +9,12 @@ import {
     Grid2, List, ListItem, ListItemText, Skeleton, Slider, Stack,
     styled, Typography,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers';
 import { Moment } from 'moment/moment';
 import moment from 'moment/moment';
 import { PlaybackData } from 'src/streams/type';
 import { performAndMeasure } from 'src/utils/performance';
+import { DataFilterType } from 'src/filter/type.ts';
+import DataFilter from 'src/components/DataFilter.tsx';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -55,13 +56,24 @@ const App = () => {
     const [loading, setLoading] = useState<boolean>(false);
 
     const [allPlaybackData, setAllPlaybackData] = useState<PlaybackData[]>([]);
-    const [minDuration, setMinDuration] = useState<number>(0);
     const [topArtistCount, setTopArtistCount] = useState<number>(50);
     const [topSongCount, setTopSongCount] = useState<number>(50);
     const [unfilteredStats, setUnfilteredStats] = useState<StatsType>();
 
-    const [fromDate, setFromDate] = useState<Moment | null>(null);
-    const [toDate, setToDate] = useState<Moment | null>(null);
+    const [filter, setFilter] = useState<DataFilterType>({
+        minDuration: 0,
+    });
+
+    const { minDuration, from, to } = filter;
+
+    const fromDate = useMemo(() => {
+        return from ? moment(from) : null;
+    }, [from]);
+
+    const toDate = useMemo(() => {
+        return to ? moment(to) : null;
+    }, [to]);
+
 
     const baseData = useMemo(() => {
         let result = allPlaybackData.filter(d => d.ms_played >= minDuration);
@@ -224,14 +236,14 @@ const App = () => {
 
     return (
         <>
-            <Grid2 container={true} alignItems={'center'} spacing={2}>
+            <Grid2 container={true} alignItems={'center'} spacing={2} p={2}>
                 <Grid2 size={12}>
                     <Typography variant={'h4'}>Spotify Viz</Typography>
                 </Grid2>
                 <Grid2 size={12}>
                     <ButtonGroup variant={'contained'}>
                         <Button component={'label'} >
-                                    Select Files
+                            Select Files
                             <VisuallyHiddenInput
                                 type={'file'}
                                 onChange={(event) => parseFiles(event.target.files)}
@@ -246,42 +258,10 @@ const App = () => {
                     </Grid2>
                 )}
             </Grid2>
-            <Typography variant={'h4'} pt={2}>Filter</Typography>
-            <Grid2 container={true} alignItems={'center'} spacing={2}>
-                <Grid2 size={4} p={2}>
-                    <Stack>
-                        <Typography variant={'body2'}>Min. Duration</Typography>
-                        <Slider
-                            getAriaLabel={() => 'Foo'}
-                            min={0}
-                            max={10_000}
-                            step={100}
-                            marks={true}
-                            valueLabelDisplay={'on'}
-                            onChange={(_, v) => setMinDuration(v as number)}
-                            value={minDuration}
-                        />
-                        <Typography variant={'caption'}>{minDuration/1000}s</Typography>
-                    </Stack>
-                </Grid2>
-                <Grid2 size={2}>
-                    <DatePicker
-                        maxDate={toDate ?? undefined}
-                        label={'From'}
-                        value={fromDate}
-                        onChange={v => setFromDate(v)}
-                    />
-                </Grid2>
-                <Grid2 size={2}>
-                    <DatePicker
-                        minDate={fromDate ?? undefined}
-                        label={'To'}
-                        value={toDate}
-                        onChange={v => setToDate(v)}
-                    />
-                </Grid2>
+            <Grid2 p={2}>
+                <DataFilter value={filter} onChange={setFilter}/>
             </Grid2>
-            <Grid2 container={true} alignItems={'center'} spacing={2}>
+            <Grid2 container={true} alignItems={'center'} spacing={2} p={2}>
                 <Grid2 size={12}>
                     <Typography variant={'h4'} pt={2}>Data Analysis</Typography>
                 </Grid2>
