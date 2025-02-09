@@ -1,17 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-    Button,
-    ButtonGroup,
     Card,
     CardContent,
     CardHeader,
     CircularProgress,
-    Grid2, Stack,
-    styled, Typography,
+    Grid2, Stack, Typography,
 } from '@mui/material';
 import moment from 'moment/moment';
 import { PlaybackData } from 'src/streams/type';
-import { performAndMeasure } from 'src/utils/performance';
 import { DataFilterType } from 'src/filter/type';
 import DataFilter from 'src/components/DataFilter';
 import FeatureLogCard from 'src/components/cards/FeatureLogCard';
@@ -20,18 +16,9 @@ import StatsCard from 'src/components/cards/StatsCard';
 import StatsDiffCard from 'src/components/cards/StatsDiffCard';
 import TopArtistsCard from 'src/components/cards/TopArtistsCard';
 import TopSongsCard from 'src/components/cards/TopSongsCard';
+import DataImport from 'src/components/DataImport';
+import { performAndMeasure } from 'src/utils/performance';
 
-const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
-    height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    whiteSpace: 'nowrap',
-    width: 1,
-});
 
 const App = () => {
 
@@ -175,7 +162,7 @@ const App = () => {
             return;
         }
         setLoading(true);
-
+        console.log(files);
         for (let i = 0; i < files.length; i++) {
             await parseFile(files[i]);
         }
@@ -216,16 +203,7 @@ const App = () => {
                     <Typography variant={'h4'}>Spotify Viz</Typography>
                 </Grid2>
                 <Grid2 size={12}>
-                    <ButtonGroup variant={'contained'}>
-                        <Button component={'label'} >
-                            Select Files
-                            <VisuallyHiddenInput
-                                type={'file'}
-                                onChange={(event) => parseFiles(event.target.files)}
-                                multiple={true}
-                            />
-                        </Button>
-                    </ButtonGroup>
+                    <DataImport/>
                 </Grid2>
                 {loading && (
                     <Grid2 size={12}>

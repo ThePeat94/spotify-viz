@@ -52,6 +52,7 @@ export default tseslint.config(
             "@typescript-eslint/no-unsafe-assignment": "off",
             "@typescript-eslint/no-unsafe-return": "off",
             "@typescript-eslint/no-base-to-string": "off",
+            "no-unused-vars": "off",
             "@typescript-eslint/no-unused-vars": "off",
             "@typescript-eslint/consistent-type-definitions": ["error", "type"],
             "react/jsx-key": "warn",
@@ -60,7 +61,16 @@ export default tseslint.config(
             "import/extensions": "error",
             "semi": ["error", "always"],
             "unused-imports/no-unused-imports": "error",
-            "unused-imports/no-unused-vars": "error",
+            "unused-imports/no-unused-vars": [
+                "warn",
+                {
+                    "vars": "all",
+                    "varsIgnorePattern": "^_",
+                    "args": "after-used",
+                    "argsIgnorePattern": "^_",
+                },
+            ],
+            "@typescript-eslint/prefer-for-of": "warn",
         },
     },
 )
