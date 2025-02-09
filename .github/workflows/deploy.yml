@@ -22,5 +22,5 @@ jobs:
       - name: Clean old build
         run: rm -rf /var/www/spotify-viz/{*,.*}
       - name: Move build to nginx
-        run: cp -a ./build/. /var/www/spotify-viz/
-      
+        run: cp -a ./dist/. /var/www/spotify-viz/
+
