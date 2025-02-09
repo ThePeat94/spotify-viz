@@ -14,15 +14,11 @@ jobs:
       - name: who am i?
         run: whoami
       - name: Checkout Code
-        uses: actions/checkout@v3
-      - name: Switch directory
-        run: cd ./spotify-viz/
+        uses: actions/checkout@v4
       - name: Build project
         run: npm run build
       - name: Clean old build
         run: rm -rf /var/www/spotify-viz/{*,.*}
       - name: Move build to nginx
         run: cp -a ./build/. /var/www/spotify-viz/
-      - name: Delete checked out repo
-        run: rm -rf ./spotify-viz
       
