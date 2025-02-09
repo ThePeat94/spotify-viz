@@ -11,8 +11,10 @@ jobs:
         run: echo "Hello World :)"
       - name: PWD
         run: pwd
-      - name: Checkout Repo at master
-        run: git clone git@github.com:ThePeat94/spotify-viz.git
+      - name: who am i?
+        run: whoami
+      - name: Checkout Code
+        uses: actions/checkout@v3
       - name: Switch directory
         run: cd ./spotify-viz/
       - name: Build project
