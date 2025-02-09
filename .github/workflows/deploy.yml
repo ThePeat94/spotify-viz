@@ -9,3 +9,18 @@ jobs:
     steps:
       - name: Hello world!
         run: echo "Hello World :)"
+      - name: PWD
+        run: pwd
+      - name: Checkout Repo at master
+        run: git clone git@github.com:ThePeat94/spotify-viz.git
+      - name: Switch directory
+        run: cd ./spotify-viz/
+      - name: Build project
+        run: npm run build
+      - name: Clean old build
+        run: rm -rf /var/www/spotify-viz/{*,.*}
+      - name: Move build to nginx
+        run: cp -a ./build/. /var/www/spotify-viz/
+      - name: Delete checked out repo
+        run: rm -rf ./spotify-viz
+      
