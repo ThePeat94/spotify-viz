@@ -200,7 +200,7 @@ const App = () => {
         <>
             <Grid2 container={true} alignItems={'center'} spacing={2} p={2}>
                 <Grid2 size={12}>
-                    <Typography variant={'h4'}>Spotify Viz</Typography>
+                    <Typography variant={'h4'}>Spotify Viz - HELLO DEPLOY :)</Typography>
                 </Grid2>
                 <Grid2 size={12}>
                     <DataImport/>
