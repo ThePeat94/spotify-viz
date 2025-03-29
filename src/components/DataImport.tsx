@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
-import { Button, ButtonGroup, Grid2, styled, Typography } from '@mui/material';
+import { Button, ButtonGroup, CircularProgress, Grid2, styled, Typography } from '@mui/material';
+import { PlaybackData } from 'src/streams/type';
+import { performAndMeasure } from 'src/utils/performance';
+import moment from 'moment/moment';
+import { StatsType } from 'src/stats/type';
 
 type DataImportProps = {
-
+    onChange?: (data: PlaybackData[], unfilteredStats: StatsType) => void;
 }
 
 const VisuallyHiddenInput = styled('input')({
@@ -17,15 +21,40 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
+type ImportState = 'NONE' | 'PARSING_FILES' | 'ANALYZING_DATA' | 'DONE';
+
 type ImportInfo = {
     fileCount: number;
     currentFileCount: number;
+    state: ImportState;
 }
 
 const DataImport: React.FC<DataImportProps> = (props) => {
-    const { } = props;
+    const { onChange } = props;
 
-    const [importInfo, setImportInfo] = useState<ImportInfo>();
+    const [importInfo, setImportInfo] = useState<ImportInfo>({
+        state: 'NONE',
+        fileCount: 0,
+        currentFileCount: 0,
+    });
+
+    const parseFile = (file: File): Promise<PlaybackData[]> => {
+        const reader = new FileReader();
+        return new Promise<PlaybackData[]>((resolve) => {
+            reader.onload = (data) => {
+                if (!data.target?.result) {
+                    return;
+                }
+                const parsed : PlaybackData[] = JSON.parse(data.target?.result.toString());
+                parsed.forEach(a => {
+                    a.ts = new Date(a.ts);
+                });
+
+                resolve(parsed);
+            };
+            reader.readAsText(file);
+        });
+    };
 
     const handleParseFiles = async (files?: FileList | null): Promise<void> => {
         if (!files) {
@@ -35,38 +64,65 @@ const DataImport: React.FC<DataImportProps> = (props) => {
         setImportInfo({
             fileCount: files.length,
             currentFileCount: 0,
+            state: 'PARSING_FILES',
         });
 
+        const playbackData : PlaybackData[] = [];
         for (let i = 0; i < files.length; i++) {
+            setImportInfo({
+                fileCount: files.length,
+                currentFileCount: i + 1,
+                state: 'PARSING_FILES',
+            });
             const file = files[i];
-            const reader = new FileReader();
-
-            reader.onload = (event) => {
-                const data = event.target?.result;
-                console.log(data);
-
-                setImportInfo((prevState) => {
-                    if (!prevState) {
-                        return prevState;
-                    }
-
-                    return {
-                        ...prevState,
-                        currentFileCount: prevState.currentFileCount + 1,
-                    };
-                });
-            };
-
-            reader.readAsText(file);
+            playbackData.push(...(await parseFile(file)));
         }
+
+        setImportInfo({
+            fileCount: files.length,
+            currentFileCount: files.length,
+            state: 'ANALYZING_DATA',
+        });
+
+        const allStats = performAndMeasure('parseFile', () => {
+            const allTs = playbackData.map(pb => pb.ts.getTime());
+
+            const uniqueArtistCount = playbackData
+                .map(pb => pb.master_metadata_album_artist_name ?? [])
+                .filter((s, index, array) => array.indexOf(s) === index)
+                .length;
+
+            const uniqueSongCount = playbackData
+                .map(pb => pb.spotify_track_uri)
+                .filter((s, index, array) => array.indexOf(s) === index)
+                .length;
+
+            return {
+                playBackDataCount: playbackData.length,
+                earliestEntry: moment(Math.min(...allTs)),
+                latestEntry: moment(Math.max(...allTs)),
+                uniqueArtists: uniqueArtistCount,
+                uniqueSongs: uniqueSongCount,
+                totalSecondsPlayed: playbackData.reduce((a, b) => a + b.ms_played / 1_000, 0)
+            };
+        });
+
+        setImportInfo({
+            fileCount: files.length,
+            currentFileCount: files.length,
+            state: 'DONE',
+        });
+
+        console.log(allStats);
+        onChange?.(playbackData, allStats);
     };
 
     return (
-        <Grid2 container={true} alignItems={'center'}>
+        <Grid2 container={true} alignItems={'center'} spacing={1}>
             <Grid2 size={12}>
                 <h1>Data Import</h1>
             </Grid2>
-            <Grid2 size={2}>
+            <Grid2 size={'auto'}>
                 <ButtonGroup variant={'contained'}>
                     <Button component={'label'} >
                         Select Files
@@ -78,9 +134,29 @@ const DataImport: React.FC<DataImportProps> = (props) => {
                     </Button>
                 </ButtonGroup>
             </Grid2>
-            {importInfo && (
+            {importInfo.state !== 'NONE' && importInfo.state !== 'DONE' && (
+                <Grid2 size={'auto'}>
+                    <CircularProgress />
+                </Grid2>
+            )}
+            {importInfo.state === 'NONE' && (
+                <Grid2 size={12}>
+                    <Typography>Nothing imported yet</Typography>
+                </Grid2>
+            )}
+            {importInfo.state === 'PARSING_FILES' && (
                 <Grid2 size={12}>
                     <Typography>Importing {importInfo.currentFileCount} of {importInfo.fileCount}</Typography>
+                </Grid2>
+            )}
+            {importInfo.state === 'ANALYZING_DATA' && (
+                <Grid2 size={12}>
+                    <Typography>Analyzing Data</Typography>
+                </Grid2>
+            )}
+            {importInfo.state === 'DONE' && (
+                <Grid2 size={12}>
+                    <Typography>Done</Typography>
                 </Grid2>
             )}
         </Grid2>

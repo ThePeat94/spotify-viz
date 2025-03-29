@@ -3,7 +3,6 @@ import {
     Card,
     CardContent,
     CardHeader,
-    CircularProgress,
     Grid2, Stack, Typography,
 } from '@mui/material';
 import moment from 'moment/moment';
@@ -17,12 +16,11 @@ import StatsDiffCard from 'src/components/cards/StatsDiffCard';
 import TopArtistsCard from 'src/components/cards/TopArtistsCard';
 import TopSongsCard from 'src/components/cards/TopSongsCard';
 import DataImport from 'src/components/DataImport';
-import { performAndMeasure } from 'src/utils/performance';
 
 
 const App = () => {
 
-    const [loading, setLoading] = useState<boolean>(false);
+    const [loading] = useState<boolean>(false);
 
     const [allPlaybackData, setAllPlaybackData] = useState<PlaybackData[]>([]);
     const [unfilteredStats, setUnfilteredStats] = useState<StatsType>();
@@ -109,66 +107,6 @@ const App = () => {
         });
     }, [baseData]);
 
-    const parseFile = (file: File): Promise<void> => {
-        const reader = new FileReader();
-        const parsingLoader = new Promise<void>((resolve) => {
-            reader.onload = (data) => {
-                if (!data.target?.result) {
-                    return;
-                }
-                console.log('HMMM????');
-                const parsed : PlaybackData[] = JSON.parse(data.target?.result.toString());
-                parsed.forEach(a => {
-                    a.ts = new Date(a.ts);
-                });
-                setAllPlaybackData((prevState) => {
-                    console.log('lol what');
-                    return performAndMeasure('parseFile', () => {
-                        const all = [...prevState, ...parsed];
-                        const allTs = all.map(a => a.ts.getTime());
-
-                        const uniqueArtistCount = all
-                            .flatMap(pb => pb.master_metadata_album_artist_name ?? [])
-                            .filter((s, index, array) => array.indexOf(s) === index)
-                            .length;
-
-                        const uniqueSongCount = all
-                            .flatMap(pb => pb.spotify_track_uri)
-                            .filter((s, index, array) => array.indexOf(s) === index)
-                            .length;
-
-                        setUnfilteredStats({
-                            playBackDataCount: all.length,
-                            earliestEntry: moment(Math.min(...allTs)),
-                            latestEntry: moment(Math.max(...allTs)),
-                            uniqueArtists: uniqueArtistCount,
-                            uniqueSongs: uniqueSongCount,
-                            totalSecondsPlayed: all.reduce((a, b) => a + b.ms_played / 1_000, 0)
-                        });
-
-                        return all;
-                    });
-                });
-                resolve();
-            };
-            console.log('wtf happens here');
-            reader.readAsText(file);
-        });
-        return parsingLoader;
-    };
-
-    const parseFiles = async (files?: FileList | null): Promise<void> => {
-        if (!files || files.length === 0) {
-            return;
-        }
-        setLoading(true);
-        console.log(files);
-        for (let i = 0; i < files.length; i++) {
-            await parseFile(files[i]);
-        }
-        setLoading(false);
-    };
-
     const filteredStats: StatsType | undefined = useMemo(() => {
         if (!baseData.length) {
             return undefined;
@@ -195,21 +133,20 @@ const App = () => {
         };
     }, [baseData]);
 
+    const handleDataChange = (data: PlaybackData[], stats: StatsType): void  => {
+        setAllPlaybackData(data);
+        setUnfilteredStats(stats);
+    };
 
     return (
         <>
             <Grid2 container={true} alignItems={'center'} spacing={2} p={2}>
                 <Grid2 size={12}>
-                    <Typography variant={'h4'}>Spotify Viz - HELLO DEPLOY :)</Typography>
+                    <Typography variant={'h4'}>Spotify Viz</Typography>
                 </Grid2>
                 <Grid2 size={12}>
-                    <DataImport/>
+                    <DataImport onChange={handleDataChange}/>
                 </Grid2>
-                {loading && (
-                    <Grid2 size={12}>
-                        <CircularProgress />
-                    </Grid2>
-                )}
             </Grid2>
             <Grid2 p={2}>
                 <DataFilter value={filter} onChange={setFilter}/>
