@@ -9,8 +9,7 @@ const plannedFeatures : string[] = [
     'Streams vs. seconds',
     'Grouping per Artist',
     'Filter per Artist',
-    'Filter for min. date',
-    'Filter for max. date',
+    'Artist chain',
     'Device stats',
     'Stop reasons'
 ];
