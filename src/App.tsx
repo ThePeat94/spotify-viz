@@ -16,7 +16,7 @@ import StatsDiffCard from 'src/components/cards/StatsDiffCard';
 import TopArtistsCard from 'src/components/cards/TopArtistsCard';
 import TopSongsCard from 'src/components/cards/TopSongsCard';
 import DataImport from 'src/components/DataImport';
-import { performAndMeasure } from 'src/utils/performance.ts';
+import { performAndMeasure } from 'src/utils/performance';
 
 
 const App = () => {
