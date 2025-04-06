@@ -11,7 +11,11 @@ const plannedFeatures : string[] = [
     'Filter per Artist',
     'Artist chain',
     'Device stats',
-    'Stop reasons'
+    'Stop reasons',
+    'First occurrence of an artist',
+    'First occurrence of a song',
+    'Timeline graph per artist',
+    'Timeline graph per song',
 ];
 
 /**
