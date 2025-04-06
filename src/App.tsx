@@ -16,6 +16,7 @@ import StatsDiffCard from 'src/components/cards/StatsDiffCard';
 import TopArtistsCard from 'src/components/cards/TopArtistsCard';
 import TopSongsCard from 'src/components/cards/TopSongsCard';
 import DataImport from 'src/components/DataImport';
+import { performAndMeasure } from 'src/utils/performance.ts';
 
 
 const App = () => {
@@ -41,96 +42,111 @@ const App = () => {
 
 
     const baseData = useMemo(() => {
-        let result = allPlaybackData.filter(d => d.ms_played >= minDuration);
+        return performAndMeasure('filter base data', () => {
+            let result = allPlaybackData.filter(d => d.ms_played >= minDuration);
 
-        if (fromDate) {
-            result = result.filter(d => moment(d.ts).toDate() >= fromDate.toDate());
-        }
+            if (fromDate) {
+                result = result.filter(d => moment(d.ts).toDate() >= fromDate.toDate());
+            }
 
-        if (toDate) {
-            result = result.filter(d => moment(d.ts).toDate() <= toDate.endOf('day').toDate());
-        }
+            if (toDate) {
+                result = result.filter(d => moment(d.ts).toDate() <= toDate.endOf('day').toDate());
+            }
 
-        return result;
+            return result;
+        });
     }, [allPlaybackData, fromDate, minDuration, toDate]);
 
     const playedPerArtist : ArtistStatsType[] = useMemo(() => {
-        const reduced = baseData.reduce((previousValue, currentValue) => {
-            if (currentValue.master_metadata_album_artist_name === null) {
+        return performAndMeasure('playedPerArtist', () => {
+            const reduced = baseData.reduce((previousValue, currentValue) => {
+                if (currentValue.master_metadata_album_artist_name === null) {
+                    return previousValue;
+                }
+
+                if (!previousValue[currentValue.master_metadata_album_artist_name]) {
+                    previousValue[currentValue.master_metadata_album_artist_name] = 0;
+                }
+                previousValue[currentValue.master_metadata_album_artist_name]++;
                 return previousValue;
-            }
+            }, {} as Record<string, number>);
 
-            if (!previousValue[currentValue.master_metadata_album_artist_name]) {
-                previousValue[currentValue.master_metadata_album_artist_name] = 0;
-            }
-            previousValue[currentValue.master_metadata_album_artist_name]++;
-            return previousValue;
-        }, {} as Record<string, number>);
-
-        return Object.entries(reduced).map(([k, v]) => ({
-            name: k, count: v
-        }));
+            return Object.entries(reduced).map(([k, v]) => ({
+                name: k, count: v
+            }));
+        });
     }, [baseData]);
 
     const playedPerSong: SongStatsType[] = useMemo(() => {
-        const trackUriTracks = baseData.reduce((prev, current) => {
-            if (current.master_metadata_album_artist_name === null) {
+        return performAndMeasure('playedPerSong', () => {
+            const trackUriTracks = baseData.reduce((prev, current) => {
+                if (current.master_metadata_album_artist_name === null) {
+                    return prev;
+                }
+                prev[current.spotify_track_uri] = current.master_metadata_track_name;
                 return prev;
-            }
-            prev[current.spotify_track_uri] = current.master_metadata_track_name;
-            return prev;
-        }, {} as Record<string, string>);
+            }, {} as Record<string, string>);
 
-        const trackUriArtist = baseData.reduce((prev, current) => {
-            if (current.master_metadata_album_artist_name === null) {
+            const trackUriArtist = baseData.reduce((prev, current) => {
+                if (current.master_metadata_album_artist_name === null) {
+                    return prev;
+                }
+                prev[current.spotify_track_uri] = current.master_metadata_album_artist_name;
                 return prev;
-            }
-            prev[current.spotify_track_uri] = current.master_metadata_album_artist_name;
-            return prev;
-        }, {} as Record<string, string>);
+            }, {} as Record<string, string>);
 
-        const trackCount = baseData.reduce((prev, current) => {
-            if (current.master_metadata_album_artist_name === null) {
+            const trackCount = baseData.reduce((prev, current) => {
+                if (current.master_metadata_album_artist_name === null) {
+                    return prev;
+                }
+
+                if (!prev[current.spotify_track_uri]) {
+                    prev[current.spotify_track_uri] = 0;
+                }
+
+                prev[current.spotify_track_uri]++;
                 return prev;
-            }
+            }, {} as Record<string, number>);
 
-            if (!prev[current.spotify_track_uri]) {
-                prev[current.spotify_track_uri] = 0;
-            }
-
-            prev[current.spotify_track_uri]++;
-            return prev;
-        }, {} as Record<string, number>);
-
-        return Object.entries(trackCount).map(([k, v]) => {
-            return { name: trackUriTracks[k], count: v, artist: trackUriArtist[k] };
+            return Object.entries(trackCount).map(([k, v]) => {
+                return { name: trackUriTracks[k], count: v, artist: trackUriArtist[k] };
+            });
         });
     }, [baseData]);
 
     const filteredStats: StatsType | undefined = useMemo(() => {
-        if (!baseData.length) {
-            return undefined;
-        }
+        return performAndMeasure('filteredStats', () => {
+            if (!baseData.length) {
+                return undefined;
+            }
 
-        const allTs = baseData.map(pb => pb.ts.getTime());
-        const uniqueArtistCount = baseData
-            .flatMap(pb => pb.master_metadata_album_artist_name ?? [])
-            .filter((s, index, array) => array.indexOf(s) === index)
-            .length;
+            const allTs = performAndMeasure('transform timestamps', () => baseData.map(pb => pb.ts.getTime()));
+            const uniqueArtistCount = performAndMeasure('unique artist count', () => baseData
+                .flatMap(pb => pb.master_metadata_album_artist_name ?? [])
+                .filter((s, index, array) => array.indexOf(s) === index)
+                .length
+            );
 
-        const uniqueSongCount = baseData
-            .flatMap(pb => pb.spotify_track_uri)
-            .filter((s, index, array) => array.indexOf(s) === index)
-            .length;
+            const uniqueSongCount = performAndMeasure('unique song count', () => baseData
+                .reduce((prev, current) => {
+                    if (prev.includes(current.spotify_track_uri)) {
+                        return prev;
+                    }
+                    prev.push(current.spotify_track_uri);
+                    return prev;
+                }, [] as string[])
+                .length
+            );
 
-        return {
-            playBackDataCount: baseData.length,
-            earliestEntry: moment(Math.min(...allTs)),
-            latestEntry: moment(Math.max(...allTs)),
-            uniqueArtists: uniqueArtistCount,
-            uniqueSongs: uniqueSongCount,
-            totalSecondsPlayed: baseData.reduce((a, b) => a + b.ms_played/1_000, 0)
-        };
+            return {
+                playBackDataCount: baseData.length,
+                earliestEntry: moment(allTs),
+                latestEntry: moment(allTs),
+                uniqueArtists: uniqueArtistCount,
+                uniqueSongs: uniqueSongCount,
+                totalSecondsPlayed: baseData.reduce((a, b) => a + b.ms_played/1_000, 0)
+            };
+        });
     }, [baseData]);
 
     const handleDataChange = (data: PlaybackData[], stats: StatsType): void  => {
