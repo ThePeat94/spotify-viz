@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { DataFilterType } from 'src/filter/type';
 import { Grid2, Slider, Stack, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
@@ -18,11 +18,13 @@ const DataFilter: React.FC<DataFilterProps> = (props) => {
         onChange,
     } = props;
 
+
     const {
         minDuration,
         from,
         to,
     } = value;
+    const [tmpDuration, setTmpDuration] = useState(minDuration);
 
     const fromDate = useMemo(() => {
         return from ? moment(from) : null;
@@ -63,13 +65,17 @@ const DataFilter: React.FC<DataFilterProps> = (props) => {
                 <Stack>
                     <Typography variant={'body2'}>Min. Duration</Typography>
                     <Slider
-                        getAriaLabel={() => 'Foo'}
                         min={0}
-                        max={10_000}
-                        step={100}
+                        max={60_000}
+                        step={1000}
                         marks={true}
-                        onChange={(_, v) => handleMinDurationChange(v as number)}
-                        value={minDuration}
+                        onDragStart={() => console.log('dragging started')}
+                        onDrag={() => console.log('dragging')}
+                        onDragEnd={() => console.log('dragging ended')}
+                        onDragStartCapture={() => console.log('on drag start capture')}
+                        onChange={(_, v) => setTmpDuration(v as number)}
+                        onChangeCommitted={(_, v) => handleMinDurationChange(v as number)}
+                        value={tmpDuration}
                     />
                     <Typography variant={'caption'}>{minDuration/1000}s</Typography>
                 </Stack>

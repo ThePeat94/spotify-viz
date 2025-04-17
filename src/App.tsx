@@ -17,6 +17,8 @@ import TopArtistsCard from 'src/components/cards/TopArtistsCard';
 import TopSongsCard from 'src/components/cards/TopSongsCard';
 import DataImport from 'src/components/DataImport';
 import { performAndMeasure } from 'src/utils/performance';
+import { maximumOf, minimumOf } from 'src/utils/numbers';
+import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/analysis';
 
 
 const App = () => {
@@ -27,7 +29,7 @@ const App = () => {
     const [unfilteredStats, setUnfilteredStats] = useState<StatsType>();
 
     const [filter, setFilter] = useState<DataFilterType>({
-        minDuration: 0,
+        minDuration: 10_000,
     });
 
     const { minDuration, from, to } = filter;
@@ -121,27 +123,13 @@ const App = () => {
             }
 
             const allTs = performAndMeasure('transform timestamps', () => baseData.map(pb => pb.ts.getTime()));
-            const uniqueArtistCount = performAndMeasure('unique artist count', () => baseData
-                .flatMap(pb => pb.master_metadata_album_artist_name ?? [])
-                .filter((s, index, array) => array.indexOf(s) === index)
-                .length
-            );
-
-            const uniqueSongCount = performAndMeasure('unique song count', () => baseData
-                .reduce((prev, current) => {
-                    if (prev.includes(current.spotify_track_uri)) {
-                        return prev;
-                    }
-                    prev.push(current.spotify_track_uri);
-                    return prev;
-                }, [] as string[])
-                .length
-            );
+            const uniqueArtistCount = performAndMeasure('unique artist count', () => calculateUniqueArtistCount(baseData));
+            const uniqueSongCount = performAndMeasure('unique song count', () => calculateUniqueSongCount(baseData));
 
             return {
                 playBackDataCount: baseData.length,
-                earliestEntry: moment(allTs),
-                latestEntry: moment(allTs),
+                earliestEntry: moment(minimumOf(allTs)),
+                latestEntry: moment(maximumOf(allTs)),
                 uniqueArtists: uniqueArtistCount,
                 uniqueSongs: uniqueSongCount,
                 totalSecondsPlayed: baseData.reduce((a, b) => a + b.ms_played/1_000, 0)

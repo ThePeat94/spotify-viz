@@ -4,6 +4,8 @@ import { PlaybackData } from 'src/streams/type';
 import { performAndMeasure } from 'src/utils/performance';
 import moment from 'moment/moment';
 import { StatsType } from 'src/stats/type';
+import { maximumOf, minimumOf } from 'src/utils/numbers';
+import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/analysis';
 
 type DataImportProps = {
     onChange?: (data: PlaybackData[], unfilteredStats: StatsType) => void;
@@ -87,20 +89,13 @@ const DataImport: React.FC<DataImportProps> = (props) => {
         const allStats = performAndMeasure('parseFile', () => {
             const allTs = playbackData.map(pb => pb.ts.getTime());
 
-            const uniqueArtistCount = playbackData
-                .map(pb => pb.master_metadata_album_artist_name ?? [])
-                .filter((s, index, array) => array.indexOf(s) === index)
-                .length;
-
-            const uniqueSongCount = playbackData
-                .map(pb => pb.spotify_track_uri)
-                .filter((s, index, array) => array.indexOf(s) === index)
-                .length;
+            const uniqueArtistCount = calculateUniqueArtistCount(playbackData);
+            const uniqueSongCount = calculateUniqueSongCount(playbackData);
 
             return {
                 playBackDataCount: playbackData.length,
-                earliestEntry: moment(Math.min(...allTs)),
-                latestEntry: moment(Math.max(...allTs)),
+                earliestEntry: moment(minimumOf(allTs)),
+                latestEntry: moment(maximumOf(allTs)),
                 uniqueArtists: uniqueArtistCount,
                 uniqueSongs: uniqueSongCount,
                 totalSecondsPlayed: playbackData.reduce((a, b) => a + b.ms_played / 1_000, 0)
