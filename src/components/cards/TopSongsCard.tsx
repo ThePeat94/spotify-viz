@@ -69,10 +69,10 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
                         overflow: 'auto',
                     }}
                 >
-                    {sortedPerSong.map(p => (
+                    {sortedPerSong.map((p, i) => (
                         <ListItem>
                             <ListItemText
-                                primary={<>{p.name} - {p.artist}</>}
+                                primary={<>#{i + 1} - {p.name} - {p.artist}</>}
                                 secondary={<>{p.count} streams - {(p.msPlayed/1000/60).toLocaleString(undefined, { maximumFractionDigits: 0 })} minutes</>}
                             />
                         </ListItem>
