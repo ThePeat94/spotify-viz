@@ -67,14 +67,20 @@ const App = () => {
                 }
 
                 if (!previousValue[currentValue.master_metadata_album_artist_name]) {
-                    previousValue[currentValue.master_metadata_album_artist_name] = 0;
+                    previousValue[currentValue.master_metadata_album_artist_name] = {
+                        count: 0,
+                        msPlayed: 0,
+                    };
                 }
-                previousValue[currentValue.master_metadata_album_artist_name]++;
+                previousValue[currentValue.master_metadata_album_artist_name] = {
+                    count: previousValue[currentValue.master_metadata_album_artist_name].count + 1,
+                    msPlayed: previousValue[currentValue.master_metadata_album_artist_name].msPlayed + currentValue.ms_played,
+                };
                 return previousValue;
-            }, {} as Record<string, number>);
+            }, {} as Record<string, { count: number, msPlayed: number }>);
 
             return Object.entries(reduced).map(([k, v]) => ({
-                name: k, count: v
+                name: k, count: v.count, msPlayed: v.msPlayed,
             }));
         });
     }, [baseData]);
@@ -105,7 +111,7 @@ const App = () => {
                 if (!prev[current.spotify_track_uri]) {
                     prev[current.spotify_track_uri] = {
                         count: 0,
-                        msPlayed: current.ms_played,
+                        msPlayed: 0,
                     };
                 }
 

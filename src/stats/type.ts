@@ -12,6 +12,7 @@ export type StatsType = {
 export type ArtistStatsType = {
     name: string;
     count: number
+    msPlayed: number;
 }
 
 export type SongStatsType = {
