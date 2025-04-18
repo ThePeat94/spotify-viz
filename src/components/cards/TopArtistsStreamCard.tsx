@@ -1,6 +1,18 @@
 import React, { useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, List, ListItem, ListItemText, Slider, Stack, Typography } from '@mui/material';
+import {
+    Box,
+    Card,
+    CardContent,
+    CardHeader,
+    List,
+    ListItem,
+    ListItemText,
+    Slider,
+    Stack,
+    Typography
+} from '@mui/material';
 import { ArtistStatsType } from 'src/stats/type';
+import { SortModeSelect, SortModeType } from 'src/components/SortModeSelect';
 
 type TopArtistsStreamCardProps = {
     artistStats: ArtistStatsType[];
@@ -15,14 +27,26 @@ const TopArtistsStreamCard: React.FC<TopArtistsStreamCardProps> = (props) => {
     } = props;
 
     const [topArtistCount, setTopArtistCount] = useState<number>(50);
+    const [sortMode, setSortMode] = useState<SortModeType>('count');
+
 
     const sortedPerArtist = useMemo(() => {
-        return artistStats.sort((p1, p2) => p2.count - p1.count).slice(0, topArtistCount);
-    }, [artistStats, topArtistCount]);
+        return artistStats.sort((p1, p2) => p2[sortMode] - p1[sortMode]).slice(0, topArtistCount);
+    }, [artistStats, topArtistCount, sortMode]);
 
     return (
         <Card>
-            <CardHeader title={'Top Artists (# of Streams)'}/>
+            <CardHeader
+                title={'Top Artists'}
+                action={
+                    <Box width={'200px'}>
+                        <SortModeSelect
+                            sortMode={sortMode}
+                            onChange={setSortMode}
+                        />
+                    </Box>
+                }
+            />
             <CardContent>
                 <Stack>
                     <Slider
@@ -46,7 +70,7 @@ const TopArtistsStreamCard: React.FC<TopArtistsStreamCardProps> = (props) => {
                         <ListItem>
                             <ListItemText
                                 primary={p.name}
-                                secondary={p.count}
+                                secondary={<>{p.count} - {(p.msPlayed/1000/60).toLocaleString(undefined, { maximumFractionDigits: 0 })} minutes</>}
                             />
                         </ListItem>
                     ))}

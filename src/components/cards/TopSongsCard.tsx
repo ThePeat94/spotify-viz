@@ -39,14 +39,17 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
 
     return (
         <Card>
-            <CardHeader title={'Top Songs'} action={
-                <Box width={'200px'}>
-                    <SortModeSelect
-                        sortMode={sortMode}
-                        onChange={handleSortModeChange}
-                    />
-                </Box>
-            }/>
+            <CardHeader
+                title={'Top Songs'}
+                action={
+                    <Box width={'200px'}>
+                        <SortModeSelect
+                            sortMode={sortMode}
+                            onChange={handleSortModeChange}
+                        />
+                    </Box>
+                }
+            />
             <CardContent>
                 <Stack>
                     <Slider
