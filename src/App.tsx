@@ -13,7 +13,7 @@ import FeatureLogCard from 'src/components/cards/FeatureLogCard';
 import { ArtistStatsType, SongStatsType, StatsType } from 'src/stats/type';
 import StatsCard from 'src/components/cards/StatsCard';
 import StatsDiffCard from 'src/components/cards/StatsDiffCard';
-import TopArtistsCard from 'src/components/cards/TopArtistsCard';
+import TopArtistsStreamCard from 'src/components/cards/TopArtistsStreamCard';
 import TopSongsCard from 'src/components/cards/TopSongsCard';
 import DataImport from 'src/components/DataImport';
 import { performAndMeasure } from 'src/utils/performance';
@@ -29,7 +29,7 @@ const App = () => {
     const [unfilteredStats, setUnfilteredStats] = useState<StatsType>();
 
     const [filter, setFilter] = useState<DataFilterType>({
-        minDuration: 10_000,
+        minDuration: 30_000,
     });
 
     const { minDuration, from, to } = filter;
@@ -103,15 +103,21 @@ const App = () => {
                 }
 
                 if (!prev[current.spotify_track_uri]) {
-                    prev[current.spotify_track_uri] = 0;
+                    prev[current.spotify_track_uri] = {
+                        count: 0,
+                        msPlayed: current.ms_played,
+                    };
                 }
 
-                prev[current.spotify_track_uri]++;
+                prev[current.spotify_track_uri] = {
+                    count: prev[current.spotify_track_uri].count + 1,
+                    msPlayed: prev[current.spotify_track_uri].msPlayed + current.ms_played,
+                };
                 return prev;
-            }, {} as Record<string, number>);
+            }, {} as Record<string, { count: number, msPlayed: number }>);
 
             return Object.entries(trackCount).map(([k, v]) => {
-                return { name: trackUriTracks[k], count: v, artist: trackUriArtist[k] };
+                return { name: trackUriTracks[k], count: v.count, artist: trackUriArtist[k], msPlayed: v.msPlayed };
             });
         });
     }, [baseData]);
@@ -160,7 +166,7 @@ const App = () => {
                     <Typography variant={'h4'} pt={2}>Data Analysis</Typography>
                 </Grid2>
                 <Grid2 size={4}>
-                    <TopArtistsCard artistStats={playedPerArtist}/>
+                    <TopArtistsStreamCard artistStats={playedPerArtist}/>
                 </Grid2>
                 <Grid2 size={4}>
                     <TopSongsCard songStats={playedPerSong}/>

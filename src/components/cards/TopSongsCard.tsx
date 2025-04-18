@@ -1,10 +1,24 @@
 import React, { useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, List, ListItem, ListItemText, Slider, Stack, Typography } from '@mui/material';
+import {
+    Box,
+    Card,
+    CardContent,
+    CardHeader, FormControl, InputLabel,
+    List,
+    ListItem,
+    ListItemText, MenuItem,
+    Select,
+    Slider,
+    Stack,
+    Typography
+} from '@mui/material';
 import { SongStatsType } from 'src/stats/type';
 
 type TopSongsCardProps = {
     songStats: SongStatsType[];
 };
+
+type SortMode = 'count' | 'msPlayed';
 
 /**
  * A Card which displays the top songs.
@@ -15,14 +29,36 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
     } = props;
 
     const [topSongCount, setTopSongCount] = useState<number>(50);
+    const [sortMode, setSortMode] = useState<SortMode>('count');
 
     const sortedPerSong = useMemo(() => {
-        return songStats.sort((p1, p2) => p2.count - p1.count).slice(0, topSongCount);
-    }, [songStats, topSongCount]);
+        return songStats.sort((p1, p2) => p2[sortMode] - p1[sortMode]).slice(0, topSongCount);
+    }, [songStats, topSongCount, sortMode]);
+
+    const handleSortModeChange = (mode: SortMode): void => {
+        setSortMode(mode);
+    };
 
     return (
         <Card>
-            <CardHeader title={'Top Songs'}/>
+            <CardHeader title={'Top Songs'} action={
+                <Box width={'200px'}>
+                    <FormControl fullWidth={true}>
+                        <InputLabel id={'sort-mode-select-label'}>Sort Mode</InputLabel>
+                        <Select
+                            labelId={'sort-mode-select-label'}
+                            label={'Sort Mode'}
+                            value={sortMode}
+                            onChange={e => handleSortModeChange(e.target.value as SortMode)}
+                            fullWidth={true}
+                            autoWidth={false}
+                        >
+                            <MenuItem value={'count'}>Stream Count</MenuItem>
+                            <MenuItem value={'msPlayed'}>Minutes Played</MenuItem>
+                        </Select>
+                    </FormControl>
+                </Box>
+            }/>
             <CardContent>
                 <Stack>
                     <Slider
@@ -46,7 +82,7 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
                         <ListItem>
                             <ListItemText
                                 primary={<>{p.name} - {p.artist}</>}
-                                secondary={p.count}
+                                secondary={<>{p.count} streams - {(p.msPlayed/1000/60).toLocaleString(undefined, { maximumFractionDigits: 0 })} minutes</>}
                             />
                         </ListItem>
                     ))}

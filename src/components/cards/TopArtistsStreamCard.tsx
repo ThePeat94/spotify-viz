@@ -2,14 +2,14 @@ import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, List, ListItem, ListItemText, Slider, Stack, Typography } from '@mui/material';
 import { ArtistStatsType } from 'src/stats/type';
 
-type TopArtistsCardProps = {
+type TopArtistsStreamCardProps = {
     artistStats: ArtistStatsType[];
 };
 
 /**
  * A Card to display the top artists.
  */
-const TopArtistsCard: React.FC<TopArtistsCardProps> = (props) => {
+const TopArtistsStreamCard: React.FC<TopArtistsStreamCardProps> = (props) => {
     const {
         artistStats,
     } = props;
@@ -22,7 +22,7 @@ const TopArtistsCard: React.FC<TopArtistsCardProps> = (props) => {
 
     return (
         <Card>
-            <CardHeader title={'Top Artists'}/>
+            <CardHeader title={'Top Artists (# of Streams)'}/>
             <CardContent>
                 <Stack>
                     <Slider
@@ -56,4 +56,4 @@ const TopArtistsCard: React.FC<TopArtistsCardProps> = (props) => {
     );
 };
 
-export default TopArtistsCard;
+export default TopArtistsStreamCard;
