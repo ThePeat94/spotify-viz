@@ -76,6 +76,8 @@ const DataFilter: React.FC<DataFilterProps> = (props) => {
                         onChange={(_, v) => setTmpDuration(v as number)}
                         onChangeCommitted={(_, v) => handleMinDurationChange(v as number)}
                         value={tmpDuration}
+                        valueLabelDisplay={'auto'}
+                        valueLabelFormat={(v => `${v/1000}s`)}
                     />
                     <Typography variant={'caption'}>{minDuration/1000}s</Typography>
                 </Stack>
