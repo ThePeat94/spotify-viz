@@ -3,22 +3,20 @@ import {
     Box,
     Card,
     CardContent,
-    CardHeader, FormControl, InputLabel,
+    CardHeader,
     List,
     ListItem,
-    ListItemText, MenuItem,
-    Select,
+    ListItemText,
     Slider,
     Stack,
     Typography
 } from '@mui/material';
 import { SongStatsType } from 'src/stats/type';
+import { SortModeSelect, SortModeType } from 'src/components/SortModeSelect';
 
 type TopSongsCardProps = {
     songStats: SongStatsType[];
 };
-
-type SortMode = 'count' | 'msPlayed';
 
 /**
  * A Card which displays the top songs.
@@ -29,13 +27,13 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
     } = props;
 
     const [topSongCount, setTopSongCount] = useState<number>(50);
-    const [sortMode, setSortMode] = useState<SortMode>('count');
+    const [sortMode, setSortMode] = useState<SortModeType>('count');
 
     const sortedPerSong = useMemo(() => {
         return songStats.sort((p1, p2) => p2[sortMode] - p1[sortMode]).slice(0, topSongCount);
     }, [songStats, topSongCount, sortMode]);
 
-    const handleSortModeChange = (mode: SortMode): void => {
+    const handleSortModeChange = (mode: SortModeType): void => {
         setSortMode(mode);
     };
 
@@ -43,20 +41,10 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
         <Card>
             <CardHeader title={'Top Songs'} action={
                 <Box width={'200px'}>
-                    <FormControl fullWidth={true}>
-                        <InputLabel id={'sort-mode-select-label'}>Sort Mode</InputLabel>
-                        <Select
-                            labelId={'sort-mode-select-label'}
-                            label={'Sort Mode'}
-                            value={sortMode}
-                            onChange={e => handleSortModeChange(e.target.value as SortMode)}
-                            fullWidth={true}
-                            autoWidth={false}
-                        >
-                            <MenuItem value={'count'}>Stream Count</MenuItem>
-                            <MenuItem value={'msPlayed'}>Minutes Played</MenuItem>
-                        </Select>
-                    </FormControl>
+                    <SortModeSelect
+                        sortMode={sortMode}
+                        onChange={handleSortModeChange}
+                    />
                 </Box>
             }/>
             <CardContent>
