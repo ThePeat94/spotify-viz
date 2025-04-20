@@ -165,7 +165,12 @@ const App = () => {
                 </Grid2>
             </Grid2>
             <Grid2 p={2}>
-                <DataFilter value={filter} onChange={setFilter}/>
+                <DataFilter
+                    earliestYear={unfilteredStats?.earliestEntry.year()}
+                    latestYear={unfilteredStats?.latestEntry.year()}
+                    value={filter}
+                    onChange={setFilter}
+                />
             </Grid2>
             <Grid2 container={true} alignItems={'center'} spacing={2} p={2}>
                 <Grid2 size={12}>

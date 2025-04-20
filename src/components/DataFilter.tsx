@@ -1,13 +1,29 @@
 import React, { useMemo, useState } from 'react';
 import { DataFilterType } from 'src/filter/type';
-import { Grid2, Slider, Stack, Typography } from '@mui/material';
+import { FormControl, Grid2, InputLabel, MenuItem, Select, Slider, Stack, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import moment, { Moment } from 'moment/moment';
 
 type DataFilterProps = {
+    earliestYear?: number;
+    latestYear?: number;
     value: DataFilterType;
     onChange: (value: DataFilterType) => void;
 }
+
+type FilterModeType = 'wrapped' | 'allYear';
+
+type FilterPresetType = { year?: number, mode: FilterModeType };
+const generateYearSelections = (earliestYear: number, latestYear: number) => {
+    const years = [];
+    for (let i = earliestYear; i <= latestYear; i++) {
+        years.push(i);
+    }
+
+    return years.map(year => (
+        <MenuItem value={year}>{year}</MenuItem>
+    ));
+};
 
 /**
  * A component  to display general data filter options, which apply to the general set of data
@@ -15,8 +31,14 @@ type DataFilterProps = {
 const DataFilter: React.FC<DataFilterProps> = (props) => {
     const {
         value,
+        earliestYear,
+        latestYear,
         onChange,
     } = props;
+
+    const [presetFilter, setPresetFilter] = useState<FilterPresetType>({
+        mode: 'wrapped'
+    });
 
 
     const {
@@ -55,6 +77,51 @@ const DataFilter: React.FC<DataFilterProps> = (props) => {
         });
     };
 
+    const handleFilterPresetChange = (newPreset: FilterPresetType): void => {
+        setPresetFilter(newPreset);
+
+        if (!newPreset.year) {
+            onChange({
+                ...value,
+                from: undefined,
+                to: undefined,
+            });
+            return;
+        }
+
+        let startOfYear  = 0;
+        let endOfYear  = 0;
+
+        if (newPreset.mode === 'allYear') {
+            startOfYear = moment(`${newPreset.year}-01-01`).startOf('day').toDate().getTime();
+            endOfYear = moment(`${newPreset.year}-12-31`).endOf('day').toDate().getTime();
+        } else if (newPreset.mode === 'wrapped') {
+            startOfYear = moment(`${newPreset.year}-01-01`).startOf('day').toDate().getTime();
+            endOfYear = moment(`${newPreset.year}-11-15`).endOf('day').toDate().getTime();
+        }
+
+
+        onChange({
+            ...value,
+            from: startOfYear,
+            to: endOfYear,
+        });
+    };
+
+    const handlePresetYearChange = (year?: number): void => {
+        handleFilterPresetChange({
+            ...presetFilter,
+            year
+        });
+    };
+
+    const handlePresetModeChange = (mode: FilterModeType): void => {
+        handleFilterPresetChange({
+            ...presetFilter,
+            mode
+        });
+    };
+
 
     return (
         <Grid2 container={true} alignItems={'center'} spacing={2}>
@@ -89,6 +156,8 @@ const DataFilter: React.FC<DataFilterProps> = (props) => {
                     value={fromDate}
                     onChange={v => handleFromDateChange(v)}
                     format={'DD.MM.YYYY'}
+                    sx={{ width: '100%' }}
+
                 />
             </Grid2>
             <Grid2 size={2}>
@@ -98,7 +167,48 @@ const DataFilter: React.FC<DataFilterProps> = (props) => {
                     value={toDate}
                     onChange={v => handleToDateChange(v)}
                     format={'DD.MM.YYYY'}
+                    sx={{ width: '100%' }}
                 />
+            </Grid2>
+            <Grid2 size={4}/>
+            <Grid2 size={12}>
+                <Typography variant={'h6'}>
+                    Filter Presets
+                </Typography>
+            </Grid2>
+            <Grid2 size={2}>
+                <FormControl fullWidth={true}>
+                    <InputLabel id={'preset-year-select-label'}>Year</InputLabel>
+                    <Select
+                        labelId={'preset-year-select-label'}
+                        label={'Year'}
+                        value={presetFilter.year}
+                        onChange={e => handlePresetYearChange(e.target.value as number)}
+                        fullWidth={true}
+                        autoWidth={false}
+                        disabled={!latestYear && !earliestYear}
+                    >
+                        <MenuItem value={undefined}>None</MenuItem>
+                        {earliestYear && latestYear && generateYearSelections(earliestYear, latestYear)}
+                    </Select>
+                </FormControl>
+            </Grid2>
+            <Grid2 size={2}>
+                <FormControl fullWidth={true}>
+                    <InputLabel id={'filter-mode-select-label'}>Mode</InputLabel>
+                    <Select
+                        labelId={'filter-mode-select-label'}
+                        label={'Mode'}
+                        value={presetFilter.mode}
+                        onChange={e => handlePresetModeChange(e.target.value as FilterModeType)}
+                        fullWidth={true}
+                        autoWidth={false}
+                        disabled={!latestYear && !earliestYear}
+                    >
+                        <MenuItem value={'allYear'}>All Year</MenuItem>
+                        <MenuItem value={'wrapped'}>Wrapped</MenuItem>
+                    </Select>
+                </FormControl>
             </Grid2>
         </Grid2>
     );

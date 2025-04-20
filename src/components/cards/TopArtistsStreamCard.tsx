@@ -70,7 +70,7 @@ const TopArtistsStreamCard: React.FC<TopArtistsStreamCardProps> = (props) => {
                         <ListItem>
                             <ListItemText
                                 primary={<>#{i + 1} - {p.name}</>}
-                                secondary={<>{p.count} - {(p.msPlayed/1000/60).toLocaleString(undefined, { maximumFractionDigits: 0 })} minutes</>}
+                                secondary={<>{p.count} streams - {(p.msPlayed/1000/60).toLocaleString(undefined, { maximumFractionDigits: 0 })} minutes</>}
                             />
                         </ListItem>
                     ))}
