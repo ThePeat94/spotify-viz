@@ -4,18 +4,30 @@ import {
     Card,
     CardContent,
     CardHeader,
-    List,
     ListItem,
-    ListItemText,
-    Slider,
-    Stack,
-    Typography
+    ListItemText
 } from '@mui/material';
 import { ArtistStatsType } from 'src/stats/type';
 import { SortModeSelect, SortModeType } from 'src/components/SortModeSelect';
+import { ListChildComponentProps, VariableSizeList } from 'react-window';
 
 type TopArtistsStreamCardProps = {
     artistStats: ArtistStatsType[];
+};
+
+const TopArtistListItem : React.FC<ListChildComponentProps<ArtistStatsType[]>> = (props: ListChildComponentProps<ArtistStatsType[]>) => {
+    const { index, style, data } = props;
+
+    const  artist  = data[index];
+
+    return (
+        <ListItem style={style} key={index} disablePadding={true}>
+            <ListItemText
+                primary={<>#{index + 1} - {artist.name}</>}
+                secondary={<>{artist.count} streams - {(artist.msPlayed/1000/60).toLocaleString(undefined, { maximumFractionDigits: 0 })} minutes</>}
+            />
+        </ListItem>
+    );
 };
 
 /**
@@ -26,13 +38,12 @@ const TopArtistsStreamCard: React.FC<TopArtistsStreamCardProps> = (props) => {
         artistStats,
     } = props;
 
-    const [topArtistCount, setTopArtistCount] = useState<number>(50);
     const [sortMode, setSortMode] = useState<SortModeType>('count');
 
 
     const sortedPerArtist = useMemo(() => {
-        return artistStats.sort((p1, p2) => p2[sortMode] - p1[sortMode]).slice(0, topArtistCount);
-    }, [artistStats, topArtistCount, sortMode]);
+        return artistStats.sort((p1, p2) => p2[sortMode] - p1[sortMode]);
+    }, [artistStats, sortMode]);
 
     return (
         <Card>
@@ -48,33 +59,16 @@ const TopArtistsStreamCard: React.FC<TopArtistsStreamCardProps> = (props) => {
                 }
             />
             <CardContent>
-                <Stack>
-                    <Slider
-                        getAriaLabel={() => 'Foo'}
-                        min={10}
-                        max={500}
-                        step={10}
-                        marks={true}
-                        onChange={(_, v) => setTopArtistCount(v as number)}
-                        value={topArtistCount}
-                    />
-                    <Typography>Display {topArtistCount} Top Artists</Typography>
-                </Stack>
-                <List
-                    sx={{
-                        maxHeight: 500,
-                        overflow: 'auto',
-                    }}
+                <VariableSizeList
+                    itemSize={() => 75}
+                    height={500}
+                    itemData={sortedPerArtist}
+                    itemCount={sortedPerArtist.length}
+                    width={'100%'}
+                    overscanCount={10}
                 >
-                    {sortedPerArtist.map((p, i) => (
-                        <ListItem>
-                            <ListItemText
-                                primary={<>#{i + 1} - {p.name}</>}
-                                secondary={<>{p.count} streams - {(p.msPlayed/1000/60).toLocaleString(undefined, { maximumFractionDigits: 0 })} minutes</>}
-                            />
-                        </ListItem>
-                    ))}
-                </List>
+                    {TopArtistListItem}
+                </VariableSizeList>
             </CardContent>
         </Card>
     );
