@@ -14,6 +14,7 @@ type TopSongsCardProps = {
     songStats: SongStatsType[];
 };
 
+const DEFAULT_LIST_ITEM_SIZE = 75;
 
 const TopSongListItem : React.FC<ListChildComponentProps<SongStatsType[]>> = (props: ListChildComponentProps<SongStatsType[]>) => {
     const { index, style, data } = props;
@@ -64,8 +65,8 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
             />
             <CardContent>
                 <VariableSizeList
-                    itemSize={() => 75}
-                    height={500}
+                    itemSize={() => DEFAULT_LIST_ITEM_SIZE}
+                    height={Math.min(sortedPerSong.length * DEFAULT_LIST_ITEM_SIZE, 500)}
                     itemData={sortedPerSong}
                     itemCount={sortedPerSong.length}
                     width={'100%'}

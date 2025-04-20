@@ -15,6 +15,8 @@ type TopArtistsStreamCardProps = {
     artistStats: ArtistStatsType[];
 };
 
+const DEFAULT_LIST_ITEM_SIZE = 75;
+
 const TopArtistListItem : React.FC<ListChildComponentProps<ArtistStatsType[]>> = (props: ListChildComponentProps<ArtistStatsType[]>) => {
     const { index, style, data } = props;
 
@@ -60,8 +62,8 @@ const TopArtistsStreamCard: React.FC<TopArtistsStreamCardProps> = (props) => {
             />
             <CardContent>
                 <VariableSizeList
-                    itemSize={() => 75}
-                    height={500}
+                    itemSize={() => DEFAULT_LIST_ITEM_SIZE}
+                    height={Math.min(sortedPerArtist.length * DEFAULT_LIST_ITEM_SIZE, 500)}
                     itemData={sortedPerArtist}
                     itemCount={sortedPerArtist.length}
                     width={'100%'}
