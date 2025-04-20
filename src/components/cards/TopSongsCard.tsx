@@ -65,7 +65,7 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
                 </Stack>
                 <List
                     sx={{
-                        maxHeight: 300,
+                        maxHeight: 500,
                         overflow: 'auto',
                     }}
                 >

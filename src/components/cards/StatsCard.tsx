@@ -34,8 +34,8 @@ const StatsCard: React.FC<UnfilteredMetaStatsCardProps> = (props) => {
                 {stats && !loading && (
                     <Stack spacing={2}>
                         <Typography>Playback count: {stats.playBackDataCount}</Typography>
-                        <Typography>Earliest Entry: {stats.earliestEntry.format('DD.MM.YYYY hh:mm:ss')}</Typography>
-                        <Typography>Latest Entry: {stats.latestEntry.format('DD.MM.YYYY hh:mm:ss')}</Typography>
+                        <Typography>Earliest Entry: {stats.earliestEntry.format('DD.MM.YYYY HH:mm:ss')}</Typography>
+                        <Typography>Latest Entry: {stats.latestEntry.format('DD.MM.YYYY HH:mm:ss')}</Typography>
                         <Typography>Unique Artists: {stats.uniqueArtists}</Typography>
                         <Typography>Unique Songs: {stats.uniqueSongs}</Typography>
                         <Typography>Total Seconds: {stats.totalSecondsPlayed}</Typography>
