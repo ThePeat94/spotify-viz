@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { DataFilterType } from 'src/filter/type';
-import { FormControl, Grid2, InputLabel, MenuItem, Select, Slider, Stack, Typography } from '@mui/material';
+import { Button, FormControl, Grid2, InputLabel, MenuItem, Select, Slider, Stack, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import moment, { Moment } from 'moment/moment';
 
@@ -170,7 +170,21 @@ const DataFilter: React.FC<DataFilterProps> = (props) => {
                     sx={{ width: '100%' }}
                 />
             </Grid2>
-            <Grid2 size={4}/>
+            <Grid2 size={1}>
+                <Button
+                    variant={'outlined'}
+                    onClick={() => {
+                        onChange({
+                            ...value,
+                            from: undefined,
+                            to: undefined,
+                        });
+                    }}
+                >
+                    Reset
+                </Button>
+            </Grid2>
+            <Grid2 size={3}/>
             <Grid2 size={12}>
                 <Typography variant={'h6'}>
                     Filter Presets
