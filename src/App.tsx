@@ -19,7 +19,23 @@ import DataImport from 'src/components/DataImport';
 import { performAndMeasure } from 'src/utils/performance';
 import { maximumOf, minimumOf } from 'src/utils/numbers';
 import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/analysis';
+import { Moment } from 'moment';
 
+const getFilterFromDates = (fromDate: Moment | null, toDate: Moment | null): (pb: PlaybackData) => boolean  => {
+    if (fromDate && toDate) {
+        return (pb: PlaybackData) => moment(pb.ts).isBetween(fromDate, toDate);
+    }
+
+    if (fromDate) {
+        return (pb: PlaybackData) => moment(pb.ts).isAfter(fromDate);
+    }
+
+    if (toDate) {
+        return (pb: PlaybackData) => moment(pb.ts).isBefore(toDate);
+    }
+
+    return () => true;
+};
 
 const App = () => {
 
@@ -45,17 +61,8 @@ const App = () => {
 
     const baseData = useMemo(() => {
         return performAndMeasure('filter base data', () => {
-            let result = allPlaybackData.filter(d => d.ms_played >= minDuration);
-
-            if (fromDate) {
-                result = result.filter(d => moment(d.ts).toDate() >= fromDate.toDate());
-            }
-
-            if (toDate) {
-                result = result.filter(d => moment(d.ts).toDate() <= toDate.endOf('day').toDate());
-            }
-
-            return result;
+            const appliesToDates = getFilterFromDates(fromDate, toDate);
+            return allPlaybackData.filter(d => d.ms_played >= minDuration && appliesToDates(d));
         });
     }, [allPlaybackData, fromDate, minDuration, toDate]);
 
