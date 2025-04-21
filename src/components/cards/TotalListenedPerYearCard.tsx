@@ -1,6 +1,6 @@
 import { PlaybackData } from 'src/streams/type';
 import { Card, CardContent, CardHeader, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
-import { LineChart } from '@mui/x-charts';
+import { BarChart, LineChart } from '@mui/x-charts';
 import React, { useMemo, useState } from 'react';
 import { generateYearSelections } from 'src/data/analysis';
 import moment from 'moment/moment';
@@ -12,6 +12,8 @@ type TotalListenedPerYearCardPropsType = {
     latestYear?: number;
 };
 
+type DisplayModeType = 'line' | 'bar';
+
 type GranularityLevelType = 'year' | 'month' | 'day';
 
 export const TotalListenedPerYearCard: React.FC<TotalListenedPerYearCardPropsType> = (props) => {
@@ -20,6 +22,7 @@ export const TotalListenedPerYearCard: React.FC<TotalListenedPerYearCardPropsTyp
     const [granularityLevel, setGranularityLevel] = useState<GranularityLevelType>('year');
     const [selectedYear, setSelectedYear] = useState<number>();
     const [selectedMonth, setSelectedMonth] = useState<number>();
+    const [displayMode, setDisplayMode] = useState<DisplayModeType>('line');
 
 
     const calculatedDataset = useMemo(() => {
@@ -113,13 +116,17 @@ export const TotalListenedPerYearCard: React.FC<TotalListenedPerYearCardPropsTyp
         setSelectedMonth(selectedMonth);
     };
 
+    const handleDisplayModeChange = (displayMode: DisplayModeType): void => {
+        setDisplayMode(displayMode);
+    };
+
     return (
         <Card>
             <CardHeader
                 title={'Total Listened Per Year'}
                 action={
                     data.length > 0 && calculatedDataset && (
-                        <Stack direction={'row'} spacing={2} width={200 * (granularityLevel === 'month' ? 2 : granularityLevel === 'day' ? 3 : 1)} alignItems={'center'}>
+                        <Stack direction={'row'} spacing={2} width={200 * (granularityLevel === 'month' ? 2 : granularityLevel === 'day' ? 3 : 1) + 200} alignItems={'center'}>
                             {granularityLevel === 'day' && (
                                 <FormControl variant={'outlined'} fullWidth={true}>
                                     <InputLabel id={'granularity-month-select-label'}>Month</InputLabel>
@@ -173,12 +180,25 @@ export const TotalListenedPerYearCard: React.FC<TotalListenedPerYearCardPropsTyp
                                     <MenuItem value={'day'}>Day</MenuItem>
                                 </Select>
                             </FormControl>
+                            <FormControl variant={'outlined'} fullWidth={true}>
+                                <InputLabel id={'display-mode-select-label'}>Display Mode</InputLabel>
+                                <Select
+                                    variant={'outlined'}
+                                    labelId={'display-mode-select-label'}
+                                    label={'Display Mode'}
+                                    value={displayMode}
+                                    onChange={e => handleDisplayModeChange(e.target.value as DisplayModeType)}
+                                >
+                                    <MenuItem value={'bar'}>Bars</MenuItem>
+                                    <MenuItem value={'line'}>Lines</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Stack>
                     )
                 }
             />
             <CardContent>
-                {data.length > 0 && calculatedDataset && (
+                {data.length > 0 && calculatedDataset && displayMode === 'line' && (
                     <LineChart
                         height={500}
                         series={[
@@ -208,6 +228,42 @@ export const TotalListenedPerYearCard: React.FC<TotalListenedPerYearCardPropsTyp
                             }
                         ]}
                         grid={{ horizontal: true }}
+                    />
+                )}
+                {data.length > 0 && calculatedDataset && displayMode === 'bar' && (
+                    <BarChart
+                        height={500}
+                        series={[
+                            {
+                                data: Object.values(calculatedDataset),
+                                label: 'Minutes',
+                            }
+                        ]}
+                        xAxis={[
+                            {
+                                data: Object.keys(calculatedDataset).map(k => k.toString()),
+                                label: granularityLevel,
+                                scaleType: 'band'
+                            }
+                        ]}
+                        yAxis={[
+                            {
+                                width: 100,
+                                disableLine: false,
+                                label: 'Minutes',
+                            }
+                        ]}
+                        grid={{ horizontal: true }}
+                        barLabel={(v) => {
+                            if ((granularityLevel === 'month' || granularityLevel === 'year') && v.value) {
+                                return `${formatNumber(v.value, 2)} minutes`;
+                            }
+                            if (granularityLevel === 'day' && v.value) {
+                                return `${formatNumber(v.value, 2)}`;
+                            }
+
+                            return undefined;
+                        }}
                     />
                 )}
             </CardContent>
