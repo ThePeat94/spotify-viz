@@ -75,7 +75,7 @@ export const HoverableDuration: React.FC<HoverableDurationProps> = (props ) => {
                     <Typography>{formatNumber(durationInWeeks, 2)} weeks</Typography>
                     <Typography>{formatNumber(durationInYears, 2)} years</Typography>
                     <Typography sx={{ fontWeight: 'bold' }}>or ca. 🤓</Typography>
-                    {ABSURD_DURATIONS.map((absurdDuration) => {
+                    {ABSURD_DURATIONS.sort((a, b) => a.durationInMs - b.durationInMs).map((absurdDuration) => {
                         const durationInAbsurd = durationInMs / absurdDuration.durationInMs;
                         return (
                             <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'} spacing={1}>
