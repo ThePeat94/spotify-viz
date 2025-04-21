@@ -1,6 +1,7 @@
 import React from 'react';
 import { StatsType } from 'src/stats/type';
 import { Card, CardContent, CardHeader, Skeleton, Stack, Typography } from '@mui/material';
+import { HoverableDuration } from 'src/components/HoverableDuration.tsx';
 
 type UnfilteredMetaStatsCardProps = {
     title: string;
@@ -38,7 +39,7 @@ const StatsCard: React.FC<UnfilteredMetaStatsCardProps> = (props) => {
                         <Typography>Latest Entry: {stats.latestEntry.format('DD.MM.YYYY HH:mm:ss')}</Typography>
                         <Typography>Unique Artists: {stats.uniqueArtists}</Typography>
                         <Typography>Unique Songs: {stats.uniqueSongs}</Typography>
-                        <Typography>Total Seconds: {stats.totalSecondsPlayed}</Typography>
+                        <Typography>Total Seconds: <HoverableDuration durationInMs={stats.totalSecondsPlayed * 1000} /></Typography>
                     </Stack>
                 )}
                 {!stats && !loading && (

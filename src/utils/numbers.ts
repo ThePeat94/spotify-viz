@@ -28,3 +28,7 @@ export const maximumOf = (numbers: number[]): number | null => {
 
     return currentMax;
 };
+
+export const formatNumber = (number: number, decimalPlaces = 0): string => {
+    return number.toLocaleString('de-DE', { maximumFractionDigits: decimalPlaces });
+};
