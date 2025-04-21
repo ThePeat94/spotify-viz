@@ -7,12 +7,6 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-      - name: Hello world!
-        run: echo "Hello World :)"
-      - name: PWD
-        run: pwd
-      - name: who am i?
-        run: whoami
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Install project
