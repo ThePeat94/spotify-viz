@@ -4,6 +4,7 @@ import { formatNumber } from 'src/utils/numbers';
 
 type HoverableDurationProps = {
     durationInMs: number;
+    decimalNumbers?: number;
 }
 
 type AbsurdDurationType = {
@@ -52,7 +53,7 @@ const NoMaxWidthTooltip = styled(({ className, ...props }: TooltipProps) => (
 });
 
 export const HoverableDuration: React.FC<HoverableDurationProps> = (props ) => {
-    const { durationInMs } = props;
+    const { durationInMs, decimalNumbers = 2 } = props;
 
     const durationInSeconds = durationInMs / 1000;
     const durationInMinutes = durationInSeconds / 60;
@@ -101,7 +102,7 @@ export const HoverableDuration: React.FC<HoverableDurationProps> = (props ) => {
                     color: 'success.main',
                 }}
             >
-                {formatNumber(durationInMinutes, 2)} minutes
+                {formatNumber(durationInMinutes, decimalNumbers)} minutes
             </Box>
         </NoMaxWidthTooltip>
     );

@@ -10,6 +10,7 @@ import {
 import { ArtistStatsType } from 'src/stats/type';
 import { SortModeSelect, SortModeType } from 'src/components/SortModeSelect';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
+import { HoverableDuration } from 'src/components/HoverableDuration';
 
 type TopArtistsStreamCardProps = {
     artistStats: ArtistStatsType[];
@@ -26,7 +27,7 @@ const TopArtistListItem : React.FC<ListChildComponentProps<ArtistStatsType[]>> =
         <ListItem style={style} key={index} disablePadding={true}>
             <ListItemText
                 primary={<>#{index + 1} - {artist.name}</>}
-                secondary={<>{artist.count} streams - {(artist.msPlayed/1000/60).toLocaleString(undefined, { maximumFractionDigits: 0 })} minutes</>}
+                secondary={<>{artist.count} streams - <HoverableDuration durationInMs={artist.msPlayed} decimalNumbers={0}/></>}
             />
         </ListItem>
     );
