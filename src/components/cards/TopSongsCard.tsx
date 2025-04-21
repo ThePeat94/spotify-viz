@@ -26,7 +26,7 @@ const TopSongListItem : React.FC<ListChildComponentProps<SongStatsType[]>> = (pr
         <ListItem style={style} key={index} disablePadding={true}>
             <ListItemText
                 primary={<>#{index + 1} - {song.name} - {song.artist}</>}
-                secondary={<>{song.count} streams - <HoverableDuration durationInMs={song.msPlayed} decimalNumbers={0}/> </>}
+                secondary={<>{song.count} streams - <HoverableDuration durationInMs={song.msPlayed} decimalNumbers={0}/> - First Stream: {song.firstStream.format('DD.MM.YYYY HH:mm')} - Last Stream: {song.lastStream.format('DD.MM.YYYY HH:mm')}</>}
             />
         </ListItem>
     );

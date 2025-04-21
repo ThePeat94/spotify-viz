@@ -1,9 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    Grid2, Stack, Typography,
+    Grid2, Typography,
 } from '@mui/material';
 import moment from 'moment/moment';
 import { PlaybackData } from 'src/streams/type';
@@ -120,18 +117,29 @@ const App = () => {
                     prev[current.spotify_track_uri] = {
                         count: 0,
                         msPlayed: 0,
+                        firstStream: moment(current.ts),
+                        lastStream: moment(current.ts),
                     };
                 }
 
                 prev[current.spotify_track_uri] = {
                     count: prev[current.spotify_track_uri].count + 1,
                     msPlayed: prev[current.spotify_track_uri].msPlayed + current.ms_played,
+                    firstStream: moment.min(prev[current.spotify_track_uri].firstStream, moment(current.ts)),
+                    lastStream: moment.max(prev[current.spotify_track_uri].lastStream, moment(current.ts)),
                 };
                 return prev;
-            }, {} as Record<string, { count: number, msPlayed: number }>);
+            }, {} as Record<string, { count: number, msPlayed: number, firstStream: Moment, lastStream: Moment }>);
 
             return Object.entries(trackCount).map(([k, v]) => {
-                return { name: trackUriTracks[k], count: v.count, artist: trackUriArtist[k], msPlayed: v.msPlayed };
+                return {
+                    name: trackUriTracks[k],
+                    count: v.count,
+                    artist: trackUriArtist[k],
+                    msPlayed: v.msPlayed,
+                    firstStream: v.firstStream,
+                    lastStream: v.lastStream
+                };
             });
         });
     }, [baseData]);
@@ -184,21 +192,11 @@ const App = () => {
                 <Grid2 size={12}>
                     <Typography variant={'h4'} pt={2}>Data Analysis</Typography>
                 </Grid2>
-                <Grid2 size={4}>
+                <Grid2 size={6}>
                     <TopArtistsStreamCard artistStats={playedPerArtist}/>
                 </Grid2>
-                <Grid2 size={4}>
+                <Grid2 size={6}>
                     <TopSongsCard songStats={playedPerSong}/>
-                </Grid2>
-                <Grid2 size={4}>
-                    <Card>
-                        <CardHeader title={'Chains'}/>
-                        <CardContent>
-                            <Stack>
-                                <Typography>Songs, with the longest streak</Typography>
-                            </Stack>
-                        </CardContent>
-                    </Card>
                 </Grid2>
                 <Grid2 size={4}>
                     <StatsCard title={'Unfiltered Stats'} loading={loading} stats={unfilteredStats}/>

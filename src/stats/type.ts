@@ -20,4 +20,6 @@ export type SongStatsType = {
     artist: string;
     count: number;
     msPlayed: number;
+    firstStream: Moment;
+    lastStream: Moment;
 }
