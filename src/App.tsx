@@ -20,6 +20,7 @@ import { performAndMeasure } from 'src/utils/performance';
 import { maximumOf, minimumOf } from 'src/utils/numbers';
 import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/analysis';
 import { Moment } from 'moment';
+import { TotalListenedPerYearCard } from 'src/components/cards/TotalListenedPerYearCard.tsx';
 
 const getFilterFromDates = (fromDate: Moment | null, toDate: Moment | null): (pb: PlaybackData) => boolean  => {
     if (fromDate && toDate) {
@@ -207,6 +208,9 @@ const App = () => {
                 </Grid2>
                 <Grid2 size={4}>
                     <StatsDiffCard loading={loading} unfilteredStats={unfilteredStats} filteredStats={filteredStats}/>
+                </Grid2>
+                <Grid2 size={12}>
+                    <TotalListenedPerYearCard data={allPlaybackData}/>
                 </Grid2>
                 <Grid2 size={4}>
                     <FeatureLogCard />
