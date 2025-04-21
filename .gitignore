@@ -31,3 +31,6 @@ dist-ssr
 stats.html
 
 .eslintcache
+
+# ignore jsons to test from
+data/**
