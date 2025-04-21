@@ -3,6 +3,7 @@ import { DataFilterType } from 'src/filter/type';
 import { Button, FormControl, Grid2, InputLabel, MenuItem, Select, Slider, Stack, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import moment, { Moment } from 'moment/moment';
+import { generateYearSelections } from 'src/data/analysis';
 
 type DataFilterProps = {
     earliestYear?: number;
@@ -14,16 +15,6 @@ type DataFilterProps = {
 type FilterModeType = 'wrapped' | 'allYear';
 
 type FilterPresetType = { year?: number, mode: FilterModeType };
-const generateYearSelections = (earliestYear: number, latestYear: number) => {
-    const years = [];
-    for (let i = earliestYear; i <= latestYear; i++) {
-        years.push(i);
-    }
-
-    return years.map(year => (
-        <MenuItem value={year}>{year}</MenuItem>
-    ));
-};
 
 /**
  * A component  to display general data filter options, which apply to the general set of data

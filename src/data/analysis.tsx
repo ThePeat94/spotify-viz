@@ -1,4 +1,6 @@
 import { PlaybackData } from 'src/streams/type';
+import { MenuItem } from '@mui/material';
+import React from 'react';
 
 export const calculateUniqueArtistCount = (playbackData: PlaybackData[]): number => {
     const foundArtists : string[] = [];
@@ -32,4 +34,15 @@ export const calculateUniqueSongCount = (playbackData: PlaybackData[]): number  
             return pb.spotify_track_uri;
         })
         .length;
+};
+
+export const generateYearSelections = (earliestYear: number, latestYear: number) => {
+    const years = [];
+    for (let i = earliestYear; i <= latestYear; i++) {
+        years.push(i);
+    }
+
+    return years.map(year => (
+        <MenuItem value={year}>{year}</MenuItem>
+    ));
 };
