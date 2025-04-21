@@ -56,7 +56,7 @@ export const HoverableDuration: React.FC<HoverableDurationProps> = (props ) => {
     return (
         <NoMaxWidthTooltip
             title={
-                <Stack maxWidth={'500px'}>
+                <Stack maxWidth={'500px'} spacing={1}>
                     <Typography>{formatNumber(durationInMs, 0)} ms</Typography>
                     <Typography>{formatNumber(durationInSeconds, 0)} seconds</Typography>
                     <Typography>{formatNumber(durationInMinutes, 2)} minutes</Typography>
@@ -64,13 +64,18 @@ export const HoverableDuration: React.FC<HoverableDurationProps> = (props ) => {
                     <Typography>{formatNumber(durationInDays, 2)} days</Typography>
                     <Typography>{formatNumber(durationInWeeks, 2)} weeks</Typography>
                     <Typography>{formatNumber(durationInYears, 2)} years</Typography>
-                    <Typography>or ca. ...</Typography>
+                    <Typography sx={{ fontWeight: 'bold' }}>or ca. 🤓</Typography>
                     {ABSURD_DURATIONS.map((absurdDuration) => {
                         const durationInAbsurd = durationInMs / absurdDuration.durationInMs;
                         return (
-                            <Typography key={absurdDuration.label}>
-                                {formatNumber(durationInAbsurd, absurdDuration.decimalNumbers ?? 2)} {absurdDuration.label} ({formatNumber(absurdDuration.durationInMs/1000/60, 2)} min)
-                            </Typography>
+                            <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'} spacing={1}>
+                                <Typography key={absurdDuration.label}>
+                                    {formatNumber(durationInAbsurd, absurdDuration.decimalNumbers ?? 2)} {absurdDuration.label}
+                                </Typography>
+                                <Typography>
+                                    ({formatNumber(absurdDuration.durationInMs/1000/60, 2)} min)
+                                </Typography>
+                            </Stack>
                         );
                     })}
                 </Stack>
