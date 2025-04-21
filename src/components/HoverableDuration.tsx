@@ -10,27 +10,35 @@ type AbsurdDurationType = {
     label: string;
     durationInMs: number;
     decimalNumbers?: number;
+    symbol?: React.ReactNode;
 }
 
 const ABSURD_DURATIONS : AbsurdDurationType[] = [{
+    symbol: <>⚽</>,
     label: 'Regular Bundesliga Games',
     durationInMs: 90 * 60 * 1000,
 }, {
+    symbol: <>🧑‍💻</>,
     label: 'Regular Working Days',
     durationInMs: 8 * 60 * 60 * 1000,
 }, {
+    symbol: <>📺</>,
     label: 'Simpsons Episodes',
     durationInMs: 22 * 60 * 1000,
 }, {
+    symbol: <>🧙‍♂️</>,
     label: 'LOTR EE Marathons',
     durationInMs: 726 * 60 * 1000,
 }, {
+    symbol: <>🚀</>,
     label: 'Days on Mars',
     durationInMs: (24 * 60 * 60 * 1000) + (39 * 60 * 1000) + (35 * 1000),
 }, {
+    symbol: <>🧌</>,
     label: 'Shrek 1 Movies',
     durationInMs: 89 * 60 * 1000,
 }, {
+    symbol: <>🚂</>,
     label: 'Tekkno Trains',
     durationInMs: ((2 * 60) + 57) * 1000,
 }];
@@ -57,6 +65,7 @@ export const HoverableDuration: React.FC<HoverableDurationProps> = (props ) => {
         <NoMaxWidthTooltip
             title={
                 <Stack maxWidth={'500px'} spacing={1}>
+                    <Typography sx={{ fontWeight: 'bold' }}>Or in other units:</Typography>
                     <Typography>{formatNumber(durationInMs, 0)} ms</Typography>
                     <Typography>{formatNumber(durationInSeconds, 0)} seconds</Typography>
                     <Typography>{formatNumber(durationInMinutes, 2)} minutes</Typography>
@@ -70,7 +79,7 @@ export const HoverableDuration: React.FC<HoverableDurationProps> = (props ) => {
                         return (
                             <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'} spacing={1}>
                                 <Typography key={absurdDuration.label}>
-                                    {formatNumber(durationInAbsurd, absurdDuration.decimalNumbers ?? 2)} {absurdDuration.label}
+                                    {absurdDuration.symbol} {formatNumber(durationInAbsurd, absurdDuration.decimalNumbers ?? 2)} {absurdDuration.label}
                                 </Typography>
                                 <Typography>
                                     ({formatNumber(absurdDuration.durationInMs/1000/60, 2)} min)
