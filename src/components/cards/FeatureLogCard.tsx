@@ -4,16 +4,11 @@ import { Card, CardContent, CardHeader, List, ListItem, Typography } from '@mui/
 type FeatureLogCardProps = {};
 
 const plannedFeatures : string[] = [
-    'Seconds per artist',
-    'Seconds per song',
-    'Streams vs. seconds',
     'Grouping per Artist',
     'Filter per Artist',
     'Artist chain',
     'Device stats',
     'Stop reasons',
-    'First occurrence of an artist',
-    'First occurrence of a song',
     'Timeline graph per artist',
     'Timeline graph per song',
 ];
