@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stack, styled, Tooltip, tooltipClasses, TooltipProps, Typography } from '@mui/material';
+import { Box, Stack, styled, Tooltip, tooltipClasses, TooltipProps, Typography } from '@mui/material';
 import { formatNumber } from 'src/utils/numbers';
 
 type HoverableDurationProps = {
@@ -22,13 +22,13 @@ const ABSURD_DURATIONS : AbsurdDurationType[] = [{
     label: 'Simpsons Episodes',
     durationInMs: 22 * 60 * 1000,
 }, {
-    label: 'LOTR Marathons',
+    label: 'LOTR EE Marathons',
     durationInMs: 726 * 60 * 1000,
 }, {
     label: 'Days on Mars',
     durationInMs: (24 * 60 * 60 * 1000) + (39 * 60 * 1000) + (35 * 1000),
 }, {
-    label: 'Shrek Movies',
+    label: 'Shrek 1 Movies',
     durationInMs: 89 * 60 * 1000,
 }, {
     label: 'Tekkno Trains',
@@ -83,9 +83,17 @@ export const HoverableDuration: React.FC<HoverableDurationProps> = (props ) => {
             arrow={true}
 
         >
-            <span>
+            <Box
+                sx={{
+                    cursor: 'pointer',
+                    display: 'inline',
+                    borderBottom: '1px dashed',
+                    borderColor: 'success.main',
+                    color: 'success.main',
+                }}
+            >
                 {formatNumber(durationInMinutes, 2)} minutes
-            </span>
+            </Box>
         </NoMaxWidthTooltip>
     );
 };
