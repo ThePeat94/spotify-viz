@@ -75,17 +75,21 @@ const App = () => {
                     previousValue[currentValue.master_metadata_album_artist_name] = {
                         count: 0,
                         msPlayed: 0,
+                        firstStream: moment(currentValue.ts),
+                        lastStream: moment(currentValue.ts),
                     };
                 }
                 previousValue[currentValue.master_metadata_album_artist_name] = {
                     count: previousValue[currentValue.master_metadata_album_artist_name].count + 1,
                     msPlayed: previousValue[currentValue.master_metadata_album_artist_name].msPlayed + currentValue.ms_played,
+                    firstStream: moment.min(previousValue[currentValue.master_metadata_album_artist_name].firstStream, moment(currentValue.ts)),
+                    lastStream: moment.max(previousValue[currentValue.master_metadata_album_artist_name].lastStream, moment(currentValue.ts)),
                 };
                 return previousValue;
-            }, {} as Record<string, { count: number, msPlayed: number }>);
+            }, {} as Record<string, { count: number, msPlayed: number, firstStream: Moment, lastStream: Moment }>);
 
             return Object.entries(reduced).map(([k, v]) => ({
-                name: k, count: v.count, msPlayed: v.msPlayed,
+                name: k, count: v.count, msPlayed: v.msPlayed, firstStream: v.firstStream, lastStream: v.lastStream
             }));
         });
     }, [baseData]);
