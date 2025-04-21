@@ -41,7 +41,19 @@ const ABSURD_DURATIONS : AbsurdDurationType[] = [{
 }, {
     symbol: <>🚂</>,
     label: 'Tekkno Trains',
-    durationInMs: ((2 * 60) + 57) * 1000,
+    durationInMs: (2 * 60 + 57) * 1000,
+}, {
+    symbol: <>👋</>,
+    label: 'Department Meetings',
+    durationInMs: 45 * 60 * 1000,
+}, {
+    symbol: <>🗣️</>,
+    label: 'Standups',
+    durationInMs: 10 * 60 * 1000,
+}, {
+    symbol: <>🤡</>,
+    label: 'Rick Rolls',
+    durationInMs: (3 * 60 + 33) * 1000,
 }];
 
 const NoMaxWidthTooltip = styled(({ className, ...props }: TooltipProps) => (
