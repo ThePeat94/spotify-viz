@@ -1,50 +1,40 @@
-# React + TypeScript + Vite
+# Spotify VIZ
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This repository contains a collections of visualizations for Spotify's extended streaming history. It should help you
+to explore your Spotify data in a more visual way and retain information about past Spotify Wrapped campaigns. It can help you
+to understand your musical history and how it has changed over time.
 
-Currently, two official plugins are available:
+It is a work in progress and is not yet complete. The goal is to create a set of visualizations that can be used to explore the data in interesting ways. 
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## How to retrieve your Spotify Extended Streaming History
+1. Go to your Spotify account settings and scroll down to the "Privacy" section. ([Link](https://www.spotify.com/us/account/privacy/))
+2. Scroll to "Download your data".
+3. Select the "Extended streaming history" option and click "Request data".
+4. Wait for Spotify to process your request. This may take some time.
 
-## Expanding the ESLint configuration
+After you receive the email with the download link, download the data and extract it. You should see a folder named `my_spotify_data.zip`, which contains a folder `Spotify Extended Streaming History`. There you will find a PDF explaining the data structure, but we will need the `Streaming_History_Audio*.json` files.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+5. Go to the application and click "SELECT FILES", select all you `Streaming_History_Audio*.json` files. 
+6. Wait for the app to process the data intially. This may take some time depending on the amount of data you have.
 
-- Configure the top-level `parserOptions` property like this:
+## Features
+Currently, the following visualizations are available:
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- Top Artists
+- Top Songs
+- First Stream and latest Stream per Artist respectively per Song
+- Filter Options
+  - Min Duration per Stream
+  - From/To Range
+- Filter Presets
+  - Wrapped
+  - Yearly
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+## Planned
+- [ ] actual song duration
+- [ ] avg song stream
+- [ ] instructions on how to use
+- [ ] timeline per artist
+- [ ] search for artist in artist card
+- [ ] search for song in song card
+- [ ] search for artist in song card
