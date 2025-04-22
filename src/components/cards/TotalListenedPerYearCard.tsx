@@ -93,9 +93,9 @@ export const TotalListenedPerYearCard: React.FC<TotalListenedPerYearCardPropsTyp
             setSelectedYear(undefined);
             setSelectedMonth(undefined);
         } else if (granularityLevel === 'month') {
-            setSelectedYear(latestYear);
+            setSelectedYear(selectedYear ?? latestYear);
         } else if (granularityLevel === 'day') {
-            setSelectedYear(latestYear);
+            setSelectedYear(selectedYear ?? latestYear);
             setSelectedMonth(moment().month() + 1);
         }
     };
