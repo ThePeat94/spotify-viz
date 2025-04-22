@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { Button, ButtonGroup, CircularProgress, Grid2, styled, Typography } from '@mui/material';
+import {
+    Button,
+    ButtonGroup,
+    Card,
+    CardContent,
+    CardHeader,
+    CircularProgress,
+    Stack,
+    styled,
+    Typography
+} from '@mui/material';
 import { PlaybackData } from 'src/streams/type';
 import { performAndMeasure } from 'src/utils/performance';
 import moment from 'moment/moment';
@@ -12,8 +22,7 @@ type DataImportProps = {
 }
 
 const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
+    clipPath: 'inset(0%)',
     height: 1,
     overflow: 'hidden',
     position: 'absolute',
@@ -113,48 +122,40 @@ const DataImport: React.FC<DataImportProps> = (props) => {
     };
 
     return (
-        <Grid2 container={true} alignItems={'center'} spacing={1}>
-            <Grid2 size={12}>
-                <h1>Data Import</h1>
-            </Grid2>
-            <Grid2 size={'auto'}>
-                <ButtonGroup variant={'contained'}>
-                    <Button component={'label'} >
-                        Select Files
-                        <VisuallyHiddenInput
-                            type={'file'}
-                            onChange={(event) => handleParseFiles(event.target.files)}
-                            multiple={true}
-                        />
-                    </Button>
-                </ButtonGroup>
-            </Grid2>
-            {importInfo.state !== 'NONE' && importInfo.state !== 'DONE' && (
-                <Grid2 size={'auto'}>
-                    <CircularProgress />
-                </Grid2>
-            )}
-            {importInfo.state === 'NONE' && (
-                <Grid2 size={12}>
-                    <Typography>Nothing imported yet</Typography>
-                </Grid2>
-            )}
-            {importInfo.state === 'PARSING_FILES' && (
-                <Grid2 size={12}>
-                    <Typography>Importing {importInfo.currentFileCount} of {importInfo.fileCount}</Typography>
-                </Grid2>
-            )}
-            {importInfo.state === 'ANALYZING_DATA' && (
-                <Grid2 size={12}>
-                    <Typography>Analyzing Data</Typography>
-                </Grid2>
-            )}
-            {importInfo.state === 'DONE' && (
-                <Grid2 size={12}>
-                    <Typography>Done</Typography>
-                </Grid2>
-            )}
-        </Grid2>
+        <Card>
+            <CardHeader
+                title={<Typography variant={'h4'}>Data Import</Typography>}
+            />
+            <CardContent>
+                <Stack direction={'row'} alignItems={'center'} spacing={1}>
+                    <ButtonGroup variant={'contained'}>
+                        <Button component={'label'}>
+                            Select Files
+                            <VisuallyHiddenInput
+                                type={'file'}
+                                onChange={(event) => handleParseFiles(event.target.files)}
+                                multiple={true}
+                            />
+                        </Button>
+                    </ButtonGroup>
+                    {importInfo.state !== 'NONE' && importInfo.state !== 'DONE' && (
+                        <CircularProgress />
+                    )}
+                    {importInfo.state === 'NONE' && (
+                        <Typography>Nothing imported yet</Typography>
+                    )}
+                    {importInfo.state === 'PARSING_FILES' && (
+                        <Typography>Importing {importInfo.currentFileCount} of {importInfo.fileCount}</Typography>
+                    )}
+                    {importInfo.state === 'ANALYZING_DATA' && (
+                        <Typography>Analyzing Data</Typography>
+                    )}
+                    {importInfo.state === 'DONE' && (
+                        <Typography>Done</Typography>
+                    )}
+                </Stack>
+            </CardContent>
+        </Card>
     );
 };
 
