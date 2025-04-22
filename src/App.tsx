@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import {
-    Grid2, Typography,
+    Alert,
+    Card, CardContent, CardHeader,
+    Grid2, Link, Stack, Typography,
 } from '@mui/material';
 import moment from 'moment/moment';
 import { PlaybackData } from 'src/streams/type';
@@ -178,50 +180,79 @@ const App = () => {
         <>
             <Grid2 container={true} alignItems={'center'} spacing={2} p={2}>
                 <Grid2 size={12}>
-                    <Typography variant={'h4'}>Spotify Viz</Typography>
+                    <Typography variant={'h3'} justifySelf={'center'}>Spotify Viz 🧙‍♂️</Typography>
+                </Grid2>
+                <Grid2 size={12}>
+                    <Card sx={{ height: '100%' }}>
+                        <CardHeader title={<Typography variant={'h4'}>Welcome</Typography>}/>
+                        <CardContent>
+                            <Typography>Welcome to Spotify Viz! This tool enables you to explore your extended streaming history from spotify.</Typography>
+                            <Typography>It is a work in progress, so please be patient with us.</Typography>
+                        </CardContent>
+                    </Card>
+                </Grid2>
+                <Grid2 size={12}>
+                    <Card>
+                        <CardHeader title={<Typography variant={'h4'}>How to use</Typography>}/>
+                        <CardContent>
+                            <Stack spacing={1}>
+                                <Typography variant={'body1'}>1. Request your extended Spotify streaming history from <Link href={'https://www.spotify.com/us/account/privacy/'} target={'_blank'}>here</Link> (log into your account if needed)</Typography>
+                                <Typography>2. Wait until Spotify sends you the confirmation, that your data is ready to be downloaded</Typography>
+                                <Typography>3. Download the data from the link in the email</Typography>
+                                <Typography>4. Unzip the downloaded file</Typography>
+                                <Typography>5. Upload the <b>Streaming_History_Audio_*.json</b> files from the unzipped folder to this tool.</Typography>
+                                <Typography>6. Explore your data!</Typography>
+                                <Alert severity={'info'}>Depending on the amount and size of your data, the import might take some time. You can also import a subset of the data and explore that, totally up to you :)</Alert>
+                            </Stack>
+                        </CardContent>
+                    </Card>
                 </Grid2>
                 <Grid2 size={12}>
                     <DataImport onChange={handleDataChange}/>
                 </Grid2>
             </Grid2>
-            <Grid2 p={2}>
-                <DataFilter
-                    earliestYear={unfilteredStats?.earliestEntry.year()}
-                    latestYear={unfilteredStats?.latestEntry.year()}
-                    value={filter}
-                    onChange={setFilter}
-                />
-            </Grid2>
-            <Grid2 container={true} alignItems={'center'} spacing={2} p={2}>
-                <Grid2 size={12}>
-                    <Typography variant={'h4'} pt={2}>Data Analysis</Typography>
-                </Grid2>
-                <Grid2 size={6}>
-                    <TopArtistsStreamCard artistStats={playedPerArtist}/>
-                </Grid2>
-                <Grid2 size={6}>
-                    <TopSongsCard songStats={playedPerSong}/>
-                </Grid2>
-                <Grid2 size={4}>
-                    <StatsCard title={'Unfiltered Stats'} loading={loading} stats={unfilteredStats}/>
-                </Grid2>
-                <Grid2 size={4}>
-                    <StatsCard title={'Filtered Stats'} loading={loading} stats={filteredStats}/>
-                </Grid2>
-                <Grid2 size={4}>
-                    <StatsDiffCard loading={loading} unfilteredStats={unfilteredStats} filteredStats={filteredStats}/>
-                </Grid2>
-                <Grid2 size={12}>
-                    <TotalListenedPerYearCard
-                        data={allPlaybackData}
-                        earliestYear={unfilteredStats?.earliestEntry.year()}
-                        latestYear={unfilteredStats?.latestEntry.year()}
-                    />
-                </Grid2>
-                <Grid2 size={4}>
-                    <FeatureLogCard />
-                </Grid2>
-            </Grid2>
+            {allPlaybackData.length > 0 && (
+                <>
+                    <Grid2 p={2}>
+                        <DataFilter
+                            earliestYear={unfilteredStats?.earliestEntry.year()}
+                            latestYear={unfilteredStats?.latestEntry.year()}
+                            value={filter}
+                            onChange={setFilter}
+                        />
+                    </Grid2>
+                    <Grid2 container={true} alignItems={'center'} spacing={2} p={2}>
+                        <Grid2 size={12}>
+                            <Typography variant={'h4'} pt={2}>Data Analysis</Typography>
+                        </Grid2>
+                        <Grid2 size={6}>
+                            <TopArtistsStreamCard artistStats={playedPerArtist}/>
+                        </Grid2>
+                        <Grid2 size={6}>
+                            <TopSongsCard songStats={playedPerSong}/>
+                        </Grid2>
+                        <Grid2 size={4}>
+                            <StatsCard title={'Unfiltered Stats'} loading={loading} stats={unfilteredStats}/>
+                        </Grid2>
+                        <Grid2 size={4}>
+                            <StatsCard title={'Filtered Stats'} loading={loading} stats={filteredStats}/>
+                        </Grid2>
+                        <Grid2 size={4}>
+                            <StatsDiffCard loading={loading} unfilteredStats={unfilteredStats} filteredStats={filteredStats}/>
+                        </Grid2>
+                        <Grid2 size={12}>
+                            <TotalListenedPerYearCard
+                                data={allPlaybackData}
+                                earliestYear={unfilteredStats?.earliestEntry.year()}
+                                latestYear={unfilteredStats?.latestEntry.year()}
+                            />
+                        </Grid2>
+                        <Grid2 size={4}>
+                            <FeatureLogCard />
+                        </Grid2>
+                    </Grid2>
+                </>
+            )}
         </>
     );
 };
