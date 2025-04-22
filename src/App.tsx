@@ -20,6 +20,7 @@ import { maximumOf, minimumOf } from 'src/utils/numbers';
 import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/analysis';
 import { Moment } from 'moment';
 import { TotalListenedPerYearCard } from 'src/components/cards/TotalListenedPerYearCard';
+import { ArtistAnalysisCard } from 'src/components/cards/ArtistAnalysisCard';
 
 const getFilterFromDates = (fromDate: Moment | null, toDate: Moment | null): (pb: PlaybackData) => boolean  => {
     if (fromDate && toDate) {
@@ -243,6 +244,14 @@ const App = () => {
                         <Grid2 size={12}>
                             <TotalListenedPerYearCard
                                 data={allPlaybackData}
+                                earliestYear={unfilteredStats?.earliestEntry.year()}
+                                latestYear={unfilteredStats?.latestEntry.year()}
+                            />
+                        </Grid2>
+                        <Grid2 size={12}>
+                            <ArtistAnalysisCard
+                                data={allPlaybackData}
+                                artists={playedPerArtist}
                                 earliestYear={unfilteredStats?.earliestEntry.year()}
                                 latestYear={unfilteredStats?.latestEntry.year()}
                             />
