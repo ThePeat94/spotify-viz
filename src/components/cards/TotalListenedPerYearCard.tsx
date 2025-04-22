@@ -1,5 +1,15 @@
 import { PlaybackData } from 'src/streams/type';
-import { Card, CardContent, CardHeader, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    Stack,
+    Typography
+} from '@mui/material';
 import { BarChart, LineChart } from '@mui/x-charts';
 import React, { useMemo, useState } from 'react';
 import { generateYearSelections } from 'src/data/analysis';
@@ -123,7 +133,7 @@ export const TotalListenedPerYearCard: React.FC<TotalListenedPerYearCardPropsTyp
     return (
         <Card>
             <CardHeader
-                title={'Total Listened Per Year'}
+                title={<Typography variant={'h4'}>Total History Analysis</Typography>}
                 action={
                     data.length > 0 && calculatedDataset && (
                         <Stack direction={'row'} spacing={2} width={200 * (granularityLevel === 'month' ? 2 : granularityLevel === 'day' ? 3 : 1) + 200} alignItems={'center'}>
