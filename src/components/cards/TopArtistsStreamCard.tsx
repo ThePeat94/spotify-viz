@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
     Autocomplete,
-    Box,
     Card,
     CardContent,
     CardHeader,
@@ -80,23 +79,25 @@ const TopArtistsStreamCard: React.FC<TopArtistsStreamCardProps> = (props) => {
             <CardHeader
                 title={'Top Artists'}
                 action={
-                    <Box width={'200px'}>
+                    <Stack direction={'row'} spacing={2} width={600}>
+                        <Autocomplete
+                            disablePortal={true}
+                            options={artistOptions}
+                            fullWidth={true}
+                            renderInput={(params) => <TextField {...params} label={'Artist'} />}
+                            onChange={(_, newValue) => handleSelectedArtistChange(newValue?.label)}
+                            sx={{ minWidth: 350 }}
+                        />
                         <SortModeSelect
                             sortMode={sortMode}
                             onChange={setSortMode}
                         />
-                    </Box>
+                    </Stack>
                 }
             />
             <CardContent>
                 <Stack spacing={2}>
-                    <Autocomplete
-                        disablePortal={true}
-                        options={artistOptions}
-                        fullWidth={true}
-                        renderInput={(params) => <TextField {...params} label={'Artist'} />}
-                        onChange={(_, newValue) => handleSelectedArtistChange(newValue?.label)}
-                    />
+
                     <VariableSizeList
                         itemSize={() => DEFAULT_LIST_ITEM_SIZE}
                         height={500}
