@@ -54,6 +54,10 @@ const ABSURD_DURATIONS : AbsurdDurationType[] = [{
     symbol: <>🤡</>,
     label: 'Rick Rolls',
     durationInMs: (3 * 60 + 33) * 1000,
+}, {
+    symbol: <>🚆</>,
+    label: 'Avg. DB Delay',
+    durationInMs: (10 * 60 * 1000) + (18 * 1000),
 }];
 
 const NoMaxWidthTooltip = styled(({ className, ...props }: TooltipProps) => (
