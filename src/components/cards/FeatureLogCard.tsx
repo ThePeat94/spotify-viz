@@ -4,13 +4,15 @@ import { Card, CardContent, CardHeader, List, ListItem, Typography } from '@mui/
 type FeatureLogCardProps = {};
 
 const plannedFeatures : string[] = [
-    'Grouping per Artist',
-    'Filter per Artist',
     'Artist chain',
+    'Song chain',
     'Device stats',
     'Stop reasons',
-    'Timeline graph per artist',
-    'Timeline graph per song',
+    'Most skipped songs',
+    'Stacked bar chart for songs',
+    'Stacked bar chart for artists',
+    'Comparison graphs for artists',
+    'Comparison graphs for songs',
 ];
 
 /**
