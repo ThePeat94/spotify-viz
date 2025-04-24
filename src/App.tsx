@@ -188,7 +188,6 @@ const App = () => {
                         <CardHeader title={<Typography variant={'h4'}>Welcome</Typography>}/>
                         <CardContent>
                             <Typography>Welcome to Spotify Viz! This tool enables you to explore your extended streaming history from spotify.</Typography>
-                            <Typography>It is a work in progress, so please be patient with us.</Typography>
                         </CardContent>
                     </Card>
                 </Grid2>
