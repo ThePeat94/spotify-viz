@@ -13,6 +13,7 @@ const plannedFeatures : string[] = [
     'Stacked bar chart for artists',
     'Comparison graphs for artists',
     'Comparison graphs for songs',
+    'Comparison between two accounts/people'
 ];
 
 /**
