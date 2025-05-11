@@ -1,0 +1,120 @@
+        const baseData = allPlaybackData.filter(d => d.ms_played >= 10_000);
+        const omittedCount = allPlaybackData.length - baseData.length;
+        console.log(omittedCount);
+        const playedPerArtist = baseData.reduce((previousValue, currentValue) => {
+
+            if (currentValue.master_metadata_album_artist_name === null)
+            {
+                return previousValue;
+            }
+
+            if (!previousValue[currentValue.master_metadata_album_artist_name]) {
+                previousValue[currentValue.master_metadata_album_artist_name] = 0;
+            }
+            previousValue[currentValue.master_metadata_album_artist_name]++;
+            return previousValue;
+        }, {} as Record<string, number>);
+
+
+        const sorted = Object.entries(playedPerArtist).map(([k, v]) => {
+            return { name: k, count: v }
+        }).sort((a, b) => b.count - a.count);
+
+
+        const howOftenOften = sorted.reduce((prev, current) => {
+            if (!prev[current.count]) {
+                prev[current.count] = 0;
+            }
+
+            prev[current.count]++;
+            return prev;
+        }, {} as Record<number, number>);
+
+        const trackUriTracks = baseData.reduce((prev, current) => {
+            if (current.master_metadata_album_artist_name === null) {
+                return prev;
+            }
+            prev[current.spotify_track_uri] = current.master_metadata_track_name;
+            return prev;
+        }, {} as Record<string, string>);
+
+        const trackCount = baseData.reduce((prev, current) => {
+            if (current.master_metadata_album_artist_name === null) {
+                return prev;
+            }
+
+            if (!prev[current.spotify_track_uri]) {
+                prev[current.spotify_track_uri] = 0;
+            }
+
+            prev[current.spotify_track_uri]++;
+            return prev;
+        }, {} as Record<string, number>)
+
+        console.log(sorted);
+        console.log(howOftenOften);
+
+        console.log(Object.entries(trackCount).map(([k, v]) => {
+            return {track: trackUriTracks[k], count: v};
+        }).sort((a, b) => b.count - a.count));
+
+        const nullEnds : PlaybackData[] = [];
+        const weirdPairs : { current: PlaybackData, next: PlaybackData }[] = [];
+        const endReasons = allPlaybackData.reduce((prev, current, index) => {
+            if (!current.reason_end) {
+                if (index < allPlaybackData.length - 1) {
+                    weirdPairs.push({
+                        current,
+                        next: allPlaybackData[index + 1]
+                    });
+                }
+                nullEnds.push(current);
+                return prev;
+            }
+
+            if (!prev[current.reason_end]) {
+                prev[current.reason_end] = 0;
+            }
+
+            prev[current.reason_end]++;
+
+            return prev;
+        }, {} as Record<string, number>)
+
+        console.log(weirdPairs);
+        console.log(nullEnds);
+
+        const startReasons = allPlaybackData.reduce((prev, current) => {
+            if (!prev[current.reason_start]) {
+                prev[current.reason_start] = 0;
+            }
+
+            prev[current.reason_start]++;
+
+            return prev;
+        }, {} as Record<string, number>)
+
+        console.log(startReasons);
+        console.log(endReasons);
+
+        const chains : PlaybackData[][] = [];
+        allPlaybackData.reduce((prev, current, index) => {
+            if (!current.spotify_track_uri) {
+                chains.push(prev);
+                return [];
+            }
+
+            if (index === 0) {
+                return [current];
+            }
+
+            const prevTrackData = allPlaybackData[index - 1];
+            if (current.spotify_track_uri === prevTrackData.spotify_track_uri && current.reason_start === '') {
+                return [...prev, current];
+            }
+
+            return prev;
+        }, [] as PlaybackData[]);
+
+
+        setLoading(false);
