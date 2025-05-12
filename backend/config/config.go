@@ -10,6 +10,10 @@ type Config struct {
 	Server struct {
 		Port int `yaml:"port"`
 	} `yaml:"server"`
+	Logging struct {
+		Zap  *string `yaml:"zap"`
+		File *string `yaml:"file"`
+	}
 }
 
 func LoadConfig(path string) *Config {
@@ -17,12 +21,7 @@ func LoadConfig(path string) *Config {
 	if err != nil {
 		log.Fatalf("error opening config file: %v", err)
 	}
-	defer func(f *os.File) {
-		closeErr := f.Close()
-		if closeErr != nil {
-			log.Fatalf("error closing config file: %v", closeErr)
-		}
-	}(f)
+	defer f.Close()
 
 	var cfg Config
 	decoder := yaml.NewDecoder(f)
