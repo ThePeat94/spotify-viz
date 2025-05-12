@@ -36,3 +36,5 @@ go.work.sum
 *.sw?
 
 config.yaml
+*.log
+logs
