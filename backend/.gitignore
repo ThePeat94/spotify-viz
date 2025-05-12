@@ -34,3 +34,5 @@ go.work.sum
 *.njsproj
 *.sln
 *.sw?
+
+config.yaml
