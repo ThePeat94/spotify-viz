@@ -13,8 +13,8 @@ import (
 )
 
 type DiscoveredArtist struct {
-	ArtistName string `json:"artist_name"`
-	TrackUri   string `json:"track_uri"`
+	ArtistName string `json:"artistName"`
+	TrackUri   string `json:"trackUri"`
 }
 
 type DiscoveredArtistsRequest struct {
@@ -33,24 +33,24 @@ func main() {
 		gin.ForceConsoleColor()
 		logger, _ = zap.NewDevelopment()
 	}
-
+	zap.ReplaceGlobals(logger)
 	logger.Info("config loaded")
 
 	if cfg.Logging.File != nil {
 		ginLogFile, err := os.OpenFile(*cfg.Logging.File, os.O_APPEND|os.O_CREATE, 0644)
+		defer ginLogFile.Close()
 		if err != nil {
 			logger.Warn("error creating file", zap.String("file", *cfg.Logging.File), zap.Error(err))
 		} else {
-			defer ginLogFile.Close()
+			gin.DefaultWriter = io.MultiWriter(os.Stdout, ginLogFile)
 		}
-
-		gin.DefaultWriter = io.MultiWriter(os.Stdout, ginLogFile)
 	}
 
 	r := gin.Default()
 	r.Use(ZapLogger(logger))
 
 	r.GET("/health", getHealthStatus)
+	r.POST("/discover", handlePostDiscoverArtists)
 
 	formattedPort := fmt.Sprintf(":%d", cfg.Server.Port)
 	err := r.Run(formattedPort)
@@ -62,6 +62,23 @@ func main() {
 
 func getHealthStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func handlePostDiscoverArtists(c *gin.Context) {
+	var request DiscoveredArtistsRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if request.Artists == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "artists field is required"})
+		return
+	}
+
+	zap.L().Info(fmt.Sprintf("found artists: %v", *request.Artists))
+
+	c.Status(http.StatusOK)
 }
 
 func ZapLogger(logger *zap.Logger) gin.HandlerFunc {
