@@ -3,6 +3,7 @@ package main
 import (
 	"backend/config"
 	"backend/mockserver"
+	"backend/spotifyapi"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -74,6 +75,14 @@ func main() {
 				logger.Fatal("failed to start mock server: %v", zap.Error(err))
 			}
 		}()
+	}
+
+	spotifyClient := spotifyapi.NewSpotifyClient("foo_bar", "abc", logger)
+	err := spotifyClient.Login()
+	if err != nil {
+		logger.Fatal("failed to login: %v", zap.Error(err))
+	} else {
+		logger.Info("successfully logged in into spotify :-)")
 	}
 
 	select {}

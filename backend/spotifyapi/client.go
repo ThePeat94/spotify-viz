@@ -33,10 +33,13 @@ func NewSpotifyClient(baseApiUrl, apiToken string, logger *zap.Logger) *SpotifyC
 	client := resty.New()
 
 	return &SpotifyClient{
-		BaseApiUrl: baseApiUrl,
-		ApiToken:   apiToken,
-		Logger:     logger,
-		client:     client,
+		ApiToken:     apiToken,
+		BaseApiUrl:   baseApiUrl,
+		AccountUrl:   "http://localhost:3041",
+		ClientId:     "bar_foo",
+		ClientSecret: "1234",
+		Logger:       logger,
+		client:       client,
 	}
 }
 
