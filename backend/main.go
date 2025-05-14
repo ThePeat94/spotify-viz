@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/config"
+	"backend/mockserver"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -52,12 +53,30 @@ func main() {
 	r.GET("/health", getHealthStatus)
 	r.POST("/discover", handlePostDiscoverArtists)
 
-	formattedPort := fmt.Sprintf(":%d", cfg.Server.Port)
-	err := r.Run(formattedPort)
+	go func() {
+		formattedPort := fmt.Sprintf(":%d", cfg.Server.Port)
+		err := r.Run(formattedPort)
+		if err != nil {
+			logger.Fatal("failed to start server: %v", zap.Error(err))
+		}
+	}()
 
-	if err != nil {
-		logger.Fatal("failed to start server: %v", zap.Error(err))
+	if cfg.MockServerConfig != nil {
+		go func() {
+			logger.Info("Starting Mock Server")
+			mckSrv := &mockserver.Server{
+				Logger: logger,
+				Port:   cfg.MockServerConfig.Port,
+			}
+
+			err := mckSrv.RunSpotifyMockServer()
+			if err != nil {
+				logger.Fatal("failed to start mock server: %v", zap.Error(err))
+			}
+		}()
 	}
+
+	select {}
 }
 
 func getHealthStatus(c *gin.Context) {
