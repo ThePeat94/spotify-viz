@@ -14,6 +14,17 @@ type Config struct {
 		Zap  *string `yaml:"zap"`
 		File *string `yaml:"file"`
 	}
+	MockServerConfig *MockServerConfig `yaml:"mock_server,omitempty"`
+	SpotifyConfig    SpotifyConfig     `yaml:"spotify,omitempty"`
+}
+
+type MockServerConfig struct {
+	Port int `yaml:"port"`
+}
+
+type SpotifyConfig struct {
+	ClientID     string `yaml:"client_id"`
+	ClientSecret string `yaml:"client_secret"`
 }
 
 func LoadConfig(path string) *Config {
