@@ -12,3 +12,7 @@ type ClientCredentials struct {
 	TokenType   string `json:"token_type"`
 	ExpiresIn   int    `json:"expires_in"`
 }
+
+type ArtistsResponse struct {
+	Artists []Artist `json:"artists"`
+}

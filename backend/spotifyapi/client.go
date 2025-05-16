@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
+	"strings"
 )
 
 type SpotifyClient struct {
@@ -31,6 +32,8 @@ var (
 
 func NewSpotifyClient(baseApiUrl, apiToken string, logger *zap.Logger) *SpotifyClient {
 	client := resty.New()
+	client = client.SetLogger(logger.Sugar())
+	client = client.SetHeader("Content-Type", "application/json")
 
 	return &SpotifyClient{
 		ApiToken:     apiToken,
@@ -50,8 +53,6 @@ func (c *SpotifyClient) Login() error {
 	}
 
 	resp, err := c.client.R().
-		SetLogger(c.Logger.Sugar()).
-		SetHeader("Content-Type", "application/json").
 		SetFormData(formData).
 		SetBasicAuth(c.ClientId, c.ClientSecret).
 		SetResult(&ClientCredentials{}).
@@ -73,4 +74,59 @@ func (c *SpotifyClient) Login() error {
 	c.client.SetAuthScheme("Bearer").SetAuthToken(parsedResponse.AccessToken)
 
 	return nil
+}
+
+func (c *SpotifyClient) GetArtist(id string) (*Artist, error) {
+	c.Logger.Info("Getting artist", zap.String("id", id))
+
+	formattedEndpoint := fmt.Sprintf(artistEndpoint, id)
+	resp, err := c.client.R().
+		SetResult(&Artist{}).
+		Get(fmt.Sprintf("%s%s", c.BaseApiUrl, formattedEndpoint))
+
+	if err != nil {
+		c.Logger.Error(
+			"Error while getting artist",
+			zap.String("id", id),
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
+	artist := resp.Result().(*Artist)
+
+	c.Logger.Info(
+		"Successfully received artist",
+		zap.String("id", id),
+		zap.String("artist_name", artist.Name),
+	)
+
+	return artist, nil
+}
+
+func (c *SpotifyClient) GetArtists(ids []string) ([]Artist, error) {
+	c.Logger.Info("Getting artists", zap.Strings("ids", ids))
+
+	formattedEndpoint := fmt.Sprintf(artistsEndpoint, strings.Join(ids, ","))
+
+	resp, err := c.client.R().
+		SetResult(&ArtistsResponse{}).
+		Get(fmt.Sprintf("%s%s", c.BaseApiUrl, formattedEndpoint))
+
+	if err != nil {
+		c.Logger.Error("Error while getting artists",
+			zap.Error(err),
+			zap.Strings("ids", ids),
+		)
+
+		return nil, err
+	}
+
+	artists := resp.Result().(*ArtistsResponse).Artists
+	c.Logger.Info("Successfully received artists",
+		zap.Strings("ids", ids),
+		zap.Int("artists_count", len(artists)),
+	)
+
+	return artists, nil
 }
