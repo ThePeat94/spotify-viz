@@ -1,27 +1,16 @@
 package main
 
 import (
+	"backend/api"
 	"backend/config"
 	"backend/mockserver"
 	"backend/spotifyapi"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"io"
 	"log"
-	"net/http"
 	"os"
-	"time"
 )
-
-type DiscoveredArtist struct {
-	ArtistName string `json:"artistName"`
-	TrackUri   string `json:"trackUri"`
-}
-
-type DiscoveredArtistsRequest struct {
-	Artists *[]DiscoveredArtist `json:"artists,omitempty"`
-}
 
 func main() {
 	log.Println("starting application")
@@ -38,6 +27,10 @@ func main() {
 	zap.ReplaceGlobals(logger)
 	logger.Info("config loaded")
 
+	if cfg.Server == nil {
+		logger.Fatal("no server configuration present")
+	}
+
 	if cfg.Logging.File != nil {
 		ginLogFile, err := os.OpenFile(*cfg.Logging.File, os.O_APPEND|os.O_CREATE, 0644)
 		defer ginLogFile.Close()
@@ -48,15 +41,9 @@ func main() {
 		}
 	}
 
-	r := gin.Default()
-	r.Use(ZapLogger(logger))
-
-	r.GET("/health", getHealthStatus)
-	r.POST("/discover", handlePostDiscoverArtists)
-
 	go func() {
-		formattedPort := fmt.Sprintf(":%d", cfg.Server.Port)
-		err := r.Run(formattedPort)
+		apiServer := api.NewServer(logger, nil, *cfg.Server)
+		err := apiServer.Run()
 		if err != nil {
 			logger.Fatal("failed to start server: %v", zap.Error(err))
 		}
@@ -86,40 +73,4 @@ func main() {
 	}
 
 	select {}
-}
-
-func getHealthStatus(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"status": "ok"})
-}
-
-func handlePostDiscoverArtists(c *gin.Context) {
-	var request DiscoveredArtistsRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if request.Artists == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "artists field is required"})
-		return
-	}
-
-	zap.L().Info(fmt.Sprintf("found artists: %v", *request.Artists))
-
-	c.Status(http.StatusOK)
-}
-
-func ZapLogger(logger *zap.Logger) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		start := time.Now()
-		c.Next()
-		duration := time.Since(start)
-
-		logger.Info("Request",
-			zap.String("method", c.Request.Method),
-			zap.String("path", c.Request.URL.Path),
-			zap.Int("status", c.Writer.Status()),
-			zap.Duration("duration", duration),
-		)
-	}
 }
