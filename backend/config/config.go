@@ -25,8 +25,11 @@ type MockServerConfig struct {
 }
 
 type SpotifyConfig struct {
-	ClientID     string `yaml:"client_id"`
-	ClientSecret string `yaml:"client_secret"`
+	AccountUrl   *string `yaml:"account_url,omitempty"`
+	ApiToken     *string `yaml:"api_token,omitempty"`
+	BaseApiUrl   *string `yaml:"base_api_url,omitempty"`
+	ClientID     *string `yaml:"client_id,omitempty"`
+	ClientSecret *string `yaml:"client_secret,omitempty"`
 }
 
 func LoadConfig(path string) *Config {
