@@ -14,10 +14,10 @@ type Server struct {
 	Port   int
 
 	restApi       *gin.Engine
-	spotifyClient *spotifyapi.SpotifyClient
+	spotifyClient spotifyapi.SpotifyClient
 }
 
-func NewServer(logger *zap.Logger, client *spotifyapi.SpotifyClient, config config.ApiServerConfig) *Server {
+func NewServer(logger *zap.Logger, client spotifyapi.SpotifyClient, config config.ApiServerConfig) *Server {
 	apiServer := gin.Default()
 	apiServer.Use(ZapLogger(logger))
 

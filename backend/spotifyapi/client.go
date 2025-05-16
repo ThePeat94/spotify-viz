@@ -19,9 +19,9 @@ type Client struct {
 }
 
 type SpotifyClient interface {
-	Login()
+	Login() error
 	GetArtist(id string) (*Artist, error)
-	GetArtists(ids []string) ([]*Artist, error)
+	GetArtists(ids []string) ([]Artist, error)
 }
 
 var (
@@ -30,7 +30,7 @@ var (
 	tokenEndpoint   = "/api/token"
 )
 
-func NewSpotifyClient(baseApiUrl, apiToken string, logger *zap.Logger) *Client {
+func NewSpotifyClient(baseApiUrl, apiToken, accountUrl, clientId, clientSecret string, logger *zap.Logger) *Client {
 	client := resty.New()
 	client = client.SetLogger(logger.Sugar())
 	client = client.SetHeader("Content-Type", "application/json")
@@ -38,9 +38,9 @@ func NewSpotifyClient(baseApiUrl, apiToken string, logger *zap.Logger) *Client {
 	return &Client{
 		ApiToken:     apiToken,
 		BaseApiUrl:   baseApiUrl,
-		AccountUrl:   "http://localhost:3041",
-		ClientId:     "bar_foo",
-		ClientSecret: "1234",
+		AccountUrl:   accountUrl,
+		ClientId:     clientId,
+		ClientSecret: clientSecret,
 		Logger:       logger,
 		client:       client,
 	}

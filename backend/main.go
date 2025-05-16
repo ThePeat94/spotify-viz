@@ -41,8 +41,23 @@ func main() {
 		}
 	}
 
+	var spotifyClient spotifyapi.SpotifyClient
+	if cfg.SpotifyConfig == nil {
+		logger.Warn("no spotify configuration present, operating in data collection mode")
+		spotifyClient = &spotifyapi.NoopClient{Logger: logger}
+	} else {
+		spotifyClient = spotifyapi.NewSpotifyClient(
+			*cfg.SpotifyConfig.BaseApiUrl,
+			*cfg.SpotifyConfig.ApiToken,
+			*cfg.SpotifyConfig.AccountUrl,
+			*cfg.SpotifyConfig.ClientID,
+			*cfg.SpotifyConfig.ClientSecret,
+			logger,
+		)
+	}
+
 	go func() {
-		apiServer := api.NewServer(logger, nil, *cfg.Server)
+		apiServer := api.NewServer(logger, spotifyClient, *cfg.Server)
 		err := apiServer.Run()
 		if err != nil {
 			logger.Fatal("failed to start server: %v", zap.Error(err))
@@ -62,14 +77,6 @@ func main() {
 				logger.Fatal("failed to start mock server: %v", zap.Error(err))
 			}
 		}()
-	}
-
-	spotifyClient := spotifyapi.NewSpotifyClient("foo_bar", "abc", logger)
-	err := spotifyClient.Login()
-	if err != nil {
-		logger.Fatal("failed to login: %v", zap.Error(err))
-	} else {
-		logger.Info("successfully logged in into spotify :-)")
 	}
 
 	select {}
