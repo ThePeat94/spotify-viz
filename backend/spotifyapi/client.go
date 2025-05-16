@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type SpotifyClient struct {
+type Client struct {
 	ApiToken     string
 	BaseApiUrl   string
 	AccountUrl   string
@@ -18,7 +18,7 @@ type SpotifyClient struct {
 	client *resty.Client
 }
 
-type SpotifyClientInterface interface {
+type SpotifyClient interface {
 	Login()
 	GetArtist(id string) (*Artist, error)
 	GetArtists(ids []string) ([]*Artist, error)
@@ -30,12 +30,12 @@ var (
 	tokenEndpoint   = "/api/token"
 )
 
-func NewSpotifyClient(baseApiUrl, apiToken string, logger *zap.Logger) *SpotifyClient {
+func NewSpotifyClient(baseApiUrl, apiToken string, logger *zap.Logger) *Client {
 	client := resty.New()
 	client = client.SetLogger(logger.Sugar())
 	client = client.SetHeader("Content-Type", "application/json")
 
-	return &SpotifyClient{
+	return &Client{
 		ApiToken:     apiToken,
 		BaseApiUrl:   baseApiUrl,
 		AccountUrl:   "http://localhost:3041",
@@ -46,7 +46,7 @@ func NewSpotifyClient(baseApiUrl, apiToken string, logger *zap.Logger) *SpotifyC
 	}
 }
 
-func (c *SpotifyClient) Login() error {
+func (c *Client) Login() error {
 	c.Logger.Info("Generation Spotify token for requests")
 	formData := map[string]string{
 		"grant_type": "client_credentials",
@@ -76,7 +76,7 @@ func (c *SpotifyClient) Login() error {
 	return nil
 }
 
-func (c *SpotifyClient) GetArtist(id string) (*Artist, error) {
+func (c *Client) GetArtist(id string) (*Artist, error) {
 	c.Logger.Info("Getting artist", zap.String("id", id))
 
 	formattedEndpoint := fmt.Sprintf(artistEndpoint, id)
@@ -104,7 +104,7 @@ func (c *SpotifyClient) GetArtist(id string) (*Artist, error) {
 	return artist, nil
 }
 
-func (c *SpotifyClient) GetArtists(ids []string) ([]Artist, error) {
+func (c *Client) GetArtists(ids []string) ([]Artist, error) {
 	c.Logger.Info("Getting artists", zap.Strings("ids", ids))
 
 	formattedEndpoint := fmt.Sprintf(artistsEndpoint, strings.Join(ids, ","))
