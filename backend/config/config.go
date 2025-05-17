@@ -31,6 +31,13 @@ type SpotifyConfig struct {
 	ClientSecret *string `yaml:"client_secret,omitempty"`
 }
 
+type DatabaseConfig struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+}
+
 func LoadConfig(path string) *Config {
 	f, err := os.Open(path)
 	if err != nil {
