@@ -9,7 +9,6 @@ import (
 )
 
 type Client struct {
-	ApiToken     string
 	BaseApiUrl   string
 	AccountUrl   string
 	ClientId     string
@@ -35,13 +34,12 @@ var (
 	tokenEndpoint   = "/api/token"
 )
 
-func NewSpotifyClient(baseApiUrl, apiToken, accountUrl, clientId, clientSecret string, logger *zap.Logger) *Client {
+func NewSpotifyClient(baseApiUrl, accountUrl, clientId, clientSecret string, logger *zap.Logger) *Client {
 	client := resty.New()
 	client = client.SetLogger(logger.Sugar())
 	client = client.SetHeader("Content-Type", "application/json")
 
 	return &Client{
-		ApiToken:     apiToken,
 		BaseApiUrl:   baseApiUrl,
 		AccountUrl:   accountUrl,
 		ClientId:     clientId,
