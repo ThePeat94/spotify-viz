@@ -14,6 +14,7 @@ type Config struct {
 	}
 	MockServerConfig *MockServerConfig `yaml:"mock_server,omitempty"`
 	SpotifyConfig    *SpotifyConfig    `yaml:"spotify,omitempty"`
+	DatabaseConfig   *DatabaseConfig   `yaml:"database,omitempty"`
 }
 
 type ApiServerConfig struct {
@@ -34,6 +35,7 @@ type SpotifyConfig struct {
 type DatabaseConfig struct {
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
+	Database string `yaml:"db"`
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
 }

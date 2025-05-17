@@ -3,10 +3,14 @@ package main
 import (
 	"backend/api"
 	"backend/config"
+	"backend/db"
 	"backend/mockserver"
 	"backend/spotifyapi"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"io"
 	"log"
 	"os"
@@ -29,6 +33,27 @@ func main() {
 
 	if cfg.Server == nil {
 		logger.Fatal("no server configuration present")
+	}
+
+	if cfg.DatabaseConfig == nil {
+		logger.Fatal("no database configuration present")
+	}
+
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
+		cfg.DatabaseConfig.Host,
+		cfg.DatabaseConfig.Username,
+		cfg.DatabaseConfig.Password,
+		cfg.DatabaseConfig.Database,
+		cfg.DatabaseConfig.Port,
+	)
+
+	dbConn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	if err != nil {
+		logger.Fatal("failed to connect to database", zap.Error(err))
+	} else {
+		dbConn.AutoMigrate(&db.Track{})
 	}
 
 	if cfg.Logging.File != nil {
