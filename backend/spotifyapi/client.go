@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
+	"path"
 	"strings"
 )
 
@@ -56,11 +57,13 @@ func (c *Client) Login() error {
 		"grant_type": "client_credentials",
 	}
 
+	loginUrl := path.Join(c.AccountUrl, tokenEndpoint)
+
 	resp, err := c.client.R().
 		SetFormData(formData).
 		SetBasicAuth(c.ClientId, c.ClientSecret).
 		SetResult(&ClientCredentials{}).
-		Post(fmt.Sprintf("%s%s", c.AccountUrl, tokenEndpoint))
+		Post(loginUrl)
 
 	if err != nil {
 		c.Logger.Error(
@@ -83,9 +86,11 @@ func (c *Client) GetArtist(id string) (*Artist, error) {
 	c.Logger.Info("Getting artist", zap.String("id", id))
 
 	formattedEndpoint := fmt.Sprintf(artistEndpoint, id)
+	artistUrl := path.Join(c.BaseApiUrl, formattedEndpoint)
+
 	resp, err := c.client.R().
 		SetResult(&Artist{}).
-		Get(fmt.Sprintf("%s%s", c.BaseApiUrl, formattedEndpoint))
+		Get(artistUrl)
 
 	if err != nil {
 		c.Logger.Error(
@@ -110,10 +115,11 @@ func (c *Client) GetArtists(ids []string) ([]Artist, error) {
 	c.Logger.Info("Getting artists", zap.Strings("ids", ids))
 
 	formattedEndpoint := fmt.Sprintf(artistsEndpoint, strings.Join(ids, ","))
+	artistsUrl := path.Join(c.BaseApiUrl, formattedEndpoint)
 
 	resp, err := c.client.R().
 		SetResult(&ArtistsResponse{}).
-		Get(fmt.Sprintf("%s%s", c.BaseApiUrl, formattedEndpoint))
+		Get(artistsUrl)
 
 	if err != nil {
 		c.Logger.Error("Error while getting artists",
@@ -137,9 +143,11 @@ func (c *Client) GetTrack(id string) (*Track, error) {
 	c.Logger.Info("Getting track", zap.String("id", id))
 
 	formattedEndpoint := fmt.Sprintf(trackEndpoint, id)
+	trackUrl := path.Join(c.BaseApiUrl, formattedEndpoint)
+
 	resp, err := c.client.R().
 		SetResult(&Track{}).
-		Get(fmt.Sprintf("%s%s", c.BaseApiUrl, formattedEndpoint))
+		Get(trackUrl)
 
 	if err != nil {
 		c.Logger.Error(
@@ -164,10 +172,11 @@ func (c *Client) GetTracks(ids []string) ([]Track, error) {
 	c.Logger.Info("Getting tracks", zap.Strings("ids", ids))
 
 	formattedEndpoint := fmt.Sprintf(tracksEndpoint, strings.Join(ids, ","))
+	tracksUrl := path.Join(c.BaseApiUrl, formattedEndpoint)
 
 	resp, err := c.client.R().
 		SetResult(&TracksResponse{}).
-		Get(fmt.Sprintf("%s%s", c.BaseApiUrl, formattedEndpoint))
+		Get(tracksUrl)
 
 	if err != nil {
 		c.Logger.Error("Error while getting tracks",
