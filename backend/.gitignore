@@ -38,3 +38,5 @@ go.work.sum
 config.yaml
 *.log
 logs
+
+*.sct
