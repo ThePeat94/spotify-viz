@@ -53,6 +53,10 @@ type ArtistsResponse struct {
 	Artists []Artist `json:"artists"`
 }
 
+type TracksResponse struct {
+	Tracks []Track `json:"tracks"`
+}
+
 func (d *MillisecondDuration) UnmarshalJSON(b []byte) error {
 	var ms int64
 	if err := json.Unmarshal(b, &ms); err != nil {
