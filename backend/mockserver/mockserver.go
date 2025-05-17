@@ -58,9 +58,13 @@ func generateRndArtist(id string) spotifyapi.Artist {
 		rndGenres = append(rndGenres, gofakeit.SongGenre())
 	}
 	return spotifyapi.Artist{
-		Id:     id,
-		Name:   gofakeit.SongArtist(),
-		Uri:    gofakeit.UUID(),
+		LightweightArtist: spotifyapi.LightweightArtist{
+			BaseSpotifyIdentifier: spotifyapi.BaseSpotifyIdentifier{
+				Id:   id,
+				Name: gofakeit.SongArtist(),
+				Uri:  gofakeit.UUID(),
+			},
+		},
 		Genres: rndGenres,
 	}
 }
