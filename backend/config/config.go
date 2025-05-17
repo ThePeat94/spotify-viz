@@ -26,7 +26,6 @@ type MockServerConfig struct {
 
 type SpotifyConfig struct {
 	AccountUrl   *string `yaml:"account_url,omitempty"`
-	ApiToken     *string `yaml:"api_token,omitempty"`
 	BaseApiUrl   *string `yaml:"base_api_url,omitempty"`
 	ClientID     *string `yaml:"client_id,omitempty"`
 	ClientSecret *string `yaml:"client_secret,omitempty"`

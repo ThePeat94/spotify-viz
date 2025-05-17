@@ -48,7 +48,6 @@ func main() {
 	} else {
 		spotifyClient = spotifyapi.NewSpotifyClient(
 			*cfg.SpotifyConfig.BaseApiUrl,
-			*cfg.SpotifyConfig.ApiToken,
 			*cfg.SpotifyConfig.AccountUrl,
 			*cfg.SpotifyConfig.ClientID,
 			*cfg.SpotifyConfig.ClientSecret,
