@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"math/rand/v2"
+	"time"
 )
 
 type Server struct {
@@ -22,14 +23,10 @@ func (s *Server) RunSpotifyMockServer() error {
 	r.POST("/api/token", handlePostToken)
 	r.GET("/api/v1/artists/:id", handleGetArtist)
 	r.GET("/api/v1/artists", handleGetArtists)
+	r.GET("/api/v1/tracks/:id", handleGetTrack)
+	r.GET("/api/v1/tracks", handleGetTracks)
 
 	return r.Run(formattedPort)
-}
-
-func handleGetArtist(context *gin.Context) {
-	id := context.Param("id")
-	response := generateRndArtist(id)
-	context.JSON(200, response)
 }
 
 func handlePostToken(context *gin.Context) {
@@ -39,6 +36,12 @@ func handlePostToken(context *gin.Context) {
 		ExpiresIn:   3600,
 	}
 
+	context.JSON(200, response)
+}
+
+func handleGetArtist(context *gin.Context) {
+	id := context.Param("id")
+	response := generateRndArtist(id)
 	context.JSON(200, response)
 }
 
@@ -66,5 +69,49 @@ func generateRndArtist(id string) spotifyapi.Artist {
 			},
 		},
 		Genres: rndGenres,
+	}
+}
+
+func handleGetTrack(context *gin.Context) {
+	id := context.Param("id")
+	track := generateRndTrack(id)
+	context.JSON(200, track)
+}
+
+func handleGetTracks(context *gin.Context) {
+	ids := context.QueryArray("ids")
+	tracks := make([]spotifyapi.Track, 0)
+	for _, id := range ids {
+		tracks = append(tracks, generateRndTrack(id))
+	}
+	context.JSON(200, gin.H{"tracks": tracks})
+}
+
+func generateRndTrack(id string) spotifyapi.Track {
+	rndGenreCount := rand.IntN(4) + 1
+	rndGenres := make([]string, 0)
+	for i := 0; i < rndGenreCount; i++ {
+		rndGenres = append(rndGenres, gofakeit.SongGenre())
+	}
+
+	rndArtist := spotifyapi.LightweightArtist{
+		BaseSpotifyIdentifier: spotifyapi.BaseSpotifyIdentifier{
+			Id:   gofakeit.UUID(),
+			Name: gofakeit.Name(),
+			Uri:  gofakeit.UUID(),
+		},
+	}
+
+	rndDuration := time.Duration(rand.IntN(300)+50) * time.Second
+	duration := spotifyapi.MillisecondDuration(rndDuration)
+
+	return spotifyapi.Track{
+		BaseSpotifyIdentifier: spotifyapi.BaseSpotifyIdentifier{
+			Id:   id,
+			Name: gofakeit.SongName(),
+			Uri:  gofakeit.UUID(),
+		},
+		Duration: &duration,
+		Artists:  &[]spotifyapi.LightweightArtist{rndArtist},
 	}
 }
