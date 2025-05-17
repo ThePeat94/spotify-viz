@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"math/rand/v2"
+	"strings"
 	"time"
 )
 
@@ -46,7 +47,8 @@ func handleGetArtist(context *gin.Context) {
 }
 
 func handleGetArtists(context *gin.Context) {
-	ids := context.QueryArray("ids")
+	rawIds := context.Query("ids")
+	ids := strings.Split(rawIds, ",")
 	artists := make([]spotifyapi.Artist, 0)
 	for _, id := range ids {
 		artists = append(artists, generateRndArtist(id))
@@ -79,7 +81,8 @@ func handleGetTrack(context *gin.Context) {
 }
 
 func handleGetTracks(context *gin.Context) {
-	ids := context.QueryArray("ids")
+	rawIds := context.Query("ids")
+	ids := strings.Split(rawIds, ",")
 	tracks := make([]spotifyapi.Track, 0)
 	for _, id := range ids {
 		tracks = append(tracks, generateRndTrack(id))
@@ -88,12 +91,6 @@ func handleGetTracks(context *gin.Context) {
 }
 
 func generateRndTrack(id string) spotifyapi.Track {
-	rndGenreCount := rand.IntN(4) + 1
-	rndGenres := make([]string, 0)
-	for i := 0; i < rndGenreCount; i++ {
-		rndGenres = append(rndGenres, gofakeit.SongGenre())
-	}
-
 	rndArtist := spotifyapi.LightweightArtist{
 		BaseSpotifyIdentifier: spotifyapi.BaseSpotifyIdentifier{
 			Id:   gofakeit.UUID(),
