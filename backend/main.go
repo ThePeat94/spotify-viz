@@ -53,7 +53,7 @@ func main() {
 	if err != nil {
 		logger.Fatal("failed to connect to database", zap.Error(err))
 	} else {
-		err = dbConn.AutoMigrate(&db.Track{}, &db.Artist{})
+		err = dbConn.AutoMigrate(&db.Track{}, &db.Artist{}, &db.ArtistDiscovery{})
 		if err != nil {
 			logger.Fatal("failed to migrate database", zap.Error(err))
 		}
