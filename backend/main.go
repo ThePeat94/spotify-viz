@@ -53,7 +53,10 @@ func main() {
 	if err != nil {
 		logger.Fatal("failed to connect to database", zap.Error(err))
 	} else {
-		dbConn.AutoMigrate(&db.Track{})
+		err = dbConn.AutoMigrate(&db.Track{}, &db.Artist{})
+		if err != nil {
+			logger.Fatal("failed to migrate database", zap.Error(err))
+		}
 	}
 
 	if cfg.Logging.File != nil {
@@ -81,7 +84,7 @@ func main() {
 	}
 
 	go func() {
-		apiServer := api.NewServer(logger, spotifyClient, *cfg.Server)
+		apiServer := api.NewServer(logger, spotifyClient, *cfg.Server, dbConn)
 		err := apiServer.Run()
 		if err != nil {
 			logger.Fatal("failed to start server: %v", zap.Error(err))
