@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
-	"path"
 	"strings"
 )
 
@@ -27,10 +26,10 @@ type SpotifyClient interface {
 }
 
 var (
-	artistEndpoint  = "/api/v1/artists/%s"
-	artistsEndpoint = "/api/v1/artists?ids=%s"
-	trackEndpoint   = "/api/v1/tracks/%s"
-	tracksEndpoint  = "/api/v1/tracks?ids=%s"
+	artistEndpoint  = "/v1/artists/%s"
+	artistsEndpoint = "/v1/artists?ids=%s"
+	trackEndpoint   = "/v1/tracks/%s"
+	tracksEndpoint  = "/v1/tracks?ids=%s"
 	tokenEndpoint   = "/api/token"
 )
 
@@ -55,7 +54,7 @@ func (c *Client) Login() error {
 		"grant_type": "client_credentials",
 	}
 
-	loginUrl := path.Join(c.AccountUrl, tokenEndpoint)
+	loginUrl := fmt.Sprintf("%s%s", c.AccountUrl, tokenEndpoint)
 
 	resp, err := c.client.R().
 		SetFormData(formData).

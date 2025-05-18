@@ -15,6 +15,7 @@ type Config struct {
 	MockServerConfig *MockServerConfig `yaml:"mock_server,omitempty"`
 	SpotifyConfig    *SpotifyConfig    `yaml:"spotify,omitempty"`
 	DatabaseConfig   *DatabaseConfig   `yaml:"database,omitempty"`
+	DiscoverConfig   *DiscoverConfig   `yaml:"discover,omitempty"`
 }
 
 type ApiServerConfig struct {
@@ -38,6 +39,10 @@ type DatabaseConfig struct {
 	Database string `yaml:"db"`
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
+}
+
+type DiscoverConfig struct {
+	BatchSize int `yaml:"batch_size"`
 }
 
 func LoadConfig(path string) *Config {

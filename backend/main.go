@@ -4,16 +4,19 @@ import (
 	"backend/api"
 	"backend/config"
 	"backend/db"
+	"backend/discovery"
 	"backend/mockserver"
 	"backend/spotifyapi"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"io"
 	"log"
 	"os"
+	"time"
 )
 
 func main() {
@@ -50,6 +53,21 @@ func main() {
 
 	dbConn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
+	otherDsn := fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		cfg.DatabaseConfig.Username,
+		cfg.DatabaseConfig.Password,
+		cfg.DatabaseConfig.Host,
+		cfg.DatabaseConfig.Port,
+		cfg.DatabaseConfig.Database,
+	)
+
+	listener := pq.NewListener(otherDsn, 10*time.Second, time.Minute, func(event pq.ListenerEventType, err error) {
+		if err != nil {
+			logger.Error("Listener error", zap.Error(err))
+		}
+	})
+
 	if err != nil {
 		logger.Fatal("failed to connect to database", zap.Error(err))
 	} else {
@@ -82,6 +100,31 @@ func main() {
 			logger,
 		)
 	}
+
+	go func() {
+		listenErr := listener.Listen("discovery")
+		if listenErr != nil {
+			logger.Error("Listener init error", zap.Error(err))
+		}
+
+		batchSize := cfg.DiscoverConfig.BatchSize
+		worker := discovery.NewDiscoverWorker(
+			batchSize,
+			spotifyClient,
+			dbConn,
+			logger,
+		)
+
+		for {
+			select {
+			case notification := <-listener.Notify:
+				logger.Info("Got new notification", zap.Any("notification", notification))
+				worker.Run()
+			case <-time.After(90 * time.Second):
+				go listener.Ping()
+			}
+		}
+	}()
 
 	go func() {
 		apiServer := api.NewServer(logger, spotifyClient, *cfg.Server, dbConn)

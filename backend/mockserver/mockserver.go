@@ -22,19 +22,20 @@ func (s *Server) RunSpotifyMockServer() error {
 	formattedPort := fmt.Sprintf(":%d", s.Port)
 
 	r.POST("/api/token", handlePostToken)
-	r.GET("/api/v1/artists/:id", handleGetArtist)
-	r.GET("/api/v1/artists", handleGetArtists)
-	r.GET("/api/v1/tracks/:id", handleGetTrack)
-	r.GET("/api/v1/tracks", handleGetTracks)
+	r.GET("/v1/artists/:id", handleGetArtist)
+	r.GET("/v1/artists", handleGetArtists)
+	r.GET("/v1/tracks/:id", handleGetTrack)
+	r.GET("/v1/tracks", handleGetTracks)
 
 	return r.Run(formattedPort)
 }
 
 func handlePostToken(context *gin.Context) {
+	duration := spotifyapi.SecondDuration(3600 * time.Second)
 	response := &spotifyapi.ClientCredentials{
 		AccessToken: gofakeit.Password(true, true, true, false, false, 64),
 		TokenType:   "Bearer",
-		ExpiresIn:   3600,
+		ExpiresIn:   duration,
 	}
 
 	context.JSON(200, response)

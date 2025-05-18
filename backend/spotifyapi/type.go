@@ -89,6 +89,6 @@ func (d *SecondDuration) Duration() time.Duration {
 }
 
 func (d *SecondDuration) MarshalJSON() ([]byte, error) {
-	milliseconds := d.Duration().Seconds()
-	return json.Marshal(milliseconds)
+	seconds := d.Duration().Seconds()
+	return json.Marshal(seconds)
 }
