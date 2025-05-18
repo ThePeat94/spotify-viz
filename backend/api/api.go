@@ -70,6 +70,8 @@ func (s *Server) handlePostDiscoverArtists(c *gin.Context) {
 
 	res := s.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&dbDiscovery)
 
+	s.db.Exec("NOTIFY discovery")
+
 	if res.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": res.Error.Error()})
 		return
