@@ -6,20 +6,25 @@ import (
 	"time"
 )
 
+type BaseSpotifyModel struct {
+	ID        string `gorm:"primarykey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
 type Track struct {
-	gorm.Model
-	SpotifyId string `gorm:"index;unique"`
-	Name      string
-	Uri       string
-	Duration  time.Duration
+	BaseSpotifyModel
+	Name     string
+	Uri      string
+	Duration time.Duration
 }
 
 type Artist struct {
-	gorm.Model
-	SpotifyId string `gorm:"index;unique"`
-	Name      string
-	Uri       string
-	Genres    pq.StringArray `gorm:"type:text[]"`
+	BaseSpotifyModel
+	Name   string
+	Uri    string
+	Genres pq.StringArray `gorm:"type:text[]"`
 }
 
 type ArtistDiscovery struct {
