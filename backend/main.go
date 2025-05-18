@@ -107,13 +107,14 @@ func main() {
 			logger.Error("Listener init error", zap.Error(err))
 		}
 
-		batchSize := cfg.DiscoverConfig.BatchSize
 		worker := discovery.NewDiscoverWorker(
-			batchSize,
+			cfg.DiscoverConfig.BatchSize,
 			spotifyClient,
 			dbConn,
 			logger,
 		)
+
+		worker.Run()
 
 		for {
 			select {

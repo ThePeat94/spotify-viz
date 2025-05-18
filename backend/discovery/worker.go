@@ -37,6 +37,11 @@ func (worker *DiscoverWorker) Run() {
 		var artists []db.ArtistDiscovery
 		worker.db.Limit(worker.batchSize).Find(&artists)
 
+		if len(artists) == 0 {
+			worker.logger.Info("No artists discovered. Nothing to do.")
+			return nil
+		}
+
 		worker.logger.Info(fmt.Sprintf("Queried %d tracks to discover artists for", len(artists)))
 
 		var trackIds []string
