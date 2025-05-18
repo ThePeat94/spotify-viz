@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"net/http"
 )
 
@@ -15,9 +16,10 @@ type Server struct {
 
 	restApi       *gin.Engine
 	spotifyClient spotifyapi.SpotifyClient
+	db            *gorm.DB
 }
 
-func NewServer(logger *zap.Logger, client spotifyapi.SpotifyClient, config config.ApiServerConfig) *Server {
+func NewServer(logger *zap.Logger, client spotifyapi.SpotifyClient, config config.ApiServerConfig, db *gorm.DB) *Server {
 	apiServer := gin.Default()
 	apiServer.Use(ZapLogger(logger))
 
@@ -26,6 +28,7 @@ func NewServer(logger *zap.Logger, client spotifyapi.SpotifyClient, config confi
 		Port:          config.Port,
 		restApi:       gin.Default(),
 		spotifyClient: client,
+		db:            db,
 	}
 }
 
