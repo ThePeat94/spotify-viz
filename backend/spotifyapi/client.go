@@ -84,7 +84,7 @@ func (c *Client) GetArtist(id string) (*Artist, error) {
 	c.Logger.Info("Getting artist", zap.String("id", id))
 
 	formattedEndpoint := fmt.Sprintf(artistEndpoint, id)
-	artistUrl := path.Join(c.BaseApiUrl, formattedEndpoint)
+	artistUrl := fmt.Sprintf("%s%s", c.BaseApiUrl, formattedEndpoint)
 
 	resp, err := c.client.R().
 		SetResult(&Artist{}).
@@ -113,7 +113,7 @@ func (c *Client) GetArtists(ids []string) ([]Artist, error) {
 	c.Logger.Info("Getting artists", zap.Strings("ids", ids))
 
 	formattedEndpoint := fmt.Sprintf(artistsEndpoint, strings.Join(ids, ","))
-	artistsUrl := path.Join(c.BaseApiUrl, formattedEndpoint)
+	artistsUrl := fmt.Sprintf("%s%s", c.BaseApiUrl, formattedEndpoint)
 
 	resp, err := c.client.R().
 		SetResult(&ArtistsResponse{}).
@@ -141,7 +141,7 @@ func (c *Client) GetTrack(id string) (*Track, error) {
 	c.Logger.Info("Getting track", zap.String("id", id))
 
 	formattedEndpoint := fmt.Sprintf(trackEndpoint, id)
-	trackUrl := path.Join(c.BaseApiUrl, formattedEndpoint)
+	trackUrl := fmt.Sprintf("%s%s", c.BaseApiUrl, formattedEndpoint)
 
 	resp, err := c.client.R().
 		SetResult(&Track{}).
@@ -170,7 +170,7 @@ func (c *Client) GetTracks(ids []string) ([]Track, error) {
 	c.Logger.Info("Getting tracks", zap.Strings("ids", ids))
 
 	formattedEndpoint := fmt.Sprintf(tracksEndpoint, strings.Join(ids, ","))
-	tracksUrl := path.Join(c.BaseApiUrl, formattedEndpoint)
+	tracksUrl := fmt.Sprintf("%s%s", c.BaseApiUrl, formattedEndpoint)
 
 	resp, err := c.client.R().
 		SetResult(&TracksResponse{}).
