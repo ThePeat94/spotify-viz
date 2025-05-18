@@ -92,12 +92,17 @@ func handleGetTracks(context *gin.Context) {
 }
 
 func generateRndTrack(id string) spotifyapi.Track {
-	rndArtist := spotifyapi.LightweightArtist{
-		BaseSpotifyIdentifier: spotifyapi.BaseSpotifyIdentifier{
-			Id:   gofakeit.UUID(),
-			Name: gofakeit.Name(),
-			Uri:  gofakeit.UUID(),
-		},
+
+	rndArtistCount := rand.IntN(4) + 1
+	var rndArtists []spotifyapi.LightweightArtist
+	for i := 0; i < rndArtistCount; i++ {
+		rndArtists = append(rndArtists, spotifyapi.LightweightArtist{
+			BaseSpotifyIdentifier: spotifyapi.BaseSpotifyIdentifier{
+				Id:   gofakeit.UUID(),
+				Name: gofakeit.Name(),
+				Uri:  gofakeit.UUID(),
+			},
+		})
 	}
 
 	rndDuration := time.Duration(rand.IntN(300)+50) * time.Second
@@ -110,6 +115,6 @@ func generateRndTrack(id string) spotifyapi.Track {
 			Uri:  gofakeit.UUID(),
 		},
 		Duration: &duration,
-		Artists:  &[]spotifyapi.LightweightArtist{rndArtist},
+		Artists:  &rndArtists,
 	}
 }
