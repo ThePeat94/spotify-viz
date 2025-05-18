@@ -2,11 +2,13 @@ package api
 
 import (
 	"backend/config"
+	"backend/db"
 	"backend/spotifyapi"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"net/http"
 )
 
@@ -51,12 +53,27 @@ func (s *Server) handlePostDiscoverArtists(c *gin.Context) {
 		return
 	}
 
-	if request.Artists == nil {
+	if request.Artists == nil || len(*request.Artists) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "artists field is required"})
 		return
 	}
 
 	s.Logger.Info(fmt.Sprintf("found artists: %v", *request.Artists))
+
+	var dbDiscovery []db.ArtistDiscovery
+	for _, disc := range *request.Artists {
+		dbDiscovery = append(dbDiscovery, db.ArtistDiscovery{
+			ArtistName: disc.ArtistName,
+			TrackUri:   disc.TrackUri,
+		})
+	}
+
+	res := s.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&dbDiscovery)
+
+	if res.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": res.Error.Error()})
+		return
+	}
 
 	c.Status(http.StatusOK)
 }
