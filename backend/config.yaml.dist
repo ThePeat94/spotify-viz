@@ -1,0 +1,25 @@
+﻿server:
+  port: 3040
+
+logging:
+  zap: development
+  file: ./logs/app.log
+
+mock_server:
+  port: 3041
+
+spotify:
+  account_url: http://localhost:3041
+  base_api_url: http://localhost:3041
+  client_id: some_id
+  client_secret: some_secret
+
+database:
+  username: some_user
+  password: some_pass
+  host: localhost
+  port: 5432
+  db: spotify_viz_db
+
+discover:
+  batch_size: 50
