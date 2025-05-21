@@ -119,7 +119,8 @@ func (c *Client) GetArtists(ids []string) ([]Artist, error) {
 		Get(artistsUrl)
 
 	if err != nil {
-		c.Logger.Error("Error while getting artists",
+		c.Logger.Error(
+			"Error while getting artists",
 			zap.Error(err),
 			zap.Strings("ids", ids),
 		)
@@ -128,7 +129,8 @@ func (c *Client) GetArtists(ids []string) ([]Artist, error) {
 	}
 
 	artists := resp.Result().(*ArtistsResponse).Artists
-	c.Logger.Info("Successfully received artists",
+	c.Logger.Info(
+		"Successfully received artists",
 		zap.Strings("ids", ids),
 		zap.Int("artists_count", len(artists)),
 	)
@@ -176,7 +178,8 @@ func (c *Client) GetTracks(ids []string) ([]Track, error) {
 		Get(tracksUrl)
 
 	if err != nil {
-		c.Logger.Error("Error while getting tracks",
+		c.Logger.Error(
+			"Error while getting tracks",
 			zap.Error(err),
 			zap.Strings("ids", ids),
 		)
