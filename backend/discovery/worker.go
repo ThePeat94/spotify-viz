@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"slices"
 )
 
@@ -52,6 +53,7 @@ func (worker *DiscoverWorker) Run() {
 
 	for i := 0; i < int(amountOfProccesses); i++ {
 		err := worker.db.Transaction(func(tx *gorm.DB) error {
+			tx = tx.Clauses(clause.OnConflict{DoNothing: true})
 			var discoveries []db.ArtistDiscovery
 			tx.Limit(worker.batchSize).Find(&discoveries)
 
