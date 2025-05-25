@@ -1,10 +1,13 @@
 package spotifyapi
 
 import (
+	"backend/config"
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
+	"net/http"
 	"strings"
+	"time"
 )
 
 type Client struct {
@@ -14,7 +17,8 @@ type Client struct {
 	ClientSecret string
 	Logger       *zap.Logger
 
-	client *resty.Client
+	client   *resty.Client
+	loggedIn bool
 }
 
 type SpotifyClient interface {
@@ -33,19 +37,73 @@ var (
 	tokenEndpoint   = "/api/token"
 )
 
-func NewSpotifyClient(baseApiUrl, accountUrl, clientId, clientSecret string, logger *zap.Logger) *Client {
-	client := resty.New()
-	client = client.SetLogger(logger.Sugar())
-	client = client.SetHeader("Content-Type", "application/json")
+func NewSpotifyClient(config config.SpotifyConfig, logger *zap.Logger) *Client {
+	client := resty.New().
+		SetLogger(logger.Sugar()).
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
+		OnAfterResponse(func(client *resty.Client, response *resty.Response) error {
+			logger.With(
+				zap.Int("response_status_code", response.StatusCode()),
+				zap.String("response_body", string(response.Body())),
+			).Info("Spotify API response")
 
-	return &Client{
-		BaseApiUrl:   baseApiUrl,
-		AccountUrl:   accountUrl,
-		ClientId:     clientId,
-		ClientSecret: clientSecret,
-		Logger:       logger,
-		client:       client,
+			if response.StatusCode() == http.StatusUnauthorized {
+				return fmt.Errorf("spotify API - Unauthorized")
+			}
+
+			if response.StatusCode() == http.StatusTooManyRequests {
+				return fmt.Errorf("spotify Api - Rate Limit reached")
+			}
+
+			if response.IsError() {
+				return fmt.Errorf("spotify Api - Other Response Error")
+			}
+
+			return nil
+		})
+
+	if config.RetryCount != nil {
+		client = client.SetRetryCount(*config.RetryCount)
 	}
+
+	if config.RetryWaitTime != nil {
+		client = client.SetRetryWaitTime(*config.RetryWaitTime)
+	}
+
+	if config.TimeOut != nil {
+		client = client.SetTimeout(*config.TimeOut)
+	} else {
+		client = client.SetTimeout(30 * time.Second)
+	}
+
+	sClient := &Client{
+		BaseApiUrl:   config.BaseApiUrl,
+		AccountUrl:   config.AccountUrl,
+		ClientId:     config.ClientID,
+		ClientSecret: config.ClientSecret,
+		Logger:       logger,
+	}
+
+	if config.RetryCount != nil || config.RetryWaitTime != nil {
+		client = client.AddRetryCondition(func(response *resty.Response, err error) bool {
+			if response.StatusCode() == http.StatusUnauthorized {
+				logger.Warn("Spotify API - Unauthorized, attempt relogin and retry operation")
+				loginErr := sClient.Login()
+				if loginErr != nil {
+					return false
+				}
+				return true
+			}
+
+			logger.Warn("Spotify API - Retryable error", zap.Error(err))
+			return response.StatusCode() >= http.StatusInternalServerError
+		})
+	}
+
+	sClient.client = client
+
+	return sClient
 }
 
 func (c *Client) Login() error {
@@ -63,17 +121,17 @@ func (c *Client) Login() error {
 		Post(loginUrl)
 
 	if err != nil {
-		c.Logger.Error(
+		responseErrorLogger(resp, err, c.Logger).Error(
 			"Error during Spotify Token generation",
-			zap.Error(err),
-			zap.Int("status_code", resp.StatusCode()),
-			zap.String("response", resp.String()),
 		)
 		return err
 	}
 
-	c.Logger.Info("Successfully generated token, setting auth info.")
 	parsedResponse := resp.Result().(*ClientCredentials)
+	c.Logger.Info(
+		"Successfully generated token, setting auth info.",
+		zap.Duration("expires_in", parsedResponse.ExpiresIn.Duration()),
+	)
 	c.client.SetAuthScheme("Bearer").SetAuthToken(parsedResponse.AccessToken)
 
 	return nil
@@ -90,10 +148,9 @@ func (c *Client) GetArtist(id string) (*Artist, error) {
 		Get(artistUrl)
 
 	if err != nil {
-		c.Logger.Error(
+		responseErrorLogger(resp, err, c.Logger).Error(
 			"Error while getting artist",
 			zap.String("id", id),
-			zap.Error(err),
 		)
 		return nil, err
 	}
@@ -119,9 +176,8 @@ func (c *Client) GetArtists(ids []string) ([]Artist, error) {
 		Get(artistsUrl)
 
 	if err != nil {
-		c.Logger.Error(
+		responseErrorLogger(resp, err, c.Logger).Error(
 			"Error while getting artists",
-			zap.Error(err),
 			zap.Strings("ids", ids),
 		)
 
@@ -149,10 +205,9 @@ func (c *Client) GetTrack(id string) (*Track, error) {
 		Get(trackUrl)
 
 	if err != nil {
-		c.Logger.Error(
+		responseErrorLogger(resp, err, c.Logger).Error(
 			"Error while getting track",
 			zap.String("id", id),
-			zap.Error(err),
 		)
 		return nil, err
 	}
@@ -178,9 +233,8 @@ func (c *Client) GetTracks(ids []string) ([]Track, error) {
 		Get(tracksUrl)
 
 	if err != nil {
-		c.Logger.Error(
+		responseErrorLogger(resp, err, c.Logger).Error(
 			"Error while getting tracks",
-			zap.Error(err),
 			zap.Strings("ids", ids),
 		)
 
@@ -194,4 +248,21 @@ func (c *Client) GetTracks(ids []string) ([]Track, error) {
 	)
 
 	return tracks, nil
+}
+
+func responseErrorLogger(resp *resty.Response, err error, baseLogger *zap.Logger) *zap.Logger {
+	modifiedLogger := baseLogger.With(
+		zap.Error(err),
+	)
+
+	if resp != nil {
+		modifiedLogger = modifiedLogger.With(
+			zap.Int("status_code", resp.StatusCode()),
+			zap.String("response", resp.String()),
+		)
+	} else {
+		baseLogger.Warn("nil response, maybe timeout")
+	}
+
+	return modifiedLogger
 }

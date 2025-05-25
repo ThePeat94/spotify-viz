@@ -4,6 +4,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"log"
 	"os"
+	"time"
 )
 
 type Config struct {
@@ -27,10 +28,13 @@ type MockServerConfig struct {
 }
 
 type SpotifyConfig struct {
-	AccountUrl   *string `yaml:"account_url,omitempty"`
-	BaseApiUrl   *string `yaml:"base_api_url,omitempty"`
-	ClientID     *string `yaml:"client_id,omitempty"`
-	ClientSecret *string `yaml:"client_secret,omitempty"`
+	AccountUrl    string         `yaml:"account_url,omitempty"`
+	BaseApiUrl    string         `yaml:"base_api_url,omitempty"`
+	ClientID      string         `yaml:"client_id,omitempty"`
+	ClientSecret  string         `yaml:"client_secret,omitempty"`
+	RetryCount    *int           `yaml:"retry_count,omitempty"`
+	RetryWaitTime *time.Duration `yaml:"retry_wait_time,omitempty"`
+	TimeOut       *time.Duration `yaml:"time_out,omitempty"`
 }
 
 type DatabaseConfig struct {

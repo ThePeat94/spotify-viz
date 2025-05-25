@@ -93,10 +93,7 @@ func main() {
 		spotifyClient = &spotifyapi.NoopClient{Logger: logger}
 	} else {
 		spotifyClient = spotifyapi.NewSpotifyClient(
-			*cfg.SpotifyConfig.BaseApiUrl,
-			*cfg.SpotifyConfig.AccountUrl,
-			*cfg.SpotifyConfig.ClientID,
-			*cfg.SpotifyConfig.ClientSecret,
+			*cfg.SpotifyConfig,
 			logger,
 		)
 	}
