@@ -248,17 +248,26 @@ func (c *Client) buildRestyClient(config config.SpotifyConfig, logger *zap.Logge
 
 	if config.RetryCount != nil || config.RetryWaitTime != nil {
 		client = client.AddRetryCondition(func(response *resty.Response, err error) bool {
+			if response.IsSuccess() {
+				return false
+			}
+
 			if response.StatusCode() == http.StatusUnauthorized {
 				logger.Warn("Spotify API - Unauthorized, attempt relogin and retry operation")
 				loginErr := c.Login()
 				if loginErr != nil {
+					logger.Warn("Spotify API - Login failed, do not retry", zap.Error(loginErr))
 					return false
 				}
+				logger.Info("Spotify API - Authorized, retry operation")
 				return true
 			}
 
-			logger.Warn("Spotify API - Retryable error", zap.Error(err))
-			return response.StatusCode() >= http.StatusInternalServerError
+			if response.StatusCode() >= http.StatusInternalServerError {
+				logger.Warn("Spotify API - Retryable error", zap.Error(err))
+				return true
+			}
+			return false
 		})
 	}
 	buildLogger.Info("Spotify API - Client initialized")
