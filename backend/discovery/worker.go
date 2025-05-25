@@ -53,7 +53,6 @@ func (worker *DiscoverWorker) Run() {
 
 	for i := 0; i < int(amountOfProccesses); i++ {
 		err := worker.db.Transaction(func(tx *gorm.DB) error {
-			tx = tx.Clauses(clause.OnConflict{DoNothing: true})
 			var discoveries []db.ArtistDiscovery
 			tx.Limit(worker.batchSize).Find(&discoveries)
 
@@ -79,7 +78,7 @@ func (worker *DiscoverWorker) Run() {
 				return artistProcessEr
 			}
 
-			res := tx.Create(&dbTracks)
+			res := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&dbTracks)
 			if res.Error != nil {
 				return res.Error
 			}
@@ -125,7 +124,7 @@ func (worker *DiscoverWorker) processArtistIds(ids []string, tx *gorm.DB) error 
 		dbArtists = append(dbArtists, found...)
 	}
 
-	res := tx.Create(&dbArtists)
+	res := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&dbArtists)
 	if res.Error != nil {
 		worker.logger.Error("Error during db action", zap.Error(res.Error))
 		return res.Error
