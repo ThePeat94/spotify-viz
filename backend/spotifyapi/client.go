@@ -17,8 +17,7 @@ type Client struct {
 	ClientSecret string
 	Logger       *zap.Logger
 
-	client   *resty.Client
-	loggedIn bool
+	client *resty.Client
 }
 
 type SpotifyClient interface {
@@ -38,45 +37,6 @@ var (
 )
 
 func NewSpotifyClient(config config.SpotifyConfig, logger *zap.Logger) *Client {
-	client := resty.New().
-		SetLogger(logger.Sugar()).
-		SetHeader("Content-Type", "application/json").
-		SetHeader("Accept", "application/json").
-		OnAfterResponse(func(client *resty.Client, response *resty.Response) error {
-			logger.With(
-				zap.Int("response_status_code", response.StatusCode()),
-				zap.String("response_body", string(response.Body())),
-			).Info("Spotify API response")
-
-			if response.StatusCode() == http.StatusUnauthorized {
-				return fmt.Errorf("spotify API - Unauthorized")
-			}
-
-			if response.StatusCode() == http.StatusTooManyRequests {
-				return fmt.Errorf("spotify Api - Rate Limit reached")
-			}
-
-			if response.IsError() {
-				return fmt.Errorf("spotify Api - Other Response Error")
-			}
-
-			return nil
-		})
-
-	if config.RetryCount != nil {
-		client = client.SetRetryCount(*config.RetryCount)
-	}
-
-	if config.RetryWaitTime != nil {
-		client = client.SetRetryWaitTime(*config.RetryWaitTime)
-	}
-
-	if config.TimeOut != nil {
-		client = client.SetTimeout(*config.TimeOut)
-	} else {
-		client = client.SetTimeout(30 * time.Second)
-	}
-
 	sClient := &Client{
 		BaseApiUrl:   config.BaseApiUrl,
 		AccountUrl:   config.AccountUrl,
@@ -85,22 +45,7 @@ func NewSpotifyClient(config config.SpotifyConfig, logger *zap.Logger) *Client {
 		Logger:       logger,
 	}
 
-	if config.RetryCount != nil || config.RetryWaitTime != nil {
-		client = client.AddRetryCondition(func(response *resty.Response, err error) bool {
-			if response.StatusCode() == http.StatusUnauthorized {
-				logger.Warn("Spotify API - Unauthorized, attempt relogin and retry operation")
-				loginErr := sClient.Login()
-				if loginErr != nil {
-					return false
-				}
-				return true
-			}
-
-			logger.Warn("Spotify API - Retryable error", zap.Error(err))
-			return response.StatusCode() >= http.StatusInternalServerError
-		})
-	}
-
+	client := sClient.buildRestyClient(config, logger)
 	sClient.client = client
 
 	return sClient
@@ -265,4 +210,79 @@ func responseErrorLogger(resp *resty.Response, err error, baseLogger *zap.Logger
 	}
 
 	return modifiedLogger
+}
+
+func (c *Client) buildRestyClient(config config.SpotifyConfig, logger *zap.Logger) *resty.Client {
+	client := resty.New().
+		SetLogger(logger.Sugar()).
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
+		OnAfterResponse(c.handleAnyResponse)
+
+	buildLogger := logger.With()
+	if config.RetryCount != nil {
+		buildLogger = buildLogger.With(
+			zap.Int("retry_count", *config.RetryCount),
+		)
+		client = client.SetRetryCount(*config.RetryCount)
+	}
+
+	if config.RetryWaitTime != nil {
+		buildLogger = buildLogger.With(
+			zap.Duration("retry_wait_time", *config.RetryWaitTime),
+		)
+		client = client.SetRetryWaitTime(*config.RetryWaitTime)
+	}
+
+	if config.TimeOut != nil {
+		buildLogger = buildLogger.With(
+			zap.Duration("timeout", *config.TimeOut),
+		)
+		client = client.SetTimeout(*config.TimeOut)
+	} else {
+		buildLogger = buildLogger.With(
+			zap.Duration("timeout", 30*time.Second),
+		)
+		client = client.SetTimeout(30 * time.Second)
+	}
+
+	if config.RetryCount != nil || config.RetryWaitTime != nil {
+		client = client.AddRetryCondition(func(response *resty.Response, err error) bool {
+			if response.StatusCode() == http.StatusUnauthorized {
+				logger.Warn("Spotify API - Unauthorized, attempt relogin and retry operation")
+				loginErr := c.Login()
+				if loginErr != nil {
+					return false
+				}
+				return true
+			}
+
+			logger.Warn("Spotify API - Retryable error", zap.Error(err))
+			return response.StatusCode() >= http.StatusInternalServerError
+		})
+	}
+	buildLogger.Info("Spotify API - Client initialized")
+
+	return client
+}
+
+func (c *Client) handleAnyResponse(client *resty.Client, response *resty.Response) error {
+	c.Logger.With(
+		zap.Int("response_status_code", response.StatusCode()),
+		zap.String("response_body", string(response.Body())),
+	).Info("Spotify API response")
+
+	if response.StatusCode() == http.StatusUnauthorized {
+		return fmt.Errorf("spotify API - Unauthorized")
+	}
+
+	if response.StatusCode() == http.StatusTooManyRequests {
+		return fmt.Errorf("spotify Api - Rate Limit reached")
+	}
+
+	if response.IsError() {
+		return fmt.Errorf("spotify Api - Other Response Error")
+	}
+
+	return nil
 }
