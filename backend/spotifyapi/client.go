@@ -252,6 +252,11 @@ func (c *Client) buildRestyClient(config config.SpotifyConfig, logger *zap.Logge
 				return false
 			}
 
+			if response.StatusCode() == http.StatusTooManyRequests {
+				logger.Warn("Spotify API rate limit exceeded, do not retry for now")
+				return false
+			}
+
 			if response.StatusCode() == http.StatusUnauthorized {
 				logger.Warn("Spotify API - Unauthorized, attempt relogin and retry operation")
 				loginErr := c.Login()
@@ -276,22 +281,29 @@ func (c *Client) buildRestyClient(config config.SpotifyConfig, logger *zap.Logge
 }
 
 func (c *Client) handleAnyResponse(client *resty.Client, response *resty.Response) error {
-	c.Logger.With(
-		zap.Int("response_status_code", response.StatusCode()),
-		zap.String("response_body", string(response.Body())),
-	).Info("Spotify API response")
-
+	var err error
+	logLevel := zap.InfoLevel
 	if response.StatusCode() == http.StatusUnauthorized {
-		return fmt.Errorf("spotify API - Unauthorized")
+		err = fmt.Errorf("spotify API - Unauthorized")
+		logLevel = zap.WarnLevel
 	}
 
 	if response.StatusCode() == http.StatusTooManyRequests {
-		return fmt.Errorf("spotify Api - Rate Limit reached")
+		err = fmt.Errorf("spotify Api - Rate Limit reached")
+		logLevel = zap.WarnLevel
 	}
 
 	if response.IsError() {
-		return fmt.Errorf("spotify Api - Other Response Error")
+		err = fmt.Errorf("spotify Api - Other Response Error")
+		logLevel = zap.ErrorLevel
 	}
 
-	return nil
+	c.Logger.With(
+		zap.Int("response_status_code", response.StatusCode()),
+		zap.String("request_method", response.Request.Method),
+		zap.String("request_url", response.Request.URL),
+		zap.Duration("duration", response.Time()),
+	).Log(logLevel, "Spotify API response")
+
+	return err
 }
