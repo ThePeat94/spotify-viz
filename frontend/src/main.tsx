@@ -4,6 +4,7 @@ import App from 'src/App';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const darkTheme = createTheme({
     palette: {
@@ -11,15 +12,21 @@ const darkTheme = createTheme({
     },
 });
 
+// Create a client
+const queryClient = new QueryClient();
+
+
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <LocalizationProvider dateAdapter={AdapterMoment}>
-            <ThemeProvider theme={darkTheme}>
-                <CssBaseline>
-                    <App />
-                </CssBaseline>
-            </ThemeProvider>
+            <QueryClientProvider client={queryClient}>
+                <ThemeProvider theme={darkTheme}>
+                    <CssBaseline>
+                        <App />
+                    </CssBaseline>
+                </ThemeProvider>
+            </QueryClientProvider>
         </LocalizationProvider>
     </StrictMode>,
 );
