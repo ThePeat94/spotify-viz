@@ -4,6 +4,7 @@ go 1.24
 
 require (
 	github.com/brianvoe/gofakeit/v7 v7.2.1
+	github.com/gin-contrib/cors v1.7.5
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-resty/resty/v2 v2.16.5
 	github.com/lib/pq v1.10.9
