@@ -37,6 +37,7 @@ func NewServer(logger *zap.Logger, client spotifyapi.SpotifyClient, config confi
 func (s *Server) Run() error {
 	s.restApi.GET("/health", getHealthStatus)
 	s.restApi.POST("/discover", s.handlePostDiscoverArtists)
+	s.restApi.GET("/discover/status", s.handleGetDiscoverStatus)
 
 	formattedPort := fmt.Sprintf(":%d", s.Port)
 	return s.restApi.Run(formattedPort)
@@ -78,4 +79,19 @@ func (s *Server) handlePostDiscoverArtists(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func (s *Server) handleGetDiscoverStatus(c *gin.Context) {
+	var alreadyDiscoveredCount int64
+	s.db.Model(&db.Artist{}).Count(&alreadyDiscoveredCount)
+
+	var stillToBeDiscoveredCount int64
+	s.db.Model(&db.ArtistDiscovery{}).Count(&stillToBeDiscoveredCount)
+
+	response := StatusReport{
+		RemainingArtistsCount:  stillToBeDiscoveredCount,
+		AlreadyDiscoveredCount: alreadyDiscoveredCount,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
