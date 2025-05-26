@@ -5,6 +5,7 @@ import (
 	"backend/db"
 	"backend/spotifyapi"
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -24,11 +25,16 @@ type Server struct {
 func NewServer(logger *zap.Logger, client spotifyapi.SpotifyClient, config config.ApiServerConfig, db *gorm.DB) *Server {
 	apiServer := gin.Default()
 	apiServer.Use(ZapLogger(logger))
+	apiServer.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost:5173"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Origin", "Content-Length", "Content-Type", "Accept"},
+	}))
 
 	return &Server{
 		Logger:        *logger,
 		Port:          config.Port,
-		restApi:       gin.Default(),
+		restApi:       apiServer,
 		spotifyClient: client,
 		db:            db,
 	}
@@ -38,6 +44,10 @@ func (s *Server) Run() error {
 	s.restApi.GET("/health", getHealthStatus)
 	s.restApi.POST("/discover", s.handlePostDiscoverArtists)
 	s.restApi.GET("/discover/status", s.handleGetDiscoverStatus)
+	s.restApi.OPTIONS("/*path", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Status(http.StatusOK)
+	})
 
 	formattedPort := fmt.Sprintf(":%d", s.Port)
 	return s.restApi.Run(formattedPort)
@@ -59,7 +69,7 @@ func (s *Server) handlePostDiscoverArtists(c *gin.Context) {
 		return
 	}
 
-	s.Logger.Info(fmt.Sprintf("found artists: %v", *request.Artists))
+	s.Logger.Info(fmt.Sprintf("found %d artists", len(*request.Artists)))
 
 	var dbDiscovery []db.ArtistDiscovery
 	for _, disc := range *request.Artists {
