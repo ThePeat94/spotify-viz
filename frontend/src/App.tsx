@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-    Alert,
+    Alert, Button,
     Card, CardContent, CardHeader,
     Grid2, Link, Stack, Typography,
 } from '@mui/material';
@@ -21,6 +21,7 @@ import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/a
 import { Moment } from 'moment';
 import { TotalListenedPerYearCard } from 'src/components/cards/TotalListenedPerYearCard';
 import { ArtistAnalysisCard } from 'src/components/cards/ArtistAnalysisCard';
+import { useDiscoverStatus, usePostArtistsToDiscover } from 'src/discover/api/discover.ts';
 
 const getFilterFromDates = (fromDate: Moment | null, toDate: Moment | null): (pb: PlaybackData) => boolean  => {
     if (fromDate && toDate) {
@@ -58,6 +59,12 @@ const App = () => {
     const toDate = useMemo(() => {
         return to ? moment(to) : null;
     }, [to]);
+
+    const {
+        mutate
+    } = usePostArtistsToDiscover();
+
+    const { data } = useDiscoverStatus(allPlaybackData.length > 0);
 
 
     const baseData = useMemo(() => {
@@ -177,6 +184,28 @@ const App = () => {
         setUnfilteredStats(stats);
     };
 
+    const handeDiscoverArtistsClick = (): void => {
+        if (!allPlaybackData) {
+            return;
+        }
+
+        const artistsAndTrack : Record<string, string> = {};
+        allPlaybackData.forEach(pb => {
+            if (pb.master_metadata_album_artist_name && pb.spotify_track_uri && artistsAndTrack[pb.master_metadata_album_artist_name] === undefined) {
+                artistsAndTrack[pb.master_metadata_album_artist_name] = pb.spotify_track_uri.replace('spotify:track:', '');
+            }
+        });
+
+        const artistsToDiscover = Object.entries(artistsAndTrack).map(([artistName, trackUri]) => ({
+            artistName,
+            trackUri
+        }));
+
+        mutate({
+            artists: artistsToDiscover
+        });
+    };
+
     return (
         <>
             <Grid2 container={true} alignItems={'center'} spacing={2} p={2}>
@@ -257,6 +286,23 @@ const App = () => {
                         </Grid2>
                         <Grid2 size={4}>
                             <FeatureLogCard />
+                        </Grid2>
+                        <Grid2 size={4}>
+                            <Card>
+                                <CardHeader
+                                    title={'Artist Discovery'}
+                                />
+                                <CardContent>
+                                    <Stack spacing={2}>
+                                        <Typography>Time to discover meta data about your artists!</Typography>
+                                        <Typography>Discovered Artists: {data?.alreadyDiscoveredCount}</Typography>
+                                        <Typography>Remaining Artists: {data?.remainingArtistsCount}</Typography>
+                                        <Button variant={'contained'} onClick={handeDiscoverArtistsClick}>
+                                            Discover Artists
+                                        </Button>
+                                    </Stack>
+                                </CardContent>
+                            </Card>
                         </Grid2>
                     </Grid2>
                 </>
