@@ -48,13 +48,21 @@ func (worker *DiscoverWorker) Run() {
 
 	loginErr := worker.spotifyClient.Login()
 	if loginErr != nil {
+		worker.logger.Error(
+			"Failed to login spotify",
+			zap.Error(loginErr),
+		)
 		return
 	}
 
 	for i := 0; i < int(amountOfProccesses); i++ {
 		err := worker.db.Transaction(func(tx *gorm.DB) error {
 			var discoveries []db.ArtistDiscovery
-			tx.Limit(worker.batchSize).Find(&discoveries)
+			res := tx.Limit(worker.batchSize).Find(&discoveries)
+			if res.Error != nil {
+				worker.logger.Error("error finding artist discoveries", zap.Error(res.Error))
+				return res.Error
+			}
 
 			if len(discoveries) == 0 {
 				worker.logger.Info("No discoveries found. Nothing to do.")
@@ -78,7 +86,7 @@ func (worker *DiscoverWorker) Run() {
 				return artistProcessEr
 			}
 
-			res := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&dbTracks)
+			res = tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&dbTracks)
 			if res.Error != nil {
 				return res.Error
 			}
@@ -179,7 +187,7 @@ func (worker *DiscoverWorker) transformTracksAndExtractArtistIds(foundTracks []s
 	var artistIds []string
 	var dbTracks []db.Track
 	for _, track := range foundTracks {
-		dbTrack := &db.Track{
+		dbTrack := db.Track{
 			BaseSpotifyModel: db.BaseSpotifyModel{
 				ID: track.Id,
 			},
@@ -192,7 +200,7 @@ func (worker *DiscoverWorker) transformTracksAndExtractArtistIds(foundTracks []s
 			artistIds = append(artistIds, artist.Id)
 		}
 
-		dbTracks = append(dbTracks, *dbTrack)
+		dbTracks = append(dbTracks, dbTrack)
 	}
 
 	return dbTracks, artistIds
