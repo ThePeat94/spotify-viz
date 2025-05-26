@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"slices"
+	"sync"
 )
 
 type DiscoverWorker struct {
@@ -15,6 +16,9 @@ type DiscoverWorker struct {
 	spotifyClient spotifyapi.SpotifyClient
 	db            *gorm.DB
 	logger        *zap.Logger
+
+	lock      sync.Mutex
+	isWorking bool
 }
 
 func NewDiscoverWorker(batchSize int, spotifyClient spotifyapi.SpotifyClient, db *gorm.DB, logger *zap.Logger) *DiscoverWorker {
@@ -28,6 +32,19 @@ func NewDiscoverWorker(batchSize int, spotifyClient spotifyapi.SpotifyClient, db
 
 func (worker *DiscoverWorker) Run() {
 	worker.logger.Info("Starting DiscoverWorker...")
+
+	if worker.isWorking {
+		worker.logger.Info("DiscoverWorker already running, skipping...")
+		return
+	}
+
+	worker.lock.Lock()
+	worker.isWorking = true
+	defer func() {
+		worker.isWorking = false
+		worker.lock.Unlock()
+	}()
+
 	var count int64
 	countRes := worker.db.Model(&db.ArtistDiscovery{}).Count(&count)
 
