@@ -10,8 +10,9 @@ import (
 type Config struct {
 	Server  *ApiServerConfig `yaml:"server"`
 	Logging struct {
-		Zap  *string `yaml:"zap"`
-		File *string `yaml:"file"`
+		Zap     *string `yaml:"zap"`
+		File    *string `yaml:"file"`
+		ApiFile *string `yaml:"api_file"`
 	}
 	MockServerConfig *MockServerConfig `yaml:"mock_server,omitempty"`
 	SpotifyConfig    *SpotifyConfig    `yaml:"spotify,omitempty"`

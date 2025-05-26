@@ -7,10 +7,12 @@ import (
 	"backend/discovery"
 	"backend/mockserver"
 	"backend/spotifyapi"
+	"backend/stripper"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"io"
@@ -31,6 +33,47 @@ func main() {
 		gin.ForceConsoleColor()
 		logger, _ = zap.NewDevelopment()
 	}
+
+	if cfg.Logging.File != nil {
+		logFile, err := os.OpenFile(*cfg.Logging.File, os.O_APPEND|os.O_CREATE, 0644)
+		jsonLogFile, jsonLogErr := os.OpenFile(fmt.Sprintf("%s.json", *cfg.Logging.File), os.O_APPEND|os.O_CREATE, 0644)
+		defer logFile.Close()
+		defer jsonLogFile.Close()
+		if err != nil {
+			logger.Warn("error creating file", zap.String("file", *cfg.Logging.File), zap.Error(err))
+		} else if jsonLogErr != nil {
+			logger.Warn("error creating json log file", zap.String("file", *cfg.Logging.File), zap.Error(err))
+		} else {
+			consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+			fileEncoderConfig := zap.NewProductionEncoderConfig()
+			fileEncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+			fileEncoder := zapcore.NewConsoleEncoder(fileEncoderConfig)
+			jsonFileEncoder := zapcore.NewJSONEncoder(fileEncoderConfig)
+			consoleWriter := zapcore.Lock(os.Stdout)
+			fileWriter := zapcore.AddSync(logFile)
+			jsonWriter := zapcore.AddSync(jsonLogFile)
+
+			core := zapcore.NewTee(
+				zapcore.NewCore(consoleEncoder, consoleWriter, zapcore.DebugLevel),
+				zapcore.NewCore(fileEncoder, fileWriter, zapcore.DebugLevel),
+				zapcore.NewCore(jsonFileEncoder, jsonWriter, zapcore.DebugLevel),
+			)
+
+			logger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
+		}
+	}
+
+	if cfg.Logging.ApiFile != nil {
+		logFile, err := os.OpenFile(*cfg.Logging.ApiFile, os.O_APPEND|os.O_CREATE, 0644)
+		defer logFile.Close()
+		if err != nil {
+			logger.Warn("error creating api log file", zap.String("file", *cfg.Logging.ApiFile), zap.Error(err))
+		} else {
+			stripWriter := stripper.StripColorWriter{W: logFile}
+			gin.DefaultWriter = io.MultiWriter(os.Stdout, &stripWriter)
+		}
+	}
+
 	zap.ReplaceGlobals(logger)
 	logger.Info("config loaded")
 
@@ -74,16 +117,6 @@ func main() {
 		err = dbConn.AutoMigrate(&db.Track{}, &db.Artist{}, &db.ArtistDiscovery{})
 		if err != nil {
 			logger.Fatal("failed to migrate database", zap.Error(err))
-		}
-	}
-
-	if cfg.Logging.File != nil {
-		ginLogFile, err := os.OpenFile(*cfg.Logging.File, os.O_APPEND|os.O_CREATE, 0644)
-		defer ginLogFile.Close()
-		if err != nil {
-			logger.Warn("error creating file", zap.String("file", *cfg.Logging.File), zap.Error(err))
-		} else {
-			gin.DefaultWriter = io.MultiWriter(os.Stdout, ginLogFile)
 		}
 	}
 
