@@ -47,7 +47,8 @@ type DatabaseConfig struct {
 }
 
 type DiscoverConfig struct {
-	BatchSize int `yaml:"batch_size"`
+	BatchSize     int            `yaml:"batch_size"`
+	RetryInterval *time.Duration `yaml:"retry_interval,omitempty"`
 }
 
 func LoadConfig(path string) *Config {

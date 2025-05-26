@@ -70,12 +70,12 @@ func main() {
 			logger.Warn("error creating api log file", zap.String("file", *cfg.Logging.ApiFile), zap.Error(err))
 		} else {
 			stripWriter := stripper.StripColorWriter{W: logFile}
-			gin.DefaultWriter = io.MultiWriter(os.Stdout, &stripWriter)
+			gin.DefaultWriter = io.MultiWriter(&stripWriter)
 		}
 	}
 
 	zap.ReplaceGlobals(logger)
-	logger.Info("config loaded")
+	logger.Info("config loaded and loggers initialized")
 
 	if cfg.Server == nil {
 		logger.Fatal("no server configuration present")
@@ -146,6 +146,12 @@ func main() {
 
 		worker.Run()
 
+		interval := 5 * time.Minute
+		if cfg.DiscoverConfig.RetryInterval != nil {
+			interval = *cfg.DiscoverConfig.RetryInterval
+		}
+		timer := time.NewTicker(interval)
+
 		for {
 			select {
 			case notification := <-listener.Notify:
@@ -153,6 +159,10 @@ func main() {
 				worker.Run()
 			case <-time.After(90 * time.Second):
 				go listener.Ping()
+			case <-timer.C:
+				timer.Stop()
+				worker.Run()
+				timer = time.NewTicker(interval)
 			}
 		}
 	}()
