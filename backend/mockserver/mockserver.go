@@ -38,12 +38,19 @@ func handlePostToken(context *gin.Context) {
 		ExpiresIn:   duration,
 	}
 
+	rndDuration := rand.IntN(5000) + 50
+	<-time.After(time.Duration(rndDuration) * time.Millisecond)
+
 	context.JSON(200, response)
 }
 
 func handleGetArtist(context *gin.Context) {
 	id := context.Param("id")
 	response := generateRndArtist(id)
+
+	rndDuration := rand.IntN(5000) + 50
+	<-time.After(time.Duration(rndDuration) * time.Millisecond)
+
 	context.JSON(200, response)
 }
 
@@ -54,6 +61,10 @@ func handleGetArtists(context *gin.Context) {
 	for _, id := range ids {
 		artists = append(artists, generateRndArtist(id))
 	}
+
+	rndDuration := rand.IntN(5000) + 50
+	<-time.After(time.Duration(rndDuration) * time.Millisecond)
+
 	context.JSON(200, gin.H{"artists": artists})
 }
 
@@ -78,6 +89,10 @@ func generateRndArtist(id string) spotifyapi.Artist {
 func handleGetTrack(context *gin.Context) {
 	id := context.Param("id")
 	track := generateRndTrack(id)
+
+	rndDuration := rand.IntN(5000) + 50
+	<-time.After(time.Duration(rndDuration) * time.Millisecond)
+
 	context.JSON(200, track)
 }
 
@@ -88,6 +103,10 @@ func handleGetTracks(context *gin.Context) {
 	for _, id := range ids {
 		tracks = append(tracks, generateRndTrack(id))
 	}
+
+	rndDuration := rand.IntN(5000) + 50
+	<-time.After(time.Duration(rndDuration) * time.Millisecond)
+
 	context.JSON(200, gin.H{"tracks": tracks})
 }
 
