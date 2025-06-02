@@ -21,7 +21,9 @@ import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/a
 import { Moment } from 'moment';
 import { TotalListenedPerYearCard } from 'src/components/cards/TotalListenedPerYearCard';
 import { ArtistAnalysisCard } from 'src/components/cards/ArtistAnalysisCard';
-import { useDiscoverStatus, usePostArtistsToDiscover } from 'src/discover/api/discover.ts';
+import { useDiscoverStatus, usePostArtistsToDiscover } from 'src/discover/api/discover';
+import { useDiscoverApiHealthStatus } from 'src/discover/api/health';
+import { Circle } from '@mui/icons-material';
 
 const getFilterFromDates = (fromDate: Moment | null, toDate: Moment | null): (pb: PlaybackData) => boolean  => {
     if (fromDate && toDate) {
@@ -65,6 +67,7 @@ const App = () => {
     } = usePostArtistsToDiscover();
 
     const { data } = useDiscoverStatus(allPlaybackData.length > 0);
+    const { isSuccess, isError } = useDiscoverApiHealthStatus();
 
 
     const baseData = useMemo(() => {
@@ -291,6 +294,15 @@ const App = () => {
                             <Card>
                                 <CardHeader
                                     title={'Artist Discovery'}
+                                    action={
+                                        <Stack direction={'row'} spacing={1} alignItems={'center'}>
+                                            {
+                                                isSuccess ?
+                                                    <><Circle color={'success'} /> <Typography>Online</Typography></> :
+                                                    <><Circle color={'error'} /> <Typography>Offline</Typography></>
+                                            }
+                                        </Stack>
+                                    }
                                 />
                                 <CardContent>
                                     <Stack spacing={2}>
