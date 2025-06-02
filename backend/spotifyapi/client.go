@@ -17,7 +17,8 @@ type Client struct {
 	ClientSecret string
 	Logger       *zap.Logger
 
-	client *resty.Client
+	client          *resty.Client
+	loginExpiration time.Time
 }
 
 type SpotifyClient interface {
@@ -52,6 +53,11 @@ func NewSpotifyClient(config config.SpotifyConfig, logger *zap.Logger) *Client {
 }
 
 func (c *Client) Login() error {
+	if time.Now().Before(c.loginExpiration) {
+		c.Logger.Info("Login still valid, no need to login")
+		return nil
+	}
+
 	c.Logger.Info("Generation Spotify token for requests")
 	formData := map[string]string{
 		"grant_type": "client_credentials",
@@ -73,6 +79,7 @@ func (c *Client) Login() error {
 	}
 
 	parsedResponse := resp.Result().(*ClientCredentials)
+	c.loginExpiration = time.Now().Add(time.Duration(parsedResponse.ExpiresIn) * time.Second)
 	c.Logger.Info(
 		"Successfully generated token, setting auth info.",
 		zap.Duration("expires_in", parsedResponse.ExpiresIn.Duration()),
