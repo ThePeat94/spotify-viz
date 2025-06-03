@@ -39,8 +39,8 @@ func main() {
 	var err error
 	var jsonLogErr error
 	if cfg.Logging.File != nil {
-		logFile, err = os.OpenFile(*cfg.Logging.File, os.O_APPEND|os.O_CREATE, 0644)
-		jsonLogFile, jsonLogErr = os.OpenFile(fmt.Sprintf("%s.json", *cfg.Logging.File), os.O_APPEND|os.O_CREATE, 0644)
+		logFile, err = os.OpenFile(*cfg.Logging.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		jsonLogFile, jsonLogErr = os.OpenFile(fmt.Sprintf("%s.json", *cfg.Logging.File), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			logger.Warn("error creating file", zap.String("file", *cfg.Logging.File), zap.Error(err))
 		} else if jsonLogErr != nil {
@@ -67,7 +67,7 @@ func main() {
 
 	var apiLogFile *os.File
 	if cfg.Logging.ApiFile != nil {
-		apiLogFile, err = os.OpenFile(*cfg.Logging.ApiFile, os.O_APPEND|os.O_CREATE, 0644)
+		apiLogFile, err = os.OpenFile(*cfg.Logging.ApiFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			logger.Warn("error creating api log file", zap.String("file", *cfg.Logging.ApiFile), zap.Error(err))
 		} else {
