@@ -1,6 +1,6 @@
 import { DiscoverArtistRequestType, DiscoverStatusResponseType } from 'src/discover/api/type';
 import { discoverClient } from 'src/discover/client';
-import { useMutation, UseMutationResult, useQuery } from '@tanstack/react-query';
+import { useMutation, UseMutationResult, useQuery, UseQueryResult } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 
 const postArtistsToDiscover = (request: DiscoverArtistRequestType) => {
@@ -25,7 +25,7 @@ const getDiscoverStatus = async (): Promise<DiscoverStatusResponseType> => {
     return response.data;
 };
 
-export const useDiscoverStatus = (enabled: boolean) => {
+export const useDiscoverStatus = (enabled: boolean): UseQueryResult<DiscoverStatusResponseType> => {
     return useQuery({
         queryKey: ['discoverStatus'],
         queryFn: getDiscoverStatus,
