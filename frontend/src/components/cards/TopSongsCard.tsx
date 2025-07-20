@@ -47,6 +47,7 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
 
     const [sortMode, setSortMode] = useState<SortModeType>('count');
     const [selectedSong, setSelectedSong] = useState<string>();
+    const [selectedArtist, setSelectedArtist] = useState<string>();
 
     const sortedPerSong: RankedSongStatsType[] = useMemo(() => {
         const transformed = songStats.sort((p1, p2) => p2[sortMode] - p1[sortMode]).map((song, index) => ({
@@ -58,8 +59,15 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
             return transformed.filter(song => song.name === selectedSong);
         }
 
+        if (selectedArtist) {
+            return songStats.filter(song => song.artist === selectedArtist).sort((p1, p2) => p2[sortMode] - p1[sortMode]).map((song, index) => ({
+                ...song,
+                rank: index + 1,
+            }));
+        }
+
         return transformed;
-    }, [selectedSong, songStats, sortMode]);
+    }, [selectedArtist, selectedSong, songStats, sortMode]);
 
     const songOptions = useMemo(() => {
         const found : { label: string }[] = [];
@@ -77,6 +85,22 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
         return found.sort((a, b) => a.label.localeCompare(b.label));
     }, [songStats]);
 
+    const artistOptions = useMemo(() => {
+        const found : { label: string }[] = [];
+
+        for (let i = 0; i < songStats.length; i++) {
+            const song = songStats[i];
+            if (found.some(item => item.label === song.artist)) {
+                continue;
+            }
+
+            const label = song.artist;
+            found.push({ label });
+        }
+
+        return found.sort((a, b) => a.label.localeCompare(b.label));
+    }, [songStats]);
+
     const handleSortModeChange = (mode: SortModeType): void => {
         setSortMode(mode);
     };
@@ -85,12 +109,24 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
         setSelectedSong(song);
     };
 
+    const handleSelectedArtistChange = (artist?: string): void => {
+        setSelectedArtist(artist);
+    };
+
     return (
         <Card>
             <CardHeader
                 title={'Top Songs'}
                 action={
-                    <Stack direction={'row'} spacing={2} width={600}>
+                    <Stack direction={'row'} spacing={2} width={800}>
+                        <Autocomplete
+                            disablePortal={true}
+                            options={artistOptions}
+                            fullWidth={true}
+                            renderInput={(params) => <TextField {...params} label={'Artist'} />}
+                            onChange={(_, newValue) => handleSelectedArtistChange(newValue?.label)}
+                            sx={{ minWidth: 200 }}
+                        />
                         <Autocomplete
                             disablePortal={true}
                             options={songOptions}
