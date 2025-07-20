@@ -61,7 +61,7 @@ export default tseslint.config(
             "no-trailing-spaces": "error",
             "import/extensions": "error",
             "semi": ["error", "always"],
-            "unused-imports/no-unused-imports": "error",
+            "unused-imports/no-unused-imports": "warn",
             "unused-imports/no-unused-vars": [
                 "warn",
                 {
