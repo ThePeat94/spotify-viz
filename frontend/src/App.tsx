@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
-    Alert, Button,
+    Alert,
     Card, CardContent, CardHeader,
     Grid2, Link, Stack, Typography,
 } from '@mui/material';
@@ -21,9 +21,6 @@ import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/a
 import { Moment } from 'moment';
 import { TotalListenedPerYearCard } from 'src/components/cards/TotalListenedPerYearCard';
 import { ArtistAnalysisCard } from 'src/components/cards/ArtistAnalysisCard';
-import { useDiscoverStatus, usePostArtistsToDiscover } from 'src/discover/api/discover';
-import { useDiscoverApiHealthStatus } from 'src/discover/api/health';
-import { Circle } from '@mui/icons-material';
 
 const getFilterFromDates = (fromDate: Moment | null, toDate: Moment | null): (pb: PlaybackData) => boolean  => {
     if (fromDate && toDate) {
@@ -61,14 +58,6 @@ const App = () => {
     const toDate = useMemo(() => {
         return to ? moment(to) : null;
     }, [to]);
-
-    const {
-        mutate
-    } = usePostArtistsToDiscover();
-
-    const { data } = useDiscoverStatus(allPlaybackData.length > 0);
-    const { isSuccess, isError } = useDiscoverApiHealthStatus(allPlaybackData.length > 0);
-
 
     const baseData = useMemo(() => {
         return performAndMeasure('filter base data', () => {
@@ -203,10 +192,6 @@ const App = () => {
             artistName,
             trackUri
         }));
-
-        mutate({
-            artists: artistsToDiscover
-        });
     };
 
     return (
@@ -289,32 +274,6 @@ const App = () => {
                         </Grid2>
                         <Grid2 size={4}>
                             <FeatureLogCard />
-                        </Grid2>
-                        <Grid2 size={4}>
-                            <Card>
-                                <CardHeader
-                                    title={'Artist Discovery'}
-                                    action={
-                                        <Stack direction={'row'} spacing={1} alignItems={'center'}>
-                                            {
-                                                isSuccess ?
-                                                    <><Circle color={'success'} /> <Typography>Online</Typography></> :
-                                                    <><Circle color={'error'} /> <Typography>Offline</Typography></>
-                                            }
-                                        </Stack>
-                                    }
-                                />
-                                <CardContent>
-                                    <Stack spacing={2}>
-                                        <Typography>Time to discover meta data about your artists!</Typography>
-                                        <Typography>Discovered Artists: {data?.alreadyDiscoveredCount}</Typography>
-                                        <Typography>Remaining Artists: {data?.remainingArtistsCount}</Typography>
-                                        <Button variant={'contained'} onClick={handeDiscoverArtistsClick}>
-                                            Discover Artists
-                                        </Button>
-                                    </Stack>
-                                </CardContent>
-                            </Card>
                         </Grid2>
                     </Grid2>
                 </>
