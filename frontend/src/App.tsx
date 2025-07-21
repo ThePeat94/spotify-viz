@@ -67,7 +67,7 @@ const App = () => {
     } = usePostArtistsToDiscover();
 
     const { data } = useDiscoverStatus(allPlaybackData.length > 0);
-    const { isSuccess, isError } = useDiscoverApiHealthStatus();
+    const { isSuccess, isError } = useDiscoverApiHealthStatus(allPlaybackData.length > 0);
 
 
     const baseData = useMemo(() => {
