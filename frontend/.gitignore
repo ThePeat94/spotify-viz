@@ -34,3 +34,5 @@ stats.html
 
 # ignore jsons to test from
 data/**
+
+.tanstack/**
