@@ -198,13 +198,13 @@ const App = () => {
         <>
             <Grid2 container={true} alignItems={'center'} spacing={2} p={2}>
                 <Grid2 size={12}>
-                    <Typography variant={'h3'} justifySelf={'center'}>Spotify Viz 🧙‍♂️</Typography>
+                    <Typography variant={'h3'} justifySelf={'center'}>StreamLens 🧙‍♂️</Typography>
                 </Grid2>
                 <Grid2 size={12}>
                     <Card sx={{ height: '100%' }}>
                         <CardHeader title={<Typography variant={'h4'}>Welcome</Typography>}/>
                         <CardContent>
-                            <Typography>Welcome to Spotify Viz! This tool enables you to explore your extended streaming history from spotify.</Typography>
+                            <Typography>Welcome to StreamLens! This tool enables you to explore your extended streaming history from spotify.</Typography>
                         </CardContent>
                     </Card>
                 </Grid2>
@@ -213,7 +213,7 @@ const App = () => {
                         <CardHeader title={<Typography variant={'h4'}>How to use</Typography>}/>
                         <CardContent>
                             <Stack spacing={1}>
-                                <Typography variant={'body1'}>1. Request your extended Spotify streaming history from <Link href={'https://www.spotify.com/us/account/privacy/'} target={'_blank'}>here</Link> (log into your account if needed)</Typography>
+                                <Typography>1. Request your extended Spotify streaming history from <Link href={'https://www.spotify.com/us/account/privacy/'} target={'_blank'}>here</Link> (log into your account if needed)</Typography>
                                 <Typography>2. Wait until Spotify sends you the confirmation, that your data is ready to be downloaded</Typography>
                                 <Typography>3. Download the data from the link in the email</Typography>
                                 <Typography>4. Unzip the downloaded file</Typography>

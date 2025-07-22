@@ -39,6 +39,11 @@ createRoot(document.getElementById('root')!).render(
                 <ThemeProvider theme={darkTheme}>
                     <CssBaseline>
                         <RouterProvider router={router}/>
+                        <footer>
+                            <p>
+                                <a href="/imprint">Imprint</a> | <a href="/privacy">Privacy Policy</a>
+                            </p>
+                        </footer>
                     </CssBaseline>
                 </ThemeProvider>
             </QueryClientProvider>
