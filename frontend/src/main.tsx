@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers';
-import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
+import { Button, createTheme, CssBaseline, Stack, ThemeProvider } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 
@@ -40,9 +40,10 @@ createRoot(document.getElementById('root')!).render(
                     <CssBaseline>
                         <RouterProvider router={router}/>
                         <footer>
-                            <p>
-                                <a href="/imprint">Imprint</a> | <a href="/privacy">Privacy Policy</a>
-                            </p>
+                            <Stack alignItems={'center'} width={'100%'}>
+                                <Button href="/imprint">Imprint</Button>
+                                <Button href="/privacy">Privacy Policy</Button>
+                            </Stack>
                         </footer>
                     </CssBaseline>
                 </ThemeProvider>
