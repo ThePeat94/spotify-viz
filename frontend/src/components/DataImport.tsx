@@ -16,6 +16,7 @@ import moment from 'moment/moment';
 import { StatsType } from 'src/stats/type';
 import { maximumOf, minimumOf } from 'src/utils/numbers';
 import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/analysis';
+import { createRandomData } from 'src/streams/generator';
 
 type DataImportProps = {
     onChange?: (data: PlaybackData[], unfilteredStats: StatsType) => void;
@@ -121,6 +122,36 @@ const DataImport: React.FC<DataImportProps> = (props) => {
         onChange?.(playbackData, allStats);
     };
 
+    const handleGenerateRandomDataClick = (): void => {
+        const playbackData = createRandomData(100_000);
+        console.log(playbackData);
+
+        const allStats = performAndMeasure('parseRandomData', () => {
+            const allTs = playbackData.map(pb => pb.ts.getTime());
+
+            const uniqueArtistCount = calculateUniqueArtistCount(playbackData);
+            const uniqueSongCount = calculateUniqueSongCount(playbackData);
+
+            return {
+                playBackDataCount: playbackData.length,
+                earliestEntry: moment(minimumOf(allTs)),
+                latestEntry: moment(maximumOf(allTs)),
+                uniqueArtists: uniqueArtistCount,
+                uniqueSongs: uniqueSongCount,
+                totalSecondsPlayed: playbackData.reduce((a, b) => a + b.ms_played / 1_000, 0)
+            };
+        });
+
+        setImportInfo({
+            fileCount: 1,
+            currentFileCount: 1,
+            state: 'DONE',
+        });
+
+        console.log(allStats);
+        onChange?.(playbackData, allStats);
+    };
+
     return (
         <Card>
             <CardHeader
@@ -136,6 +167,9 @@ const DataImport: React.FC<DataImportProps> = (props) => {
                                 onChange={(event) => handleParseFiles(event.target.files)}
                                 multiple={true}
                             />
+                        </Button>
+                        <Button onClick={handleGenerateRandomDataClick}>
+                            Generate Random Data
                         </Button>
                     </ButtonGroup>
                     {importInfo.state !== 'NONE' && importInfo.state !== 'DONE' && (
