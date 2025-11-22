@@ -75,7 +75,7 @@ const MiniWrappedCards: React.FC<Props> = ({ rawData }) => {
     const [processedMonthData, processedYearData] = useMemo(() => processRawData(rawData), [rawData]);
     return (
         <Stack>
-            <Typography variant={'h4'}>Your Monthly Mini Wrappeds</Typography>
+            <Typography variant={'h4'}>Your monthly mini Wrappeds</Typography>
             <Grid2 container={true} spacing={2}>
                 {Object.entries(processedMonthData).map(([year, months]) => (
                     Object.entries(months).map(([month, monthsData]) => (
@@ -91,7 +91,8 @@ const MiniWrappedCards: React.FC<Props> = ({ rawData }) => {
                     ))
                 ))}
             </Grid2>
-            <Grid2 container={true} spacing={2}>
+            <Typography variant={'h4'}>Your yearly Wrappeds</Typography>
+            <Grid2 container={true} spacing={2} pt={2}>
                 {Object.entries(processedYearData).map(([year, yearData]) => (
                     <Grid2 size={4}
                         key={`${year}-yearly`}
