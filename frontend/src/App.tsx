@@ -21,7 +21,7 @@ import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/a
 import { Moment } from 'moment';
 import { TotalListenedPerYearCard } from 'src/components/cards/TotalListenedPerYearCard';
 import { ArtistAnalysisCard } from 'src/components/cards/ArtistAnalysisCard';
-import MiniWrappedCards from 'src/components/cards/wrapped/MiniWrappedCards.tsx';
+import MiniWrappedCards from 'src/components/cards/wrapped/MiniWrappedCards';
 import { analyzeArtists, analyzeSongs } from 'src/utils/analysis';
 
 const getFilterFromDates = (fromDate: Moment | null, toDate: Moment | null): (pb: PlaybackData) => boolean  => {
@@ -200,6 +200,9 @@ const App = () => {
                         </Grid2>
                         <Grid2 size={4}>
                             <FeatureLogCard />
+                        </Grid2>
+                        <Grid2 size={12}>
+                            <MiniWrappedCards rawData={baseData} />
                         </Grid2>
                     </Grid2>
                 </>
