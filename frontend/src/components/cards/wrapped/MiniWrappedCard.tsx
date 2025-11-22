@@ -49,6 +49,10 @@ const MiniWrappedCard: React.FC<Props> = ({ year, month, wrappedData }) => {
                             </List>
                         </Stack>
                     </Grid2>
+                    <Grid2>
+                        <Typography variant={'body1'}>Total Streams: {wrappedData.totalStreams}</Typography>
+                        <Typography variant={'body1'}>Total Listening Time: <HoverableDuration durationInMs={wrappedData.totalPlayedMs} decimalNumbers={0}/></Typography>
+                    </Grid2>
                 </Grid2>
             </CardContent>
         </Card>
