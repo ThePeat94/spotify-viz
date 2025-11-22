@@ -198,11 +198,11 @@ const App = () => {
                                 latestYear={unfilteredStats?.latestEntry.year()}
                             />
                         </Grid2>
-                        <Grid2 size={4}>
-                            <FeatureLogCard />
-                        </Grid2>
                         <Grid2 size={12}>
                             <MiniWrappedCards rawData={baseData} />
+                        </Grid2>
+                        <Grid2 size={4}>
+                            <FeatureLogCard />
                         </Grid2>
                     </Grid2>
                 </>
