@@ -6,18 +6,27 @@ import { HoverableDuration } from 'src/components/HoverableDuration';
 import { getGradientByHash } from 'src/utils/gradients';
 
 type Props = {
-    year: number;
+    year?: number;
     month?: number;
+    artist?: string;
     wrappedData: WrappedData,
 };
 
 /**
  * A component which displays the top data in a mini wrapped card format
  */
-const MiniWrappedCard: React.FC<Props> = ({ year, month, wrappedData }) => {
+const MiniWrappedCard: React.FC<Props> = ({ year, month, artist, wrappedData }) => {
     const gradient = useMemo(() => {
         return getGradientByHash(`${year}-${month}-${wrappedData.totalStreams}-${wrappedData.totalPlayedMs}`);
     }, [year, month, wrappedData.totalStreams, wrappedData.totalPlayedMs]);
+
+    const title = useMemo(() => {
+        if (artist) {
+            return `${artist} Wrapped`;
+        }
+
+        return `${month && moment.months()[month - 1]} ${year} Wrapped`;
+    }, [artist, month, year]);
 
     return (
         <Card sx={{
@@ -29,7 +38,7 @@ const MiniWrappedCard: React.FC<Props> = ({ year, month, wrappedData }) => {
         }}>
             <CardHeader
                 style={{ textAlign: 'center' }}
-                title={<Typography variant={'h4'}>{month && moment.months()[month - 1]} {year} Wrapped</Typography>}
+                title={<Typography variant={'h4'}>{title}</Typography>}
             />
             <CardContent>
                 <Grid2 container={true} spacing={2}>
