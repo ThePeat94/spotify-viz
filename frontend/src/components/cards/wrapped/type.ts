@@ -14,6 +14,10 @@ export type WrappedCardData = {
     }
 }
 
+export type WrappedYearCardData = {
+    [year: number] : WrappedData,
+}
+
 export type ToProcessType = {
     [year: number] : {
         [month: number] : PlaybackData[]

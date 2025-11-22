@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { WrappedData } from 'src/components/cards/wrapped/type';
 import { Card, CardContent, CardHeader, Grid2, List, ListItem, ListItemText, Stack, Typography } from '@mui/material';
 import moment from 'moment';
 import { HoverableDuration } from 'src/components/HoverableDuration';
+import { getGradientByHash } from 'src/utils/gradients';
 
 type Props = {
     year: number;
-    month: number;
+    month?: number;
     wrappedData: WrappedData,
 };
 
@@ -14,9 +15,22 @@ type Props = {
  * A component which displays the top data in a mini wrapped card format
  */
 const MiniWrappedCard: React.FC<Props> = ({ year, month, wrappedData }) => {
+    const gradient = useMemo(() => {
+        return getGradientByHash(`${year}-${month}-${wrappedData.totalStreams}-${wrappedData.totalPlayedMs}`);
+    }, [year, month, wrappedData.totalStreams, wrappedData.totalPlayedMs]);
+
     return (
-        <Card>
-            <CardHeader style={{ textAlign: 'center' }} title={<Typography variant={'h4'}>{moment.months()[month - 1]} {year} Wrapped</Typography>}/>
+        <Card sx={{
+            background: gradient,
+            color: 'white',
+            '& .MuiTypography-root': { color: 'white' },
+            '& .MuiListItemText-primary': { color: 'white' },
+            '& .MuiListItemText-secondary': { color: 'rgba(255, 255, 255, 0.8)' }
+        }}>
+            <CardHeader
+                style={{ textAlign: 'center' }}
+                title={<Typography variant={'h4'}>{month && moment.months()[month - 1]} {year} Wrapped</Typography>}
+            />
             <CardContent>
                 <Grid2 container={true} spacing={2}>
                     <Grid2 size={6}>
@@ -24,7 +38,7 @@ const MiniWrappedCard: React.FC<Props> = ({ year, month, wrappedData }) => {
                             <Typography variant={'h6'}>Top Artists</Typography>
                             <List>
                                 {wrappedData.topArtists.map((artist, index) => (
-                                    <ListItem key={artist.name}>
+                                    <ListItem key={artist.name} style={{ background: 'rgba(0, 0, 0, 0.2)', marginTop: 2, marginBottom: 2 }}>
                                         <ListItemText
                                             primary={<>#{index + 1} - {artist.name}</>}
                                             secondary={<>{artist.count} streams - <HoverableDuration durationInMs={artist.msPlayed} decimalNumbers={0}/></>}
@@ -39,9 +53,9 @@ const MiniWrappedCard: React.FC<Props> = ({ year, month, wrappedData }) => {
                             <Typography variant={'h6'}>Top Songs</Typography>
                             <List>
                                 {wrappedData.topSongs.map((song, index) => (
-                                    <ListItem key={song.name + song.artist}>
+                                    <ListItem key={song.name + song.artist} style={{ background: 'rgba(0, 0, 0, 0.2)', marginTop: 2, marginBottom: 2 }}>
                                         <ListItemText
-                                            primary={<>#{index + 1} - {song.name} - {song.artist}</>}
+                                            primary={<>#{index + 1} - {song.name}</>}
                                             secondary={<>{song.count} streams - <HoverableDuration durationInMs={song.msPlayed} decimalNumbers={0}/></>}
                                         />
                                     </ListItem>
@@ -49,9 +63,15 @@ const MiniWrappedCard: React.FC<Props> = ({ year, month, wrappedData }) => {
                             </List>
                         </Stack>
                     </Grid2>
-                    <Grid2>
-                        <Typography variant={'body1'}>Total Streams: {wrappedData.totalStreams}</Typography>
-                        <Typography variant={'body1'}>Total Listening Time: <HoverableDuration durationInMs={wrappedData.totalPlayedMs} decimalNumbers={0}/></Typography>
+                    <Grid2 size={12} style={{ background: 'rgba(0, 0, 0, 0.2)' }}>
+                        <List>
+                            <ListItem>
+                                <ListItemText primary={<Typography variant={'body1'}>Total Streams: {wrappedData.totalStreams}</Typography>}/>
+                            </ListItem>
+                            <ListItem>
+                                <ListItemText primary={<Typography variant={'body1'}>Total Listening Time: <HoverableDuration durationInMs={wrappedData.totalPlayedMs} decimalNumbers={0}/></Typography>}/>
+                            </ListItem>
+                        </List>
                     </Grid2>
                 </Grid2>
             </CardContent>

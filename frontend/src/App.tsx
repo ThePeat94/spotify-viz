@@ -199,7 +199,7 @@ const App = () => {
                             />
                         </Grid2>
                         <Grid2 size={12}>
-                            <MiniWrappedCards rawData={baseData} />
+                            <MiniWrappedCards rawData={allPlaybackData} />
                         </Grid2>
                         <Grid2 size={4}>
                             <FeatureLogCard />
