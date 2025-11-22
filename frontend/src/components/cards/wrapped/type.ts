@@ -4,6 +4,8 @@ import { PlaybackData } from 'src/streams/type';
 export type WrappedData = {
     topArtists: ArtistStatsType[],
     topSongs: SongStatsType[],
+    totalStreams: number,
+    totalPlayedMs: number,
 };
 
 export type WrappedCardData = {

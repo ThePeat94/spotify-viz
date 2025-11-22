@@ -39,6 +39,8 @@ const processRawData = (rawData: PlaybackData[]): WrappedCardData => {
             accM[Number(month)] = {
                 topArtists,
                 topSongs,
+                totalStreams: pbData.length,
+                totalPlayedMs: pbData.reduce((a, b) => a + b.ms_played, 0),
             };
 
             return accM;
