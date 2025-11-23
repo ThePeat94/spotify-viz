@@ -8,25 +8,23 @@ import { getGradientByHash } from 'src/utils/gradients';
 type Props = {
     year?: number;
     month?: number;
-    artist?: string;
     wrappedData: WrappedData,
 };
 
 /**
  * A component which displays the top data in a mini wrapped card format
  */
-const MiniWrappedCard: React.FC<Props> = ({ year, month, artist, wrappedData }) => {
+const MiniWrappedCard: React.FC<Props> = ({ year, month, wrappedData }) => {
     const gradient = useMemo(() => {
         return getGradientByHash(`${year}-${month}-${wrappedData.totalStreams}-${wrappedData.totalPlayedMs}`);
     }, [year, month, wrappedData.totalStreams, wrappedData.totalPlayedMs]);
 
     const title = useMemo(() => {
-        if (artist) {
-            return `${artist} Wrapped`;
+        if (!month) {
+            return `${year} Wrapped`;
         }
-
         return `${month && moment.months()[month - 1]} ${year} Wrapped`;
-    }, [artist, month, year]);
+    }, [month, year]);
 
     return (
         <Card sx={{
