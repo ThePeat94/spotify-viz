@@ -21,7 +21,9 @@ import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/a
 import { Moment } from 'moment';
 import { TotalListenedPerYearCard } from 'src/components/cards/TotalListenedPerYearCard';
 import { ArtistAnalysisCard } from 'src/components/cards/ArtistAnalysisCard';
+import MiniWrappedCards from 'src/components/cards/wrapped/MiniWrappedCards';
 import { analyzeArtists, analyzeSongs } from 'src/utils/analysis';
+import ArtistWrapped from 'src/components/cards/wrapped/ArtistWrapped';
 
 const getFilterFromDates = (fromDate: Moment | null, toDate: Moment | null): (pb: PlaybackData) => boolean  => {
     if (fromDate && toDate) {
@@ -196,6 +198,12 @@ const App = () => {
                                 earliestYear={unfilteredStats?.earliestEntry.year()}
                                 latestYear={unfilteredStats?.latestEntry.year()}
                             />
+                        </Grid2>
+                        <Grid2 size={12}>
+                            <MiniWrappedCards rawData={allPlaybackData} />
+                        </Grid2>
+                        <Grid2 size={12}>
+                            <ArtistWrapped artistStats={playedPerArtist} songStats={playedPerSong}/>
                         </Grid2>
                         <Grid2 size={4}>
                             <FeatureLogCard />

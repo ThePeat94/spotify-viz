@@ -53,6 +53,7 @@ export default tseslint.config(
             "@typescript-eslint/no-unsafe-assignment": "off",
             "@typescript-eslint/no-unsafe-return": "off",
             "@typescript-eslint/no-base-to-string": "off",
+            "@typescript-eslint/consistent-indexed-object-style": "off",
             "no-unused-vars": "off",
             "@typescript-eslint/no-unused-vars": "off",
             "@typescript-eslint/consistent-type-definitions": ["error", "type"],

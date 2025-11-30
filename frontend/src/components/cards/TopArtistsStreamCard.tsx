@@ -97,7 +97,6 @@ const TopArtistsStreamCard: React.FC<TopArtistsStreamCardProps> = (props) => {
             />
             <CardContent>
                 <Stack spacing={2}>
-
                     <VariableSizeList
                         itemSize={() => DEFAULT_LIST_ITEM_SIZE}
                         height={500}
