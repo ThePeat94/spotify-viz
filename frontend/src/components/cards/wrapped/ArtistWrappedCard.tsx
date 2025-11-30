@@ -29,7 +29,7 @@ const ArtistWrappedCard: React.FC<Props> = ({ artist, songs }) => {
         }}>
             <CardHeader
                 style={{ textAlign: 'center' }}
-                title={<Typography variant={'h4'}>{artist.name}</Typography>}
+                title={<Typography variant={'h4'}>Wrapped: {artist.name}</Typography>}
             />
             <CardContent>
                 <Grid2 container={true} spacing={2}>
@@ -48,13 +48,23 @@ const ArtistWrappedCard: React.FC<Props> = ({ artist, songs }) => {
                             </List>
                         </Stack>
                     </Grid2>
-                    <Grid2 size={12} style={{ background: 'rgba(0, 0, 0, 0.2)' }}>
+                    <Grid2 size={6} style={{ background: 'rgba(0, 0, 0, 0.2)' }}>
                         <List>
                             <ListItem>
-                                <ListItemText primary={<Typography variant={'body1'}>Total Streams: {artist.count}</Typography>}/>
+                                <ListItemText primary={<Typography variant={'body1'}>{artist.count} streams</Typography>}/>
                             </ListItem>
                             <ListItem>
-                                <ListItemText primary={<Typography variant={'body1'}>Total Listening Time: <HoverableDuration durationInMs={artist.msPlayed} decimalNumbers={0}/></Typography>}/>
+                                <ListItemText primary={<Typography variant={'body1'}><HoverableDuration durationInMs={artist.msPlayed} decimalNumbers={0}/></Typography>}/>
+                            </ListItem>
+                        </List>
+                    </Grid2>
+                    <Grid2 size={6} style={{ background: 'rgba(0, 0, 0, 0.2)' }}>
+                        <List>
+                            <ListItem>
+                                <ListItemText primary={<Typography variant={'body1'}>First: {artist.firstStream.format('DD.MM.YYYY HH:mm')}</Typography>}/>
+                            </ListItem>
+                            <ListItem>
+                                <ListItemText primary={<Typography variant={'body1'}>Last: {artist.lastStream.format('DD.MM.YYYY HH:mm')}</Typography>}/>
                             </ListItem>
                         </List>
                     </Grid2>

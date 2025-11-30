@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ArtistStatsType, SongStatsType } from 'src/stats/type';
-import { Autocomplete, Grid2, Stack, TextField } from '@mui/material';
+import { Autocomplete, Card, CardContent, CardHeader, TextField, Typography } from '@mui/material';
 import ArtistWrappedCard from 'src/components/cards/wrapped/ArtistWrappedCard';
 
 type Props = {
@@ -29,23 +29,24 @@ const ArtistWrapped: React.FC<Props> = ({ artistStats, songStats }) => {
     }, [selectedArtist, songStats]);
 
     return (
-        <Grid2 container={true} spacing={2}>
-            <Grid2 size={4}>
-                <Stack spacing={2}>
-                    <Autocomplete
-                        disablePortal={true}
-                        options={artistOptions}
-                        fullWidth={true}
-                        renderInput={(params) => <TextField {...params} label={'Artist'} />}
-                        onChange={(_, newValue) => setSelectedArtist(newValue?.label)}
-                        sx={{ minWidth: 350 }}
-                    />
-                    {selectedArtistStats && (
-                        <ArtistWrappedCard artist={selectedArtistStats} songs={songsForArtist} />
-                    )}
-                </Stack>
-            </Grid2>
-        </Grid2>
+        <Card>
+            <CardHeader
+                title={<Typography variant={'h4'}>Artist Wrapped</Typography>}
+                action={<Autocomplete
+                    disablePortal={true}
+                    options={artistOptions}
+                    fullWidth={true}
+                    renderInput={(params) => <TextField {...params} label={'Artist'} />}
+                    onChange={(_, newValue) => setSelectedArtist(newValue?.label)}
+                    sx={{ minWidth: 500 }}
+                />}
+            />
+            <CardContent>
+                {selectedArtistStats && (
+                    <ArtistWrappedCard artist={selectedArtistStats} songs={songsForArtist} />
+                )}
+            </CardContent>
+        </Card>
     );
 };
 
