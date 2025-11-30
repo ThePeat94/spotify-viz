@@ -1,9 +1,19 @@
-import React, { useMemo } from 'react';
-import { Grid2, Stack, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Button,
+    Card, CardContent,
+    CardHeader,
+    Grid2,
+    Typography
+} from '@mui/material';
 import { PlaybackData } from 'src/streams/type';
 import { analyzeArtists, analyzeSongs } from 'src/utils/analysis';
 import { ToProcessType, WrappedCardData, WrappedData, WrappedYearCardData } from 'src/components/cards/wrapped/type';
 import MiniWrappedCard from 'src/components/cards/wrapped/MiniWrappedCard';
+import { ArrowDownward } from '@mui/icons-material';
 
 type Props = {
     rawData: PlaybackData[];
@@ -72,39 +82,54 @@ const processRawData = (rawData: PlaybackData[]): [WrappedCardData, WrappedYearC
  * A component which displays all mini wrap cards
  */
 const MiniWrappedCards: React.FC<Props> = ({ rawData }) => {
-    const [processedMonthData, processedYearData] = useMemo(() => processRawData(rawData), [rawData]);
+
+    const [processedData, setProcessedData] = useState<[WrappedCardData, WrappedYearCardData]>();
+
+    const [processedMonthData, processedYearData] = processedData ?? [{}, {}];
+
+    const handleGenerateMiniWrapsClick = (): void => {
+        setProcessedData(processRawData(rawData));
+    };
+
     return (
-        <Stack>
-            <Typography variant={'h4'}>Your monthly mini Wrappeds</Typography>
-            <Grid2 container={true} spacing={2}>
-                {Object.entries(processedMonthData).map(([year, months]) => (
-                    Object.entries(months).map(([month, monthsData]) => (
-                        <Grid2 size={4}
-                            key={`${year}-${month}`}
+        <Card>
+            <CardHeader
+                title={<Typography variant={'h4'}>Your monthly mini Wrappeds</Typography>}
+                action={!processedData ? <Button onClick={handleGenerateMiniWrapsClick} variant={'outlined'}>Generate</Button> : undefined}
+            />
+            <CardContent>
+                {processedData && Object.keys(processedYearData).map((year) => (
+                    <Accordion key={year}>
+                        <AccordionSummary
+                            expandIcon={<ArrowDownward />}
                         >
-                            <MiniWrappedCard
-                                year={Number(year)}
-                                month={Number(month)}
-                                wrappedData={monthsData}
-                            />
-                        </Grid2>
-                    ))
+                            <Typography variant={'h6'}>{year}</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Grid2 container={true} spacing={2}>
+                                {Object.entries(processedMonthData[Number(year)]).map(([month, monthsData]) => (
+                                    <Grid2 size={4}
+                                        key={`${year}-${month}`}
+                                    >
+                                        <MiniWrappedCard
+                                            year={Number(year)}
+                                            month={Number(month)}
+                                            wrappedData={monthsData}
+                                        />
+                                    </Grid2>
+                                ))}
+                                <Grid2 size={4}>
+                                    <MiniWrappedCard
+                                        year={Number(year)}
+                                        wrappedData={processedYearData[Number(year)]}
+                                    />
+                                </Grid2>
+                            </Grid2>
+                        </AccordionDetails>
+                    </Accordion>
                 ))}
-            </Grid2>
-            <Typography variant={'h4'}>Your yearly Wrappeds</Typography>
-            <Grid2 container={true} spacing={2} pt={2}>
-                {Object.entries(processedYearData).map(([year, yearData]) => (
-                    <Grid2 size={4}
-                        key={`${year}-yearly`}
-                    >
-                        <MiniWrappedCard
-                            year={Number(year)}
-                            wrappedData={yearData}
-                        />
-                    </Grid2>
-                ))}
-            </Grid2>
-        </Stack>
+            </CardContent>
+        </Card>
     );
 };
 
