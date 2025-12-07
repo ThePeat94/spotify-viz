@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { ArtistStatsType, SongStatsType } from 'src/stats/type';
-import { Autocomplete, Card, CardContent, CardHeader, TextField, Typography } from '@mui/material';
+import { Autocomplete, Button, Card, CardContent, CardHeader, Stack, TextField, Typography } from '@mui/material';
 import ArtistWrappedCard from 'src/components/cards/wrapped/ArtistWrappedCard';
+import { toPng } from 'html-to-image';
 
 type Props = {
     artistStats: ArtistStatsType[];
@@ -14,6 +15,8 @@ type Props = {
 const ArtistWrapped: React.FC<Props> = ({ artistStats, songStats }) => {
     const [selectedArtist, setSelectedArtist] = useState<string>();
 
+    const cardRef = useRef(null);
+
     const artistOptions = useMemo(() => {
         return artistStats.map(artist => ({
             label: artist.name,
@@ -25,8 +28,29 @@ const ArtistWrapped: React.FC<Props> = ({ artistStats, songStats }) => {
     }, [artistStats, selectedArtist]);
 
     const songsForArtist : SongStatsType[] = useMemo(() => {
-        return songStats.filter(song => song.artist === selectedArtist) ?? [];
+        return songStats.filter(song => song.artist === selectedArtist);
     }, [selectedArtist, songStats]);
+
+    const handleExportClick = async (): Promise<void> => {
+        if (!cardRef.current){
+            return;
+        }
+
+        try {
+            const dataUrl = await toPng(cardRef.current, {
+                cacheBust: true,
+                quality: 1,
+            });
+
+            const link = document.createElement('a');
+            link.download = `${selectedArtist}-wrapped.png`;
+            link.href = dataUrl;
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Failed to export image:', error);
+        }
+    };
 
     return (
         <Card>
@@ -43,7 +67,12 @@ const ArtistWrapped: React.FC<Props> = ({ artistStats, songStats }) => {
             />
             <CardContent>
                 {selectedArtistStats && (
-                    <ArtistWrappedCard artist={selectedArtistStats} songs={songsForArtist} />
+                    <Stack>
+                        <div ref={cardRef}>
+                            <ArtistWrappedCard artist={selectedArtistStats} songs={songsForArtist} />
+                        </div>
+                        <Button onClick={handleExportClick}>Export as PNG</Button>
+                    </Stack>
                 )}
             </CardContent>
         </Card>
