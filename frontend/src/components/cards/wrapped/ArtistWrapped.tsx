@@ -40,6 +40,12 @@ const ArtistWrapped: React.FC<Props> = ({ artistStats, songStats }) => {
             const dataUrl = await toPng(cardRef.current, {
                 cacheBust: true,
                 quality: 1,
+                width: 660,
+                height: 660,
+                style: {
+                    width: '660px',
+                    height: '660px',
+                }
             });
 
             const link = document.createElement('a');
@@ -67,12 +73,15 @@ const ArtistWrapped: React.FC<Props> = ({ artistStats, songStats }) => {
             />
             <CardContent>
                 {selectedArtistStats && (
-                    <Stack>
-                        <div ref={cardRef}>
+                    <>
+                        <Stack>
                             <ArtistWrappedCard artist={selectedArtistStats} songs={songsForArtist} />
+                            <Button onClick={handleExportClick}>Export as PNG</Button>
+                        </Stack>
+                        <div ref={cardRef} style={{ width: '660px', height: '0px', overflow: 'hidden' }}>
+                            <ArtistWrappedCard artist={selectedArtistStats} songs={songsForArtist} isExportTemplate={true}/>
                         </div>
-                        <Button onClick={handleExportClick}>Export as PNG</Button>
-                    </Stack>
+                    </>
                 )}
             </CardContent>
         </Card>

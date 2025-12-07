@@ -7,17 +7,18 @@ import { ArtistStatsType, SongStatsType } from 'src/stats/type';
 type Props = {
     artist: ArtistStatsType;
     songs: SongStatsType[],
+    isExportTemplate?: boolean;
 };
 
 /**
  * A component which displays the top data in a mini wrapped card format
  */
-const ArtistWrappedCard: React.FC<Props> = ({ artist, songs }) => {
+const ArtistWrappedCard: React.FC<Props> = ({ artist, songs, isExportTemplate = false }) => {
     const gradient = useMemo(() => {
         return getGradientByHash(`${artist.name}-${artist.msPlayed}-${artist.count}`);
     }, [artist.count, artist.msPlayed, artist.name]);
 
-    const topSongs = useMemo(() => songs.sort((a, b) => b.msPlayed - a.msPlayed).slice(0, 5), [songs]);
+    const topSongs = useMemo(() => songs.sort((a, b) => b.count - a.count).slice(0, 5), [songs]);
 
     return (
         <Card sx={{
@@ -41,7 +42,7 @@ const ArtistWrappedCard: React.FC<Props> = ({ artist, songs }) => {
                                     <ListItem key={song.name + song.artist} style={{ background: 'rgba(0, 0, 0, 0.2)', marginTop: 2, marginBottom: 2 }}>
                                         <ListItemText
                                             primary={<>#{index + 1} - {song.name}</>}
-                                            secondary={<>{song.count} streams - <HoverableDuration durationInMs={song.msPlayed} decimalNumbers={0}/></>}
+                                            secondary={<>{song.count} streams - <HoverableDuration durationInMs={song.msPlayed} decimalNumbers={0} isExportTemplate={isExportTemplate}/></>}
                                         />
                                     </ListItem>
                                 ))}
@@ -54,7 +55,7 @@ const ArtistWrappedCard: React.FC<Props> = ({ artist, songs }) => {
                                 <ListItemText primary={<Typography variant={'body1'}>{artist.count} streams</Typography>}/>
                             </ListItem>
                             <ListItem>
-                                <ListItemText primary={<Typography variant={'body1'}><HoverableDuration durationInMs={artist.msPlayed} decimalNumbers={0}/></Typography>}/>
+                                <ListItemText primary={<Typography variant={'body1'}><HoverableDuration durationInMs={artist.msPlayed} decimalNumbers={0} isExportTemplate={isExportTemplate}/></Typography>}/>
                             </ListItem>
                         </List>
                     </Grid2>
