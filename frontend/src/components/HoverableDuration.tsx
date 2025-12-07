@@ -2,9 +2,10 @@ import React from 'react';
 import { Box, Stack, styled, Tooltip, tooltipClasses, TooltipProps, Typography } from '@mui/material';
 import { formatNumber } from 'src/utils/numbers';
 
-type HoverableDurationProps = {
+type Props = {
     durationInMs: number;
     decimalNumbers?: number;
+    isExportTemplate?: boolean;
 }
 
 type AbsurdDurationType = {
@@ -68,15 +69,19 @@ const NoMaxWidthTooltip = styled(({ className, ...props }: TooltipProps) => (
     },
 });
 
-export const HoverableDuration: React.FC<HoverableDurationProps> = (props ) => {
-    const { durationInMs, decimalNumbers = 2 } = props;
-
+export const HoverableDuration: React.FC<Props> = ({ durationInMs, decimalNumbers = 2, isExportTemplate = false }) => {
     const durationInSeconds = durationInMs / 1000;
     const durationInMinutes = durationInSeconds / 60;
     const durationInHours = durationInMinutes / 60;
     const durationInDays = durationInHours / 24;
     const durationInWeeks = durationInDays / 7;
     const durationInYears = durationInDays / 365;
+
+    const additionalStyles = isExportTemplate ? undefined : {
+        borderBottom: '1px dashed',
+        borderColor: 'success.main',
+        color: 'success.main',
+    };
 
     return (
         <NoMaxWidthTooltip
@@ -113,9 +118,7 @@ export const HoverableDuration: React.FC<HoverableDurationProps> = (props ) => {
                 sx={{
                     cursor: 'pointer',
                     display: 'inline',
-                    borderBottom: '1px dashed',
-                    borderColor: 'success.main',
-                    color: 'success.main',
+                    ...additionalStyles,
                 }}
             >
                 {formatNumber(durationInMinutes, decimalNumbers)} minutes
