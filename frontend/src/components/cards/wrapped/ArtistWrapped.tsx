@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { ArtistStatsType, SongStatsType } from 'src/stats/type';
-import { Autocomplete, Button, Card, CardContent, CardHeader, Stack, TextField, Typography } from '@mui/material';
+import { Autocomplete, Card, CardContent, CardHeader, TextField, Typography } from '@mui/material';
 import ArtistWrappedCard from 'src/components/cards/wrapped/ArtistWrappedCard';
 import { toPng } from 'html-to-image';
 
@@ -74,10 +74,7 @@ const ArtistWrapped: React.FC<Props> = ({ artistStats, songStats }) => {
             <CardContent>
                 {selectedArtistStats && (
                     <>
-                        <Stack>
-                            <ArtistWrappedCard artist={selectedArtistStats} songs={songsForArtist} />
-                            <Button onClick={handleExportClick}>Export as PNG</Button>
-                        </Stack>
+                        <ArtistWrappedCard artist={selectedArtistStats} songs={songsForArtist} onExportClick={handleExportClick} />
                         <div ref={cardRef} style={{ width: '660px', height: '0px', overflow: 'hidden' }}>
                             <ArtistWrappedCard artist={selectedArtistStats} songs={songsForArtist} isExportTemplate={true}/>
                         </div>
