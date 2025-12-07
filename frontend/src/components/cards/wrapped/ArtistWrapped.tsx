@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { ArtistStatsType, SongStatsType } from 'src/stats/type';
 import { Autocomplete, Card, CardContent, CardHeader, TextField, Typography } from '@mui/material';
 import ArtistWrappedCard from 'src/components/cards/wrapped/ArtistWrappedCard';
-import { toPng } from 'html-to-image';
+import { exportNode } from 'src/utils/export';
 
 type Props = {
     artistStats: ArtistStatsType[];
@@ -32,30 +32,11 @@ const ArtistWrapped: React.FC<Props> = ({ artistStats, songStats }) => {
     }, [selectedArtist, songStats]);
 
     const handleExportClick = async (): Promise<void> => {
-        if (!cardRef.current){
+        if (!cardRef.current || !selectedArtist) {
             return;
         }
 
-        try {
-            const dataUrl = await toPng(cardRef.current, {
-                cacheBust: true,
-                quality: 1,
-                width: 660,
-                height: 660,
-                style: {
-                    width: '660px',
-                    height: '660px',
-                }
-            });
-
-            const link = document.createElement('a');
-            link.download = `${selectedArtist}-wrapped.png`;
-            link.href = dataUrl;
-            link.click();
-            link.remove();
-        } catch (error) {
-            console.error('Failed to export image:', error);
-        }
+        await exportNode(cardRef.current, `artist-wrapped-${selectedArtist}.png`, { width: 660, height: 660 });
     };
 
     return (
