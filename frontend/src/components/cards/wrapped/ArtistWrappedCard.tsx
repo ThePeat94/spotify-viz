@@ -1,22 +1,37 @@
-import React, { useMemo } from 'react';
-import { Card, CardContent, CardHeader, Grid2, List, ListItem, ListItemText, Stack, Typography } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import {
+    Button,
+    Card,
+    CardContent,
+    CardHeader,
+    Grid2,
+    List,
+    ListItem,
+    ListItemText,
+    Stack,
+    Typography
+} from '@mui/material';
 import { HoverableDuration } from 'src/components/HoverableDuration';
 import { getGradientByHash } from 'src/utils/gradients';
 import { ArtistStatsType, SongStatsType } from 'src/stats/type';
+import { Download } from '@mui/icons-material';
 
 type Props = {
     artist: ArtistStatsType;
     songs: SongStatsType[],
     isExportTemplate?: boolean;
+    onExportClick?: () => void;
 };
 
 /**
  * A component which displays the top data in a mini wrapped card format
  */
-const ArtistWrappedCard: React.FC<Props> = ({ artist, songs, isExportTemplate = false }) => {
+const ArtistWrappedCard: React.FC<Props> = ({ artist, songs, isExportTemplate = false, onExportClick }) => {
     const gradient = useMemo(() => {
         return getGradientByHash(`${artist.name}-${artist.msPlayed}-${artist.count}`);
     }, [artist.count, artist.msPlayed, artist.name]);
+
+    const [actionsVisible, setActionsVisible] = useState<boolean>(false);
 
     const topSongs = useMemo(() => songs.sort((a, b) => b.count - a.count).slice(0, 5), [songs]);
 
@@ -31,6 +46,8 @@ const ArtistWrappedCard: React.FC<Props> = ({ artist, songs, isExportTemplate = 
             <CardHeader
                 style={{ textAlign: 'center' }}
                 title={<Typography variant={'h4'}>Wrapped: {artist.name}</Typography>}
+                action={actionsVisible && onExportClick && <Button onClick={onExportClick} variant={'contained'} startIcon={<Download/>}>Export as PNG</Button>}
+                onMouseEnter={() => setActionsVisible(true)} onMouseLeave={() => setActionsVisible(false)}
             />
             <CardContent>
                 <Grid2 container={true} spacing={2}>
