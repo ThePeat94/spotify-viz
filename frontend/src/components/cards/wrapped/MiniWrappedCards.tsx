@@ -12,11 +12,12 @@ import {
 import { PlaybackData } from 'src/streams/type';
 import { analyzeArtists, analyzeSongs } from 'src/utils/analysis';
 import { ToProcessType, WrappedCardData, WrappedData, WrappedYearCardData } from 'src/components/cards/wrapped/type';
-import MiniWrappedCard from 'src/components/cards/wrapped/MiniWrappedCard';
 import { ArrowDownward } from '@mui/icons-material';
+import ExportableMiniWrappedCard from 'src/components/cards/wrapped/ExportableMiniWrappedCard';
 
 type Props = {
     rawData: PlaybackData[];
+    isExportTemplate?: boolean;
 };
 
 const processRawData = (rawData: PlaybackData[]): [WrappedCardData, WrappedYearCardData] => {
@@ -111,7 +112,7 @@ const MiniWrappedCards: React.FC<Props> = ({ rawData }) => {
                                     <Grid2 size={4}
                                         key={`${year}-${month}`}
                                     >
-                                        <MiniWrappedCard
+                                        <ExportableMiniWrappedCard
                                             year={Number(year)}
                                             month={Number(month)}
                                             wrappedData={monthsData}
@@ -119,7 +120,7 @@ const MiniWrappedCards: React.FC<Props> = ({ rawData }) => {
                                     </Grid2>
                                 ))}
                                 <Grid2 size={4}>
-                                    <MiniWrappedCard
+                                    <ExportableMiniWrappedCard
                                         year={Number(year)}
                                         wrappedData={processedYearData[Number(year)]}
                                     />
