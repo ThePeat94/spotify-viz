@@ -20,7 +20,7 @@ const ArtistWrapped: React.FC<Props> = ({ artistStats, songStats }) => {
     const artistOptions = useMemo(() => {
         return artistStats.map(artist => ({
             label: artist.name,
-        })).sort((a, b) => a.label.localeCompare(b.label));
+        })).toSorted((a, b) => a.label.localeCompare(b.label));
     }, [artistStats]);
 
     const selectedArtistStats = useMemo(() => {

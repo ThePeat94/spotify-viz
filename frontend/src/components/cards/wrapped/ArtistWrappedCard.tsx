@@ -33,7 +33,7 @@ const ArtistWrappedCard: React.FC<Props> = ({ artist, songs, isExportTemplate = 
 
     const [actionsVisible, setActionsVisible] = useState<boolean>(false);
 
-    const topSongs = useMemo(() => songs.sort((a, b) => b.count - a.count).slice(0, 5), [songs]);
+    const topSongs = useMemo(() => songs.toSorted((a, b) => b.count - a.count).slice(0, 5), [songs]);
 
     return (
         <Card sx={{

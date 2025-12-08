@@ -52,12 +52,12 @@ const TopArtistsStreamCard: React.FC<TopArtistsStreamCardProps> = (props) => {
     const artistOptions = useMemo(() => {
         return artistStats.map(artist => ({
             label: artist.name,
-        })).sort((a, b) => a.label.localeCompare(b.label));
+        })).toSorted((a, b) => a.label.localeCompare(b.label));
     }, [artistStats]);
 
 
     const sortedPerArtist: RankedArtistStatsType[]  = useMemo(() => {
-        const transformed = artistStats.sort((p1, p2) => p2[sortMode] - p1[sortMode]).map((artist, index) => ({
+        const transformed = artistStats.toSorted((p1, p2) => p2[sortMode] - p1[sortMode]).map((artist, index) => ({
             ...artist,
             rank: index + 1,
         }));

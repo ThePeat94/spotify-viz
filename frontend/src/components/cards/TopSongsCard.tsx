@@ -50,7 +50,7 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
     const [selectedArtist, setSelectedArtist] = useState<string>();
 
     const sortedPerSong: RankedSongStatsType[] = useMemo(() => {
-        const transformed = songStats.sort((p1, p2) => p2[sortMode] - p1[sortMode]).map((song, index) => ({
+        const transformed = songStats.toSorted((p1, p2) => p2[sortMode] - p1[sortMode]).map((song, index) => ({
             ...song,
             rank: index + 1,
         }));
@@ -60,7 +60,7 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
         }
 
         if (selectedArtist) {
-            return songStats.filter(song => song.artist === selectedArtist).sort((p1, p2) => p2[sortMode] - p1[sortMode]).map((song, index) => ({
+            return songStats.filter(song => song.artist === selectedArtist).toSorted((p1, p2) => p2[sortMode] - p1[sortMode]).map((song, index) => ({
                 ...song,
                 rank: index + 1,
             }));
@@ -82,7 +82,7 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
             found.push({ label });
         }
 
-        return found.sort((a, b) => a.label.localeCompare(b.label));
+        return found.toSorted((a, b) => a.label.localeCompare(b.label));
     }, [songStats]);
 
     const artistOptions = useMemo(() => {
@@ -98,7 +98,7 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
             found.push({ label });
         }
 
-        return found.sort((a, b) => a.label.localeCompare(b.label));
+        return found.toSorted((a, b) => a.label.localeCompare(b.label));
     }, [songStats]);
 
     const handleSortModeChange = (mode: SortModeType): void => {
