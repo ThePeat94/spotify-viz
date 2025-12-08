@@ -36,7 +36,7 @@ const ArtistWrapped: React.FC<Props> = ({ artistStats, songStats }) => {
             return;
         }
 
-        await exportNode(cardRef.current, `artist-wrapped-${selectedArtist}.png`, { width: 660, height: 660 });
+        await exportNode(cardRef.current, `artist-wrapped-${selectedArtist}.png`);
     };
 
     return (

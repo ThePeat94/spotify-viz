@@ -10,7 +10,7 @@ type Props = {
 };
 
 /**
- * A component which displays the top data in a mini wrapped card format
+ * A component which wraps the MiniWrappedCard with export functionality
  */
 const ExportableMiniWrappedCard: React.FC<Props> = ({ year, month, wrappedData }) => {
     const cardRef = useRef(null);
@@ -22,7 +22,7 @@ const ExportableMiniWrappedCard: React.FC<Props> = ({ year, month, wrappedData }
 
         const title = [month, year].filter(Boolean).join('-');
 
-        await exportNode(cardRef.current, `wrapped-${title}.png`, { width: 660, height: 660 });
+        await exportNode(cardRef.current, `wrapped-${title}.png`);
     };
 
     return (

@@ -1,7 +1,16 @@
 import { toPng } from 'html-to-image';
-import { Options } from 'html-to-image/lib/types';
 
-export const exportNode = async (node: any, fileName: string, dimensionOptions?: Pick<Options, 'height' | 'width'>) : Promise<void>  => {
+type Dimensions = {
+    width: number;
+    height: number;
+}
+
+export const DEFAULT_INSTAGRAM_DIMENSIONS : Dimensions = {
+    width: 660,
+    height: 660,
+};
+
+export const exportNode = async (node: HTMLElement, fileName: string, dimensionOptions: Dimensions = DEFAULT_INSTAGRAM_DIMENSIONS) : Promise<void>  => {
     try {
         const dataUrl = await toPng(node, {
             cacheBust: true,
