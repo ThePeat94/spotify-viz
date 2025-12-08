@@ -1,5 +1,5 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { discoverClient } from 'src/discover/client.ts';
+import { discoverClient } from 'src/discover/client';
 
 const getHealthStatus = async (): Promise<boolean> => {
     const resp = await discoverClient.get('/health', { timeout: 1000 });

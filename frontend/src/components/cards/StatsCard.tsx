@@ -1,7 +1,7 @@
 import React from 'react';
 import { StatsType } from 'src/stats/type';
 import { Card, CardContent, CardHeader, Skeleton, Stack, Typography } from '@mui/material';
-import { HoverableDuration } from 'src/components/HoverableDuration.tsx';
+import { HoverableDuration } from 'src/components/HoverableDuration';
 
 type UnfilteredMetaStatsCardProps = {
     title: string;
