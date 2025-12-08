@@ -40,7 +40,7 @@ export const ArtistAnalysisCard: React.FC<ArtistAnalysisCardPropsType> = (props)
     const artistOptions = useMemo(() => {
         return artists.map(artist => ({
             label: artist.name,
-        })).sort((a, b) => a.label.localeCompare(b.label));
+        })).toSorted((a, b) => a.label.localeCompare(b.label));
     }, [artists]);
 
     const calculatedDataset = useMemo(() => {

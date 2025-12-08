@@ -44,8 +44,8 @@ const processRawData = (rawData: PlaybackData[]): [WrappedCardData, WrappedYearC
 
     const analyzedClusters: WrappedCardData = Object.entries(clustered).reduce((accY, [year, data]) => {
         accY[Number(year)] = Object.entries(data).reduce((accM, [month, pbData]) => {
-            const topArtists = analyzeArtists(pbData).sort((a, b) => b.count - a.count).slice(0, 5);
-            const topSongs = analyzeSongs(pbData).sort((a, b) => b.count - a.count).slice(0, 5);
+            const topArtists = analyzeArtists(pbData).toSorted((a, b) => b.count - a.count).slice(0, 5);
+            const topSongs = analyzeSongs(pbData).toSorted((a, b) => b.count - a.count).slice(0, 5);
 
             accM[Number(month)] = {
                 topArtists,
@@ -63,8 +63,8 @@ const processRawData = (rawData: PlaybackData[]): [WrappedCardData, WrappedYearC
     const analyzedYearClusters: WrappedYearCardData = Object.entries(clustered).reduce((accY, [year, data]) => {
         const allPbData = Object.values(data).flat();
 
-        const topArtists = analyzeArtists(allPbData).sort((a, b) => b.count - a.count).slice(0, 5);
-        const topSongs = analyzeSongs(allPbData).sort((a, b) => b.count - a.count).slice(0, 5);
+        const topArtists = analyzeArtists(allPbData).toSorted((a, b) => b.count - a.count).slice(0, 5);
+        const topSongs = analyzeSongs(allPbData).toSorted((a, b) => b.count - a.count).slice(0, 5);
 
         accY[Number(year)] = {
             topArtists,
