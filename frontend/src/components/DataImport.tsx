@@ -121,13 +121,11 @@ const DataImport: React.FC<DataImportProps> = (props) => {
             state: 'DONE',
         });
 
-        console.log(allStats);
         onChange?.(playbackData, allStats);
     };
 
     const handleGenerateRandomDataClick = (): void => {
         const playbackData = createRandomData(100_000);
-        console.log(playbackData);
 
         const allStats = performAndMeasure('parseRandomData', () => {
             const allTs = playbackData.map(pb => pb.ts.getTime());
@@ -152,7 +150,6 @@ const DataImport: React.FC<DataImportProps> = (props) => {
             state: 'DONE',
         });
 
-        console.log(allStats);
         onChange?.(playbackData, allStats);
     };
 
