@@ -50,23 +50,19 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
     const [selectedArtist, setSelectedArtist] = useState<string>();
 
     const sortedPerSong: RankedSongStatsType[] = useMemo(() => {
-        const transformed = songStats.toSorted((p1, p2) => p2[sortMode] - p1[sortMode]).map((song, index) => ({
-            ...song,
-            rank: index + 1,
-        }));
-
+        let filtered = [...songStats];
         if (selectedSong) {
-            return transformed.filter(song => song.name === selectedSong);
+            filtered = filtered.filter(song => song.name === selectedSong);
+        } else if (selectedArtist) {
+            filtered = filtered.filter(song => song.artist === selectedArtist);
         }
 
-        if (selectedArtist) {
-            return songStats.filter(song => song.artist === selectedArtist).toSorted((p1, p2) => p2[sortMode] - p1[sortMode]).map((song, index) => ({
+        return filtered
+            .toSorted((p1, p2) => p2[sortMode] - p1[sortMode])
+            .map((song, index) => ({
                 ...song,
                 rank: index + 1,
             }));
-        }
-
-        return transformed;
     }, [selectedArtist, selectedSong, songStats, sortMode]);
 
     const songOptions = useMemo(() => {
