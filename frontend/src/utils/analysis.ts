@@ -9,19 +9,21 @@ export const analyzeArtists = (baseData: PlaybackData[]) : ArtistStatsType[] => 
             return previousValue;
         }
 
+        const currentTs = moment(currentValue.ts);
+
         if (!previousValue[currentValue.master_metadata_album_artist_name]) {
             previousValue[currentValue.master_metadata_album_artist_name] = {
                 count: 0,
                 msPlayed: 0,
-                firstStream: moment(currentValue.ts),
-                lastStream: moment(currentValue.ts),
+                firstStream: currentTs,
+                lastStream: currentTs,
             };
         }
         previousValue[currentValue.master_metadata_album_artist_name] = {
             count: previousValue[currentValue.master_metadata_album_artist_name].count + 1,
             msPlayed: previousValue[currentValue.master_metadata_album_artist_name].msPlayed + currentValue.ms_played,
-            firstStream: moment.min(previousValue[currentValue.master_metadata_album_artist_name].firstStream, moment(currentValue.ts)),
-            lastStream: moment.max(previousValue[currentValue.master_metadata_album_artist_name].lastStream, moment(currentValue.ts)),
+            firstStream: moment.min(previousValue[currentValue.master_metadata_album_artist_name].firstStream, currentTs),
+            lastStream: moment.max(previousValue[currentValue.master_metadata_album_artist_name].lastStream, currentTs),
         };
         return previousValue;
     }, {} as Record<string, { count: number, msPlayed: number, firstStream: Moment, lastStream: Moment }>);
@@ -32,53 +34,38 @@ export const analyzeArtists = (baseData: PlaybackData[]) : ArtistStatsType[] => 
 };
 
 export const analyzeSongs = (baseData: PlaybackData[]): SongStatsType[] => {
-    const trackUriTracks = baseData.reduce((prev, current) => {
-        if (current.master_metadata_album_artist_name === null) {
-            return prev;
-        }
-        prev[current.spotify_track_uri] = current.master_metadata_track_name;
-        return prev;
-    }, {} as Record<string, string>);
-
-    const trackUriArtist = baseData.reduce((prev, current) => {
-        if (current.master_metadata_album_artist_name === null) {
-            return prev;
-        }
-        prev[current.spotify_track_uri] = current.master_metadata_album_artist_name;
-        return prev;
-    }, {} as Record<string, string>);
-
     const trackCount = baseData.reduce((prev, current) => {
         if (current.master_metadata_album_artist_name === null) {
             return prev;
         }
 
+        const currentTs = moment(current.ts);
+
         if (!prev[current.spotify_track_uri]) {
             prev[current.spotify_track_uri] = {
+                name: current.master_metadata_track_name,
+                artist: current.master_metadata_album_artist_name,
                 count: 0,
                 msPlayed: 0,
-                firstStream: moment(current.ts),
-                lastStream: moment(current.ts),
+                firstStream: currentTs,
+                lastStream: currentTs,
             };
         }
 
         prev[current.spotify_track_uri] = {
+            name: current.master_metadata_track_name,
+            artist: current.master_metadata_album_artist_name,
             count: prev[current.spotify_track_uri].count + 1,
             msPlayed: prev[current.spotify_track_uri].msPlayed + current.ms_played,
-            firstStream: moment.min(prev[current.spotify_track_uri].firstStream, moment(current.ts)),
-            lastStream: moment.max(prev[current.spotify_track_uri].lastStream, moment(current.ts)),
+            firstStream: moment.min(prev[current.spotify_track_uri].firstStream, currentTs),
+            lastStream: moment.max(prev[current.spotify_track_uri].lastStream, currentTs),
         };
         return prev;
-    }, {} as Record<string, { count: number, msPlayed: number, firstStream: Moment, lastStream: Moment }>);
+    }, {} as Record<string, SongStatsType>);
 
-    return Object.entries(trackCount).map(([k, v]) => {
+    return Object.entries(trackCount).map(([_, v]) => {
         return {
-            name: trackUriTracks[k],
-            count: v.count,
-            artist: trackUriArtist[k],
-            msPlayed: v.msPlayed,
-            firstStream: v.firstStream,
-            lastStream: v.lastStream
+            ...v
         };
     });
 };
