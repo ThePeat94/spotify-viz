@@ -18,7 +18,7 @@ import DataImport from 'src/components/DataImport';
 import { performAndMeasure } from 'src/utils/performance';
 import { maximumOf, minimumOf } from 'src/utils/numbers';
 import {
-    calculateUniqueArtistAndSongCount
+    calculateUniqueCounts
 } from 'src/data/analysis';
 import { Moment } from 'moment';
 import { TotalListenedPerYearCard } from 'src/components/cards/TotalListenedPerYearCard';
@@ -87,7 +87,7 @@ const App = () => {
 
             const allTs = performAndMeasure('transform timestamps', () => baseData.map(pb => pb.ts.getTime()));
             const filteredAnalysisCounts = performAndMeasure('calculate unique counts', () => {
-                return calculateUniqueArtistAndSongCount(baseData);
+                return calculateUniqueCounts(baseData);
             });
 
             return {
