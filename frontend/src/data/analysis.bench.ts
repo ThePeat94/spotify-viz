@@ -1,7 +1,7 @@
 import { bench, describe } from 'vitest';
 import { createRandomData } from 'src/streams/generator';
 import {
-    calculateUniqueArtistAndSongCount,
+    calculateUniqueCounts,
 } from 'src/data/analysis';
 import { PlaybackData } from 'src/streams/type';
 
@@ -56,7 +56,7 @@ describe('Performance Tests', () => {
             });
 
             bench(`optimized raw v1 - data size: ${size}`, () => {
-                calculateUniqueArtistAndSongCount(rndData);
+                calculateUniqueCounts(rndData);
             });
         });
     });

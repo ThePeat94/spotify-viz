@@ -7,7 +7,7 @@ type AnalysisResult = {
     uniqueSongCount: number;
 }
 
-export const calculateUniqueArtistAndSongCount = (playbackData: PlaybackData[]): AnalysisResult => {
+export const calculateUniqueCounts = (playbackData: PlaybackData[]): AnalysisResult => {
     const foundArtists = new Set<string>();
     const uniqueSongs  = new Set<string>();
 
