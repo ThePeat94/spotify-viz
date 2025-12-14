@@ -70,47 +70,36 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
     }, [selectedArtist, selectedSong, songStats, sortMode]);
 
     const songOptions = useMemo(() => {
-        const found : { label: string }[] = [];
+        const found : Set<string> = new Set<string>();
 
         for (let i = 0; i < songStats.length; i++) {
             const song = songStats[i];
-            if (found.some(item => item.label === song.name)) {
-                continue;
-            }
-
-            const label = song.name;
-            found.push({ label });
+            found.add(song.name);
         }
 
-        return found.toSorted((a, b) => a.label.localeCompare(b.label));
+        return Array.from(found).toSorted((a, b) => a.localeCompare(b));
     }, [songStats]);
 
     const artistOptions = useMemo(() => {
-        const found : { label: string }[] = [];
-
+        const found : Set<string> = new Set<string>();
         for (let i = 0; i < songStats.length; i++) {
             const song = songStats[i];
-            if (found.some(item => item.label === song.artist)) {
-                continue;
-            }
-
-            const label = song.artist;
-            found.push({ label });
+            found.add(song.artist);
         }
 
-        return found.toSorted((a, b) => a.label.localeCompare(b.label));
+        return Array.from(found).toSorted((a, b) => a.localeCompare(b));
     }, [songStats]);
 
     const handleSortModeChange = (mode: SortModeType): void => {
         setSortMode(mode);
     };
 
-    const handleSelectedSongChange = (song?: string): void => {
-        setSelectedSong(song);
+    const handleSelectedSongChange = (song?: string | null): void => {
+        setSelectedSong(song ?? undefined);
     };
 
-    const handleSelectedArtistChange = (artist?: string): void => {
-        setSelectedArtist(artist);
+    const handleSelectedArtistChange = (artist?: string | null): void => {
+        setSelectedArtist(artist ?? undefined);
     };
 
     return (
@@ -124,7 +113,7 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
                             options={artistOptions}
                             fullWidth={true}
                             renderInput={(params) => <TextField {...params} label={'Artist'} />}
-                            onChange={(_, newValue) => handleSelectedArtistChange(newValue?.label)}
+                            onChange={(_, newValue) => handleSelectedArtistChange(newValue)}
                             sx={{ minWidth: 200 }}
                         />
                         <Autocomplete
@@ -132,7 +121,7 @@ const TopSongsCard: React.FC<TopSongsCardProps> = (props) => {
                             options={songOptions}
                             fullWidth={true}
                             renderInput={(params) => <TextField {...params} label={'Song'} />}
-                            onChange={(_, newValue) => handleSelectedSongChange(newValue?.label)}
+                            onChange={(_, newValue) => handleSelectedSongChange(newValue)}
                             sx={{ minWidth: 350 }}
                         />
                         <SortModeSelect
