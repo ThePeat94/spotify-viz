@@ -49,7 +49,6 @@ export const ArtistAnalysisCard: React.FC<ArtistAnalysisCardPropsType> = (props)
         }
 
         const baseData = data.filter(pb => pb.master_metadata_album_artist_name === selectedArtist);
-        console.log(baseData.filter(pb => !!pb.master_metadata_album_artist_name && pb.master_metadata_album_artist_name.includes('Los Brudalos')));
 
         if (granularityLevel === 'year') {
             const baseEmptyRecord : Record<number, number> = {};

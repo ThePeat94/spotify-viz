@@ -137,10 +137,6 @@ const DataFilter: React.FC<DataFilterProps> = (props) => {
                                 max={60_000}
                                 step={1000}
                                 marks={true}
-                                onDragStart={() => console.log('dragging started')}
-                                onDrag={() => console.log('dragging')}
-                                onDragEnd={() => console.log('dragging ended')}
-                                onDragStartCapture={() => console.log('on drag start capture')}
                                 onChange={(_, v) => setTmpDuration(v as number)}
                                 onChangeCommitted={(_, v) => handleMinDurationChange(v as number)}
                                 value={tmpDuration}
