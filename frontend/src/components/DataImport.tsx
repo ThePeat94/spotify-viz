@@ -15,7 +15,9 @@ import { performAndMeasure } from 'src/utils/performance';
 import moment from 'moment/moment';
 import { StatsType } from 'src/stats/type';
 import { maximumOf, minimumOf } from 'src/utils/numbers';
-import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/analysis';
+import {
+    calculateUniqueArtistAndSongCount
+} from 'src/data/analysis';
 import { createRandomData } from 'src/streams/generator';
 
 type DataImportProps = {
@@ -99,8 +101,9 @@ const DataImport: React.FC<DataImportProps> = (props) => {
         const allStats = performAndMeasure('parseFile', () => {
             const allTs = playbackData.map(pb => pb.ts.getTime());
 
-            const uniqueArtistCount = calculateUniqueArtistCount(playbackData);
-            const uniqueSongCount = calculateUniqueSongCount(playbackData);
+            const analysisResult = calculateUniqueArtistAndSongCount(playbackData);
+            const uniqueArtistCount = analysisResult.uniqueArtistCount;
+            const uniqueSongCount = analysisResult.uniqueSongCount;
 
             return {
                 playBackDataCount: playbackData.length,
@@ -129,8 +132,9 @@ const DataImport: React.FC<DataImportProps> = (props) => {
         const allStats = performAndMeasure('parseRandomData', () => {
             const allTs = playbackData.map(pb => pb.ts.getTime());
 
-            const uniqueArtistCount = calculateUniqueArtistCount(playbackData);
-            const uniqueSongCount = calculateUniqueSongCount(playbackData);
+            const analysisResult = calculateUniqueArtistAndSongCount(playbackData);
+            const uniqueArtistCount = analysisResult.uniqueArtistCount;
+            const uniqueSongCount = analysisResult.uniqueSongCount;
 
             return {
                 playBackDataCount: playbackData.length,

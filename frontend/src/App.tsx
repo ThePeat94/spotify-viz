@@ -17,7 +17,9 @@ import TopSongsCard from 'src/components/cards/TopSongsCard';
 import DataImport from 'src/components/DataImport';
 import { performAndMeasure } from 'src/utils/performance';
 import { maximumOf, minimumOf } from 'src/utils/numbers';
-import { calculateUniqueArtistCount, calculateUniqueSongCount } from 'src/data/analysis';
+import {
+    calculateUniqueArtistAndSongCount
+} from 'src/data/analysis';
 import { Moment } from 'moment';
 import { TotalListenedPerYearCard } from 'src/components/cards/TotalListenedPerYearCard';
 import { ArtistAnalysisCard } from 'src/components/cards/ArtistAnalysisCard';
@@ -84,15 +86,16 @@ const App = () => {
             }
 
             const allTs = performAndMeasure('transform timestamps', () => baseData.map(pb => pb.ts.getTime()));
-            const uniqueArtistCount = performAndMeasure('unique artist count', () => calculateUniqueArtistCount(baseData));
-            const uniqueSongCount = performAndMeasure('unique song count', () => calculateUniqueSongCount(baseData));
+            const filteredAnalysisCounts = performAndMeasure('calculate unique counts', () => {
+                return calculateUniqueArtistAndSongCount(baseData);
+            });
 
             return {
                 playBackDataCount: baseData.length,
                 earliestEntry: moment(minimumOf(allTs)),
                 latestEntry: moment(maximumOf(allTs)),
-                uniqueArtists: uniqueArtistCount,
-                uniqueSongs: uniqueSongCount,
+                uniqueArtists: filteredAnalysisCounts.uniqueArtistCount,
+                uniqueSongs: filteredAnalysisCounts.uniqueSongCount,
                 totalSecondsPlayed: baseData.reduce((a, b) => a + b.ms_played/1_000, 0)
             };
         });
