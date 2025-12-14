@@ -63,7 +63,6 @@ const TopArtistsStreamCard: React.FC<TopArtistsStreamCardProps> = (props) => {
         }));
 
         if (selectedArtist) {
-            console.log('Selected artist: ', selectedArtist);
             return transformed.filter(artist => artist.name === selectedArtist);
         }
 
