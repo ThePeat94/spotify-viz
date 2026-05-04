@@ -69,3 +69,21 @@ export const analyzeSongs = (baseData: PlaybackData[]): SongStatsType[] => {
         };
     });
 };
+
+export const groupPlaybackDataByArtist = (data: PlaybackData[], artists: Set<string>): Map<string, PlaybackData[]> => {
+    const dataByArtist = new Map<string, PlaybackData[]>();
+
+    for (const playback of data) {
+        const artist = playback.master_metadata_album_artist_name;
+
+        if (!artist || !artists.has(artist)) {
+            continue;
+        }
+
+        const artistData = dataByArtist.get(artist) ?? [];
+        artistData.push(playback);
+        dataByArtist.set(artist, artistData);
+    }
+
+    return dataByArtist;
+};

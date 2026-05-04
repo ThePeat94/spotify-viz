@@ -17,9 +17,10 @@ import React, { useMemo, useState } from 'react';
 import moment from 'moment/moment';
 import { ArtistStatsType } from 'src/stats/type';
 import { ChartData } from 'src/utils/chart/type';
-import { getDayData, getMonthData, getYearData } from 'src/utils/chart/charts';
 import { getLinearSeriesData, getLinearXAxisData, getLinearYAxisData } from 'src/utils/chart/linechart';
-import { getBarSeriesData, getBarXAxisData, getBarYAxisData } from 'src/utils/chart/barchart.ts';
+import { getBarSeriesData, getBarXAxisData, getBarYAxisData } from 'src/utils/chart/barchart';
+import { getDataBuilder } from 'src/utils/chart/databuilder';
+import { groupPlaybackDataByArtist } from 'src/utils/analysis';
 
 type ArtistAnalysisCardPropsType = {
     data: PlaybackData[],
@@ -52,39 +53,24 @@ export const ArtistAnalysisCard: React.FC<ArtistAnalysisCardPropsType> = (props)
             return undefined;
         }
 
-        const baseData = data.filter(pb => pb.master_metadata_album_artist_name && selectedArtists.includes(pb.master_metadata_album_artist_name));
+        const buildData = getDataBuilder({
+            granularityLevel,
+            earliestYear,
+            latestYear,
+            selectedMonth,
+            selectedYear,
+        });
 
-        if (granularityLevel === 'year') {
-            return selectedArtists.map(a => {
-                const forArtist = baseData.filter(d => d.master_metadata_album_artist_name == a);
-                return {
-                    label: a,
-                    data: getYearData(forArtist, earliestYear, latestYear),
-                };
-            });
+        if (!buildData) {
+            return [];
         }
 
-        if (granularityLevel === 'month' && selectedYear) {
-            return selectedArtists.map(a => {
-                const forArtist = baseData.filter(d => d.master_metadata_album_artist_name == a);
-                return {
-                    label: a,
-                    data: getMonthData(forArtist, selectedYear),
-                };
-            });
-        }
-
-        if (granularityLevel === 'day' && selectedYear && selectedMonth) {
-            return selectedArtists.map(a => {
-                const forArtist = baseData.filter(d => d.master_metadata_album_artist_name == a);
-                return {
-                    label: a,
-                    data: getDayData(forArtist, selectedYear, selectedMonth),
-                };
-            });
-        }
-
-        return undefined;
+        const selectedArtistSet = new Set(selectedArtists);
+        const dataByArtist = groupPlaybackDataByArtist(data, selectedArtistSet);
+        return selectedArtists.map(artist => ({
+            label: artist,
+            data: buildData(dataByArtist.get(artist) ?? []),
+        }));
     }, [selectedArtists, data, granularityLevel, selectedYear, selectedMonth, earliestYear, latestYear]);
 
     const handleGranularityLevelChange = (granularityLevel: GranularityLevelType): void => {
