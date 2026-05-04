@@ -16,6 +16,10 @@ import { formatNumber } from 'src/utils/numbers';
 import React, { useMemo, useState } from 'react';
 import moment from 'moment/moment';
 import { ArtistStatsType } from 'src/stats/type';
+import { ChartData } from 'src/utils/chart/type';
+import { getDayData, getMonthData, getYearData } from 'src/utils/chart/charts';
+import { getLinearSeriesData, getLinearXAxisData, getLinearYAxisData } from 'src/utils/chart/linechart';
+import { getBarSeriesData, getBarXAxisData, getBarYAxisData } from 'src/utils/chart/barchart.ts';
 
 type ArtistAnalysisCardPropsType = {
     data: PlaybackData[],
@@ -35,7 +39,7 @@ export const ArtistAnalysisCard: React.FC<ArtistAnalysisCardPropsType> = (props)
     const [selectedYear, setSelectedYear] = useState<number>();
     const [selectedMonth, setSelectedMonth] = useState<number>();
     const [displayMode, setDisplayMode] = useState<DisplayModeType>('line');
-    const [selectedArtist, setSelectedArtist] = useState<string>();
+    const [selectedArtists, setSelectedArtists] = useState<string[]>();
 
     const artistOptions = useMemo(() => {
         return artists.map(artist => ({
@@ -43,80 +47,45 @@ export const ArtistAnalysisCard: React.FC<ArtistAnalysisCardPropsType> = (props)
         })).toSorted((a, b) => a.label.localeCompare(b.label));
     }, [artists]);
 
-    const calculatedDataset = useMemo(() => {
-        if (!selectedArtist) {
+    const calculatedDataset : ChartData[] | undefined = useMemo(() => {
+        if (!selectedArtists) {
             return undefined;
         }
 
-        const baseData = data.filter(pb => pb.master_metadata_album_artist_name === selectedArtist);
+        const baseData = data.filter(pb => pb.master_metadata_album_artist_name && selectedArtists.includes(pb.master_metadata_album_artist_name));
 
         if (granularityLevel === 'year') {
-            const baseEmptyRecord : Record<number, number> = {};
-
-            if (earliestYear && latestYear) {
-                for (let i = earliestYear; i <= latestYear; i++) {
-                    baseEmptyRecord[i] = 0;
-                }
-            }
-
-            return baseData.reduce((a, b) => {
-                const year = b.ts.getFullYear();
-                if (!a[year]) {
-                    a[year] = 0;
-                }
-                a[year] += b.ms_played / 1_000 / 60;
-                return a;
-            }, baseEmptyRecord);
+            return selectedArtists.map(a => {
+                const forArtist = baseData.filter(d => d.master_metadata_album_artist_name == a);
+                return {
+                    label: a,
+                    data: getYearData(forArtist, earliestYear, latestYear),
+                };
+            });
         }
 
         if (granularityLevel === 'month' && selectedYear) {
-
-            const baseEmptyRecord : Record<number, number> = {};
-            for (let i = 0; i < 12; i++) {
-                baseEmptyRecord[i + 1] = 0;
-            }
-
-            return baseData.reduce((a, b) => {
-                const year = b.ts.getFullYear();
-                const month = b.ts.getMonth() + 1;
-                if (year !== selectedYear) {
-                    return a;
-                }
-                if (!a[month]) {
-                    a[month] = 0;
-                }
-                a[month] += b.ms_played / 1_000 / 60;
-                return a;
-            }, baseEmptyRecord);
+            return selectedArtists.map(a => {
+                const forArtist = baseData.filter(d => d.master_metadata_album_artist_name == a);
+                return {
+                    label: a,
+                    data: getMonthData(forArtist, selectedYear),
+                };
+            });
         }
 
         if (granularityLevel === 'day' && selectedYear && selectedMonth) {
-
-            const daysInSelectedMonth = moment(`${selectedYear}-${selectedMonth}`, 'YYYY-MM').daysInMonth();
-
-            const baseEmptyRecord : Record<number, number> = {};
-
-            for (let i = 0; i < daysInSelectedMonth; i++) {
-                baseEmptyRecord[i + 1] = 0;
-            }
-
-            return baseData.reduce((a, b) => {
-                const year = b.ts.getFullYear();
-                const month = b.ts.getMonth() + 1;
-                const day = b.ts.getDate();
-                if (year !== selectedYear || month !== selectedMonth) {
-                    return a;
-                }
-                if (!a[day]) {
-                    a[day] = 0;
-                }
-                a[day] += b.ms_played / 1_000 / 60;
-                return a;
-            }, baseEmptyRecord);
+            return selectedArtists.map(a => {
+                const forArtist = baseData.filter(d => d.master_metadata_album_artist_name == a);
+                return {
+                    label: a,
+                    data: getDayData(forArtist, selectedYear, selectedMonth),
+                };
+            });
         }
 
         return undefined;
-    }, [selectedArtist, data, granularityLevel, selectedYear, selectedMonth, earliestYear, latestYear]);
+    }, [selectedArtists, data, granularityLevel, selectedYear, selectedMonth, earliestYear, latestYear]);
 
     const handleGranularityLevelChange = (granularityLevel: GranularityLevelType): void => {
         setGranularityLevel(granularityLevel);
@@ -152,8 +121,8 @@ export const ArtistAnalysisCard: React.FC<ArtistAnalysisCardPropsType> = (props)
         setDisplayMode(displayMode);
     };
 
-    const handleSelectedArtistChange = (selectedArtist?: string): void => {
-        setSelectedArtist(selectedArtist);
+    const handleSelectedArtistChange = (selectedArtists?: string[]): void => {
+        setSelectedArtists(selectedArtists);
     };
 
     return (
@@ -162,14 +131,17 @@ export const ArtistAnalysisCard: React.FC<ArtistAnalysisCardPropsType> = (props)
                 title={<Typography variant={'h4'}>Artist History Analysis</Typography>}
                 action={
                     data.length > 0 && (
-                        <Stack direction={'row'} spacing={2} width={200 * (granularityLevel === 'month' ? 2 : granularityLevel === 'day' ? 3 : 1) + 500} alignItems={'center'}>
+                        <Stack direction={'row'} spacing={2} width={200 * (granularityLevel === 'month' ? 2 : granularityLevel === 'day' ? 3 : 1) + 900} alignItems={'center'}>
                             <Autocomplete
                                 disablePortal={true}
                                 options={artistOptions}
-                                sx={{ minWidth: 300 }}
                                 fullWidth={true}
+                                sx={{
+                                    minWidth: 500,
+                                }}
+                                multiple={true}
                                 renderInput={(params) => <TextField {...params} label={'Artist'} />}
-                                onChange={(_, newValue) => handleSelectedArtistChange(newValue?.label)}
+                                onChange={(_, newValue) => handleSelectedArtistChange(newValue.map(o => o.label))}
                             />
                             {calculatedDataset && (
                                 <>
@@ -249,58 +221,18 @@ export const ArtistAnalysisCard: React.FC<ArtistAnalysisCardPropsType> = (props)
                 {data.length > 0 && calculatedDataset && displayMode === 'line' && (
                     <LineChart
                         height={500}
-                        series={[
-                            {
-                                data: Object.values(calculatedDataset),
-                                baseline: 0,
-                                curve: 'linear',
-                                showMark: true,
-                                label: 'Minutes',
-                                valueFormatter: (v) => formatNumber(v ?? 0, 2),
-                            }
-                        ]}
-                        xAxis={[
-                            {
-                                data: Object.keys(calculatedDataset).map(k => k.toString()),
-                                scaleType: 'point',
-                                label: granularityLevel,
-                            }
-                        ]}
-                        yAxis={[
-                            {
-                                width: 100,
-                                disableLine: false,
-                                scaleType: 'linear',
-                                label: 'Minutes',
-                                min: 0
-                            }
-                        ]}
+                        series={getLinearSeriesData(calculatedDataset)}
+                        xAxis={getLinearXAxisData(calculatedDataset, granularityLevel)}
+                        yAxis={getLinearYAxisData(calculatedDataset)}
                         grid={{ horizontal: true }}
                     />
                 )}
                 {data.length > 0 && calculatedDataset && displayMode === 'bar' && (
                     <BarChart
                         height={500}
-                        series={[
-                            {
-                                data: Object.values(calculatedDataset),
-                                label: 'Minutes',
-                            }
-                        ]}
-                        xAxis={[
-                            {
-                                data: Object.keys(calculatedDataset).map(k => k.toString()),
-                                label: granularityLevel,
-                                scaleType: 'band'
-                            }
-                        ]}
-                        yAxis={[
-                            {
-                                width: 100,
-                                disableLine: false,
-                                label: 'Minutes',
-                            }
-                        ]}
+                        series={getBarSeriesData(calculatedDataset)}
+                        xAxis={getBarXAxisData(calculatedDataset, granularityLevel)}
+                        yAxis={getBarYAxisData(calculatedDataset)}
                         grid={{ horizontal: true }}
                         barLabel={(v) => {
                             if ((granularityLevel === 'month' || granularityLevel === 'year') && v.value) {
